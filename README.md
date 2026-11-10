@@ -168,8 +168,35 @@ The platform architecture follows **Domain-Driven Design (DDD)** and **Command Q
 
 ### Prerequisites
 * [.NET 10 SDK](https://dotnet.microsoft.com/)
-* [MySQL 8](https://dev.mysql.com/downloads/) (local instance or Docker container)
+* Access to the shared MySQL 8 database `trazza_database` (Amazon RDS) or a local MySQL 8 instance with the same schema
 * JetBrains Rider or Visual Studio 2026 / VS Code
+
+### Configuration
+
+No credentials are stored in the repository. Every secret is read from environment variables:
+
+| Variable | Description | Example |
+|:--|:--|:--|
+| `DATABASE_URL` | MySQL host | `localhost` or the RDS endpoint |
+| `DATABASE_USER` | MySQL user | your own database user |
+| `DATABASE_PASSWORD` | MySQL password | (never commit it) |
+| `DATABASE_SCHEMA` | Database name (Production only; Development always uses `trazza_database`) | `trazza_database` |
+| `TokenSettings__Secret` | JWT signing key used by IAM, at least 32 characters | (never commit it) |
+| `Cors__AllowedOrigins__0` | Web application origin allowed by CORS (optional, Development already allows `http://localhost:5173`) | `https://your-webapp-domain` |
+
+Set them in your shell before running the API:
+
+```bash
+export DATABASE_URL="your-mysql-host"
+export DATABASE_USER="your-user"
+export DATABASE_PASSWORD="your-password"
+export DATABASE_SCHEMA="trazza_database"
+export TokenSettings__Secret="a-random-key-of-at-least-32-characters"
+```
+
+In Rider, add the same variables in **Run | Edit Configurations | Environment variables**. Do not add them to `launchSettings.json`, because that file is committed.
+
+The database schema is managed outside the API (database-first). The API does not create or migrate tables on startup.
 
 ### Setup Instructions
 
@@ -179,20 +206,15 @@ The platform architecture follows **Domain-Driven Design (DDD)** and **Command Q
    cd trazza-platform
    ```
 
-2. **Configure the database** in `Trazza.Platform/appsettings.Development.json`:
-   ```json
-   "DefaultConnection": "server=localhost;user=root;password=mysql;database=trazza-platform-dev"
-   ```
+2. **Set the environment variables** described in [Configuration](#configuration).
 
-3. **Restore, create the migration and build:**
+3. **Restore and build:**
    ```bash
    dotnet restore
-   dotnet tool install --global dotnet-ef
-   dotnet ef migrations add InitialCreate --project Trazza.Platform
    dotnet build
    ```
 
-4. **Run the application** (pending migrations are applied on startup):
+4. **Run the application:**
    ```bash
    dotnet run --project Trazza.Platform
    ```
@@ -269,11 +291,11 @@ Trazza.Platform/
 
 | Member | Bounded Context |
 |:--|:--|
-| Emanuel Renato Checalla Apaza | |
+| Emanuel Renato Checalla Apaza | IAM & Profiles |
 | Fabricio Jofred Lozano Quispe | Payment & Billing |
-| Ingrid Melani Medina Merma | |
-| Gabriel Augusto Peñaranda Caldas | |
-| Rodrigo Matias Vite Celis | Loyalty & Reputation, Shared Kernel |
+| Ingrid Melani Medina Merma | Service Execution & Monitoring |
+| Gabriel Augusto Peñaranda Caldas | Matchmaking & Routing, Shared Kernel |
+| Rodrigo Matias Vite Celis | Loyalty & Reputation |
 
 ---
 
