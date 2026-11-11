@@ -1,3 +1,4 @@
+using System;
 using System.Globalization;
 
 namespace Trazza.Platform.Shared.Domain.Model.ValueObjects;
