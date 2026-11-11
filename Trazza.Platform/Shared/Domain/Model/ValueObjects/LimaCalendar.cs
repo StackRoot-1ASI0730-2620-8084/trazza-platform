@@ -1,3 +1,5 @@
+using System;
+
 namespace Trazza.Platform.Shared.Domain.Model.ValueObjects;
 
 /// <summary>
