@@ -21,6 +21,7 @@ publish/
 # Local environment and secrets
 .env
 .env.*
+!.env.example
 appsettings.*.local.json
 *.pfx
 
