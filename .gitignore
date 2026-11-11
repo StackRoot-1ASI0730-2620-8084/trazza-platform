@@ -1,0 +1,35 @@
+# Build output
+bin/
+obj/
+out/
+publish/
+
+# IDE and user settings
+.vs/
+.vscode/
+*.user
+*.suo
+*.DotSettings.user
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/shelf/
+.idea/**/dataSources/
+.idea/**/dataSources.local.xml
+.idea/**/jsonSchemas.xml
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+appsettings.*.local.json
+*.pfx
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs and test results
+*.log
+TestResults/
+coverage/
