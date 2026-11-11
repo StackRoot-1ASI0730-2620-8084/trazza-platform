@@ -76,6 +76,9 @@ using ProblemDetailsFactory = Trazza.Platform.Shared.Interfaces.Rest.ProblemDeta
 // using Trazza.Platform.Reputation.Domain.Repositories;
 // using Trazza.Platform.Reputation.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 
+// Local development: load variables from the .env file at the repository root (never committed).
+LoadDotEnvForDevelopment();
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
@@ -228,3 +231,40 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+static void LoadDotEnvForDevelopment()
+{
+    var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+    if (!string.IsNullOrEmpty(environment) && !environment.Equals("Development", StringComparison.OrdinalIgnoreCase))
+        return;
+
+    var envFile = FindDotEnvFile(Directory.GetCurrentDirectory()) ?? FindDotEnvFile(AppContext.BaseDirectory);
+    if (envFile is null) return;
+
+    foreach (var rawLine in File.ReadAllLines(envFile))
+    {
+        var line = rawLine.Trim();
+        if (line.Length == 0 || line.StartsWith('#')) continue;
+
+        var separator = line.IndexOf('=');
+        if (separator <= 0) continue;
+
+        var key = line[..separator].Trim();
+        var value = line[(separator + 1)..].Trim().Trim('"');
+
+        if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(key)))
+            Environment.SetEnvironmentVariable(key, value);
+    }
+}
+
+static string? FindDotEnvFile(string startDirectory)
+{
+    var directory = new DirectoryInfo(startDirectory);
+    while (directory is not null)
+    {
+        var candidate = Path.Combine(directory.FullName, ".env");
+        if (File.Exists(candidate)) return candidate;
+        directory = directory.Parent;
+    }
+    return null;
+}
