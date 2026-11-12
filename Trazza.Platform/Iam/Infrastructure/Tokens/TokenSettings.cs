@@ -1,4 +1,4 @@
-namespace TrazzaPlatform.API.Iam.Infrastructure.Tokens;
+namespace Trazza.Platform.Iam.Infrastructure.Tokens;
 
 /// <summary>
 ///     JWT settings. The secret supports <c>%VARIABLE%</c> placeholders and must have at least 32 characters.

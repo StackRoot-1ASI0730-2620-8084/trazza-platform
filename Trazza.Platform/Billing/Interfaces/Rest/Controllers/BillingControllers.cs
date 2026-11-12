@@ -1,16 +1,16 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Localization;
-using TrazzaPlatform.API.Billing.Domain.Model.Commands;
-using TrazzaPlatform.API.Billing.Domain.Services;
-using TrazzaPlatform.API.Billing.Interfaces.Rest.Resources;
-using TrazzaPlatform.API.Billing.Interfaces.Rest.Transform;
-using TrazzaPlatform.API.Iam.Domain.Model.ValueObjects;
-using TrazzaPlatform.API.Iam.Infrastructure.Pipeline;
-using TrazzaPlatform.API.Resources;
-using TrazzaPlatform.API.Shared.Interfaces.Rest;
+using Trazza.Platform.Billing.Domain.Model.Commands;
+using Trazza.Platform.Billing.Domain.Services;
+using Trazza.Platform.Billing.Interfaces.Rest.Resources;
+using Trazza.Platform.Billing.Interfaces.Rest.Transform;
+using Trazza.Platform.Iam.Domain.Model.ValueObjects;
+using Trazza.Platform.Iam.Infrastructure.Pipeline;
+using Trazza.Platform.Resources;
+using Trazza.Platform.Shared.Interfaces.Rest;
  
-namespace TrazzaPlatform.API.Billing.Interfaces.Rest.Controllers;
+namespace Trazza.Platform.Billing.Interfaces.Rest.Controllers;
  
 [Route("api/v1/[controller]")]
 [AllowAnonymous]

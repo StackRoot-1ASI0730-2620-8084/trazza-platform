@@ -1,4 +1,4 @@
-namespace TrazzaPlatform.API.Reputation.Interfaces.Acl;
+namespace Trazza.Platform.Reputation.Interfaces.Acl;
 
 /// <summary>
 ///     Anti-corruption layer used by Execution to award loyalty points. Changes are saved by the caller.

@@ -1,6 +1,6 @@
-using TrazzaPlatform.API.Billing.Domain.Model.ValueObjects;
+using Trazza.Platform.Billing.Domain.Model.ValueObjects;
  
-namespace TrazzaPlatform.API.Billing.Domain.Model.Aggregates;
+namespace Trazza.Platform.Billing.Domain.Model.Aggregates;
  
 /// <summary>
 ///     Monitoring plan sold by Trazza, priced in USD per truck or as a package (seeded in <c>plans</c>).

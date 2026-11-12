@@ -1,4 +1,4 @@
-namespace TrazzaPlatform.API.Reputation.Domain.Model.Aggregates;
+namespace Trazza.Platform.Reputation.Domain.Model.Aggregates;
 
 public enum LoyaltyReason
 {

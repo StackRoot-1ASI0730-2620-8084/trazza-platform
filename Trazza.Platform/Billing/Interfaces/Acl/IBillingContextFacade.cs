@@ -1,4 +1,4 @@
-namespace TrazzaPlatform.API.Billing.Interfaces.Acl;
+namespace Trazza.Platform.Billing.Interfaces.Acl;
 
 public interface IBillingContextFacade
 {

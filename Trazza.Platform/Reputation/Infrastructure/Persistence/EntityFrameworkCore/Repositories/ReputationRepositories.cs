@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore;
-using TrazzaPlatform.API.Reputation.Domain.Model.Aggregates;
-using TrazzaPlatform.API.Reputation.Domain.Repositories;
-using TrazzaPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
-using TrazzaPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using Trazza.Platform.Reputation.Domain.Model.Aggregates;
+using Trazza.Platform.Reputation.Domain.Repositories;
+using Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
+using Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 
-namespace TrazzaPlatform.API.Reputation.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+namespace Trazza.Platform.Reputation.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 
 public class RatingRepository(AppDbContext context) : BaseRepository<Rating>(context), IRatingRepository
 {
