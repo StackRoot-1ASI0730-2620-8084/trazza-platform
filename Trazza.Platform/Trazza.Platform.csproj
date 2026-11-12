@@ -29,7 +29,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Billing\Domain\Model\Errors\" />
       <Folder Include="Billing\Domain\Model\Events\" />
+      <Folder Include="Billing\Domain\Model\Queries\" />
     </ItemGroup>
 
 </Project>
