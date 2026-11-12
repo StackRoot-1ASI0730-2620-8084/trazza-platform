@@ -1,8 +1,9 @@
-namespace Trazza.Platform.Billing.Interfaces.Acl;
+namespace TrazzaPlatform.API.Billing.Interfaces.Acl;
 
 public interface IBillingContextFacade
 {
-    Task<bool> CanPublish(int userId, int usedThisMonth, CancellationToken cancellationToken);
-
-    Task<string> FetchCurrentPlanCode(int userId, CancellationToken cancellationToken);
+    Task CreateFreightSettlementAsync(ulong tripId, decimal amount, string currency, CancellationToken ct = default);
+ 
+    Task CreateCancellationCompensationAsync(ulong tripId, decimal amount, string currency, DateTime now,
+        CancellationToken ct = default);
 }
