@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ApiTitle" xml:space="preserve">
+    <value>API de Trazza Platform</value>
+  </data>
+  <data name="ApiDescription" xml:space="preserve">
+    <value>API RESTful que conecta transportistas con viajes de retorno vacíos y comerciantes que necesitan enviar mercadería en Lima Metropolitana.</value>
+  </data>
+  <data name="OperationCompleted" xml:space="preserve">
+    <value>La operación se completó correctamente.</value>
+  </data>
+  <data name="ResourceCreated" xml:space="preserve">
+    <value>El recurso se creó correctamente.</value>
+  </data>
+  <data name="ResourceNotFound" xml:space="preserve">
+    <value>No se encontró el recurso solicitado.</value>
+  </data>
+  <data name="Unauthenticated" xml:space="preserve">
+    <value>Debes iniciar sesión para acceder a este recurso.</value>
+  </data>
+  <data name="AccessDenied" xml:space="preserve">
+    <value>No tienes permiso para realizar esta acción.</value>
+  </data>
+</root>
