@@ -23,7 +23,7 @@ public class BillingContextFacade(IPaymentTransactionQueryService paymentTransac
     private async Task<SubscriptionPlan> FetchCurrentPlan(int userId, CancellationToken cancellationToken)
     {
         var activeSubscription = await paymentTransactionQueryService.Handle(
-            new GetActiveSubscriptionByUserIdQuery(new UserId(userId)), cancellationToken);
+            new GetActiveSubscriptionsByUserIdQuery(new UserId(userId)), cancellationToken);
         return activeSubscription?.Plan ?? new SubscriptionPlan(SubscriptionPlan.Free);
     }
 }

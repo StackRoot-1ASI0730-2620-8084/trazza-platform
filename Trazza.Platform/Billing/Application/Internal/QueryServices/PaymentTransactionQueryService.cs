@@ -28,7 +28,7 @@ public class PaymentTransactionQueryService(IPaymentTransactionRepository paymen
             cancellationToken);
     }
 
-    public async Task<PaymentTransaction?> Handle(GetActiveSubscriptionByUserIdQuery query,
+    public async Task<PaymentTransaction?> Handle(GetActiveSubscriptionsByUserIdQuery query,
         CancellationToken cancellationToken)
     {
         var paidTransactions =

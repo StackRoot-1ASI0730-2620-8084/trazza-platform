@@ -13,5 +13,5 @@ public interface IPaymentTransactionQueryService
 
     Task<PaymentTransaction?> Handle(GetPaymentTransactionByIdQuery query, CancellationToken cancellationToken);
 
-    Task<PaymentTransaction?> Handle(GetActiveSubscriptionByUserIdQuery query, CancellationToken cancellationToken);
+    Task<PaymentTransaction?> Handle(GetActiveSubscriptionsByUserIdQuery query, CancellationToken cancellationToken);
 }
