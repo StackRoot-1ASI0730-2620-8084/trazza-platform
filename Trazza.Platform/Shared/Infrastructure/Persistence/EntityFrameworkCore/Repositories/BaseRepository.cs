@@ -19,18 +19,18 @@ public class BaseRepository<TEntity>(AppDbContext context) : IBaseRepository<TEn
 {
     protected AppDbContext Context { get; } = context;
 
-    public async Task AddAsync(TEntity entity, CancellationToken cancellationToken = default)
+    public virtual async Task AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         await Context.Set<TEntity>().AddAsync(entity, cancellationToken);
     }
 
-    public async Task<TEntity?> FindByIdAsync<TId>(TId id, CancellationToken cancellationToken = default)
+    public virtual async Task<TEntity?> FindByIdAsync<TId>(TId id, CancellationToken cancellationToken = default)
         where TId : struct
     {
         return await Context.Set<TEntity>().FindAsync([id], cancellationToken);
     }
 
-    public async Task<TEntity?> FindByIdAsNoTrackingAsync<TId>(TId id, CancellationToken cancellationToken = default)
+    public virtual async Task<TEntity?> FindByIdAsNoTrackingAsync<TId>(TId id, CancellationToken cancellationToken = default)
         where TId : struct
     {
         return await Context.Set<TEntity>()
@@ -38,7 +38,7 @@ public class BaseRepository<TEntity>(AppDbContext context) : IBaseRepository<TEn
             .FirstOrDefaultAsync(HasId(id), cancellationToken);
     }
 
-    public async Task<IEnumerable<TEntity>> ListAsNoTrackingAsync(CancellationToken cancellationToken = default)
+    public virtual async Task<IEnumerable<TEntity>> ListAsNoTrackingAsync(CancellationToken cancellationToken = default)
     {
         return await Context.Set<TEntity>().AsNoTracking().ToListAsync(cancellationToken);
     }

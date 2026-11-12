@@ -13,5 +13,9 @@ public class UnitOfWork(AppDbContext context) : IUnitOfWork
     public async Task CompleteAsync(CancellationToken cancellationToken = default)
     {
         await context.SaveChangesAsync(cancellationToken);
+
+        // A repository may open a transaction to hold a row lock or to read LAST_INSERT_ID on the same connection.
+        if (context.Database.CurrentTransaction is { } transaction)
+            await transaction.CommitAsync(cancellationToken);
     }
 }
