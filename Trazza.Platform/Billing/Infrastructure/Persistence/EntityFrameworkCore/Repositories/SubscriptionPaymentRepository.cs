@@ -10,21 +10,13 @@ namespace Trazza.Platform.Billing.Infrastructure.Persistence.EntityFrameworkCore
 public class SubscriptionPaymentRepository(AppDbContext context)
     : BaseRepository<SubscriptionPayment>(context), ISubscriptionPaymentRepository
 {
-    public async Task<IEnumerable<SubscriptionPayment>> FindByUserIdAsNoTrackingAsync(UserId userId,
-        CancellationToken cancellationToken)
+    public async Task<IEnumerable<SubscriptionPayment>> ListBySubscriptionIdAsNoTrackingAsync(
+        SubscriptionId subscriptionId, CancellationToken cancellationToken)
     {
         return await Context.Set<SubscriptionPayment>()
             .AsNoTracking()
-            .Where(transaction => transaction.UserId == userId)
-            .ToListAsync(cancellationToken);
-    }
-
-    public async Task<IEnumerable<SubscriptionPayment>> FindPaidByUserIdAsNoTrackingAsync(UserId userId,
-        CancellationToken cancellationToken)
-    {
-        return await Context.Set<SubscriptionPayment>()
-            .AsNoTracking()
-            .Where(transaction => transaction.UserId == userId && transaction.Status == ESubscriptionPaymentStatus.Paid)
+            .Where(payment => payment.SubscriptionId == subscriptionId)
+            .OrderByDescending(payment => payment.CreatedAt)
             .ToListAsync(cancellationToken);
     }
 }

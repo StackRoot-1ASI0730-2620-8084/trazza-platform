@@ -3,14 +3,10 @@ using Trazza.Platform.Shared.Interfaces.Rest.Resources;
 namespace Trazza.Platform.Billing.Interfaces.Rest.Resources;
 
 public record SubscriptionPaymentResource(
-    int Id,
-    int UserId,
-    string Plan,
+    ulong Id,
+    ulong SubscriptionId,
     MoneyResource Amount,
-    PaymentMethodResource Method,
     string Status,
-    string? AuthorizationCode,
-    DateTimeOffset? CreatedAt,
+    string? GatewayPaymentId,
     DateTimeOffset? PaidAt,
-    DateOnly? PeriodStart,
-    DateOnly? PeriodEnd);
+    DateTimeOffset CreatedAt);

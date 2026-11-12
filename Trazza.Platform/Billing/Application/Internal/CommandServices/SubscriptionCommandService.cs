@@ -1,56 +1,58 @@
 using Trazza.Platform.Billing.Application.CommandServices;
 using Trazza.Platform.Billing.Application.Internal.OutboundServices;
-using Trazza.Platform.Billing.Application.QueryServices;
 using Trazza.Platform.Billing.Domain.Model.Aggregates;
 using Trazza.Platform.Billing.Domain.Model.Commands;
 using Trazza.Platform.Billing.Domain.Model.Errors;
-using Trazza.Platform.Billing.Domain.Model.Queries;
-using Trazza.Platform.Billing.Domain.Model.ValueObjects;
 using Trazza.Platform.Billing.Domain.Repositories;
-using Trazza.Platform.Iam.Interfaces.Acl;
 using Trazza.Platform.Shared.Application.Model;
-using Trazza.Platform.Shared.Domain.Model.ValueObjects;
 using Trazza.Platform.Shared.Domain.Repositories;
 
 namespace Trazza.Platform.Billing.Application.Internal.CommandServices;
 
 public class SubscriptionCommandService(
-    ISubscriptionPaymentRepository paymentTransactionRepository,
-    ISubscriptionPaymentQueryService paymentTransactionQueryService,
+    IPlanRepository planRepository,
+    ISubscriptionRepository subscriptionRepository,
+    ISubscriptionPaymentRepository subscriptionPaymentRepository,
     IPaymentGateway paymentGateway,
-    IIamContextFacade iamContextFacade,
+    IIamUserService iamUserService,
+    IFleetService fleetService,
     IUnitOfWork unitOfWork)
     : ISubscriptionCommandService
 {
-    public async Task<Result<SubscriptionPayment>> Handle(SubscribeToPlanCommand command,
+    public async Task<Result<Subscription>> Handle(SubscribeToPlanCommand command,
         CancellationToken cancellationToken)
     {
-        var plan = Plan.From(command.Plan);
-        if (!plan.IsValid)
-            return Result<SubscriptionPayment>.Failure(BillingErrors.InvalidPlan);
-        if (plan.IsFree)
-            return Result<SubscriptionPayment>.Failure(BillingErrors.PlanFreeNotChargeable);
-        if (!command.Method.IsValid)
-            return Result<SubscriptionPayment>.Failure(BillingErrors.InvalidPaymentMethod);
-        if (command.Method.IsExpired(LimaCalendar.Today))
-            return Result<SubscriptionPayment>.Failure(BillingErrors.CardExpired);
-        if (!await iamContextFacade.ExistsUserById(command.UserId, cancellationToken))
-            return Result<SubscriptionPayment>.Failure(BillingErrors.UserNotFound);
+        var plan = await planRepository.FindByCodeAsync(command.PlanCode, cancellationToken);
+        if (plan is null) return BillingErrors.PlanNotFound;
+        if (!plan.IsActive) return BillingErrors.PlanInactive;
 
-        var activeSubscription = await paymentTransactionQueryService.Handle(
-            new GetActiveSubscriptionsByUserIdQuery(command.UserId), cancellationToken);
-        if (activeSubscription is not null)
-            return Result<SubscriptionPayment>.Failure(BillingErrors.PlanAlreadyActive);
+        var vehicleIds = command.VehicleIds.Distinct().ToList();
+        if (!plan.AcceptsVehicleCount(vehicleIds.Count)) return BillingErrors.InvalidVehicleCount;
 
-        var transaction = new SubscriptionPayment(command.UserId, plan, command.Method);
-        var response = await paymentGateway.Charge(transaction.Amount, transaction.Method, cancellationToken);
-        if (response.Approved)
-            transaction.MarkPaid(response.AuthorizationCode ?? string.Empty, DateTimeOffset.UtcNow);
-        else
-            transaction.MarkFailed();
+        if (!await iamUserService.ExistsUserById(command.UserId, cancellationToken))
+            return BillingErrors.UserNotFound;
+        if (!await fleetService.OwnsVehicles(command.UserId, vehicleIds, cancellationToken))
+            return BillingErrors.VehicleNotOwned;
 
-        await paymentTransactionRepository.AddAsync(transaction, cancellationToken);
+        foreach (var vehicleId in vehicleIds)
+            if (await subscriptionRepository.IsVehicleCoveredAsync(vehicleId, plan.MonitoringType, cancellationToken))
+                return BillingErrors.VehicleAlreadyCovered;
+
+        var amount = plan.CalculatePrice(vehicleIds.Count);
+        var response = await paymentGateway.Charge(amount, command.PaymentToken, cancellationToken);
+        if (!response.Approved || string.IsNullOrWhiteSpace(response.GatewayPaymentId))
+            return BillingErrors.PaymentDeclined;
+
+        var now = DateTimeOffset.UtcNow;
+        var subscription = new Subscription(command.UserId, plan.Id, vehicleIds, now);
+        await subscriptionRepository.AddAsync(subscription, cancellationToken);
         await unitOfWork.CompleteAsync(cancellationToken);
-        return Result<SubscriptionPayment>.Success(transaction);
+
+        var payment = new SubscriptionPayment(subscription.Id, amount);
+        payment.MarkPaid(response.GatewayPaymentId, now);
+        await subscriptionPaymentRepository.AddAsync(payment, cancellationToken);
+        await unitOfWork.CompleteAsync(cancellationToken);
+
+        return subscription;
     }
 }

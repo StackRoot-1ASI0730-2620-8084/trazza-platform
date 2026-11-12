@@ -6,6 +6,5 @@ namespace Trazza.Platform.Billing.Application.CommandServices;
 
 public interface ISubscriptionCommandService
 {
-    Task<Result<SubscriptionPayment>> Handle(SubscribeToPlanCommand command,
-        CancellationToken cancellationToken);
+    Task<Result<Subscription>> Handle(SubscribeToPlanCommand command, CancellationToken cancellationToken);
 }
