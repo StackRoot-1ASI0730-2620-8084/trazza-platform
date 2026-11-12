@@ -28,4 +28,8 @@
         <PackageReference Include="Cortex.Mediator" Version="3.1.2"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Billing\Domain\Model\Events\" />
+    </ItemGroup>
+
 </Project>
