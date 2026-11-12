@@ -1,4 +1,4 @@
-namespace TrazzaPlatform.API.Reputation.Domain.Model.Commands;
+namespace Trazza.Platform.Reputation.Domain.Model.Commands;
 
 public record RateTripCommand(ulong UserId, Guid TripId, int Score, string? Comment);
 

@@ -17,19 +17,17 @@ using ProblemDetailsFactory = Trazza.Platform.Shared.Interfaces.Rest.ProblemDeta
 
 // Bounded context namespaces: uncomment each block when its feature branch is merged into develop.
 // IAM (feature/iam)
-// using Trazza.Platform.Iam.Application.Acl;
-// using Trazza.Platform.Iam.Application.CommandServices;
-// using Trazza.Platform.Iam.Application.Internal.CommandServices;
-// using Trazza.Platform.Iam.Application.Internal.OutboundServices;
-// using Trazza.Platform.Iam.Application.Internal.QueryServices;
-// using Trazza.Platform.Iam.Application.QueryServices;
-// using Trazza.Platform.Iam.Domain.Repositories;
-// using Trazza.Platform.Iam.Infrastructure.Hashing.BCrypt.Services;
-// using Trazza.Platform.Iam.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
-// using Trazza.Platform.Iam.Infrastructure.Pipeline.Middleware.Extensions;
-// using Trazza.Platform.Iam.Infrastructure.Tokens.Jwt.Configuration;
-// using Trazza.Platform.Iam.Infrastructure.Tokens.Jwt.Services;
-// using Trazza.Platform.Iam.Interfaces.Acl;
+using Trazza.Platform.Iam.Application.Internal.CommandServices;
+using Trazza.Platform.Iam.Application.Internal.OutboundServices;
+using Trazza.Platform.Iam.Application.Internal.QueryServices;
+using Trazza.Platform.Iam.Domain.Repositories;
+using Trazza.Platform.Iam.Domain.Services;
+using Trazza.Platform.Iam.Infrastructure.Hashing;
+using Trazza.Platform.Iam.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using Trazza.Platform.Iam.Infrastructure.Pipeline;
+using Trazza.Platform.Iam.Infrastructure.Security;
+using Trazza.Platform.Iam.Infrastructure.Tokens;
+using Trazza.Platform.Iam.Interfaces.Acl;
 // Profiles (feature/profiles)
 // using Trazza.Platform.Profiles.Application.Acl;
 // using Trazza.Platform.Profiles.Application.CommandServices;
@@ -146,14 +144,36 @@ builder.Services.AddScoped<DispatchDomainEventsInterceptor>();
 
 // Bounded context registrations: uncomment each block when its feature branch is merged into develop.
 // IAM (feature/iam)
-// builder.Services.Configure<TokenSettings>(builder.Configuration.GetSection("TokenSettings"));
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddOptions<TokenSettings>()
+    .Bind(builder.Configuration.GetSection("TokenSettings"))
+    .Validate(settings => System.Text.Encoding.UTF8.GetByteCount(settings.Secret) >= 32,
+        "TokenSettings:Secret must be configured with at least 32 characters.")
+    .ValidateOnStart();
+builder.Services.AddOptions<PersonalDataSettings>()
+    .Bind(builder.Configuration.GetSection("PersonalData"))
+    .Validate(settings => IsBase64Key(settings.EncryptionKey) && IsBase64Key(settings.HashKey),
+        "PersonalData:EncryptionKey and PersonalData:HashKey must be Base64 keys of 32 bytes.")
+    .ValidateOnStart();
 
-// builder.Services.AddScoped<IUserRepository, UserRepository>();
-// builder.Services.AddScoped<IUserCommandService, UserCommandService>();
-// builder.Services.AddScoped<IUserQueryService, UserQueryService>();
-// builder.Services.AddScoped<ITokenService, TokenService>();
-// builder.Services.AddScoped<IHashingService, HashingService>();
-// builder.Services.AddScoped<IIamContextFacade, IamContextFacade>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IPersonIdentityRepository, PersonIdentityRepository>();
+builder.Services.AddScoped<IIdentityVerificationRepository, IdentityVerificationRepository>();
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+builder.Services.AddScoped<ICarrierProfileRepository, CarrierProfileRepository>();
+builder.Services.AddScoped<IMerchantProfileRepository, MerchantProfileRepository>();
+builder.Services.AddScoped<IDriverRepository, DriverRepository>();
+builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
+builder.Services.AddScoped<ISavedAddressRepository, SavedAddressRepository>();
+builder.Services.AddSingleton<IHashingService, BCryptHashingService>();
+builder.Services.AddSingleton<ITokenService, JwtTokenService>();
+builder.Services.AddSingleton<IPersonalDataProtector, AesGcmPersonalDataProtector>();
+builder.Services.AddSingleton<IIdentityVerificationProvider, SimulatedReniecProvider>();
+builder.Services.AddScoped<IUserCommandService, UserCommandService>();
+builder.Services.AddScoped<IUserQueryService, UserQueryService>();
+builder.Services.AddScoped<IFleetCommandService, FleetCommandService>();
+builder.Services.AddScoped<IFleetQueryService, FleetQueryService>();
+builder.Services.AddScoped<IIamContextFacade, IamContextFacade>();
 
 // Profiles (feature/profiles)
 // builder.Services.AddScoped<ICarrierProfileRepository, CarrierProfileRepository>();
@@ -231,7 +251,7 @@ if (app.Environment.IsDevelopment())
 app.UseCors("TrazzaWebAppPolicy");
 
 // IAM (feature/iam)
-// app.UseRequestAuthorization();
+app.UseRequestAuthorization();
 
 app.UseHttpsRedirection();
 
@@ -240,6 +260,12 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+static bool IsBase64Key(string value)
+{
+    var buffer = new byte[32];
+    return Convert.TryFromBase64String(value, buffer, out var length) && length == 32;
+}
 
 static void LoadDotEnvForDevelopment()
 {

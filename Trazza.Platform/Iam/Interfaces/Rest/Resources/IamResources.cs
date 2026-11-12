@@ -1,4 +1,4 @@
-namespace TrazzaPlatform.API.Iam.Interfaces.Rest.Resources;
+namespace Trazza.Platform.Iam.Interfaces.Rest.Resources;
 
 public record MerchantResource(string BusinessName, string Ruc, string BusinessType);
 

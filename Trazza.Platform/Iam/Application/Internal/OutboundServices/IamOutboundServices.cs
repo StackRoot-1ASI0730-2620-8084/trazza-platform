@@ -1,6 +1,6 @@
-using TrazzaPlatform.API.Iam.Domain.Model.Aggregates;
+using Trazza.Platform.Iam.Domain.Model.Aggregates;
 
-namespace TrazzaPlatform.API.Iam.Application.Internal.OutboundServices;
+namespace Trazza.Platform.Iam.Application.Internal.OutboundServices;
 
 /// <summary>Password hashing (BCrypt). The password itself is never stored.</summary>
 public interface IHashingService

@@ -1,7 +1,7 @@
-using TrazzaPlatform.API.Iam.Application.Internal.OutboundServices;
-using TrazzaPlatform.API.Iam.Domain.Repositories;
+using Trazza.Platform.Iam.Application.Internal.OutboundServices;
+using Trazza.Platform.Iam.Domain.Repositories;
 
-namespace TrazzaPlatform.API.Iam.Infrastructure.Pipeline;
+namespace Trazza.Platform.Iam.Infrastructure.Pipeline;
 
 /// <summary>
 ///     Reads <c>Authorization: Bearer &lt;token&gt;</c>, validates the JWT and stores the active user in

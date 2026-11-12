@@ -1,6 +1,6 @@
-using TrazzaPlatform.API.Iam.Domain.Model.ValueObjects;
+using Trazza.Platform.Iam.Domain.Model.ValueObjects;
 
-namespace TrazzaPlatform.API.Iam.Domain.Model.Commands;
+namespace Trazza.Platform.Iam.Domain.Model.Commands;
 
 public record VehicleData(
     string Plate,

@@ -1,7 +1,7 @@
-using TrazzaPlatform.API.Iam.Domain.Model.ValueObjects;
-using TrazzaPlatform.API.Shared.Domain.Model.Entities;
+using Trazza.Platform.Iam.Domain.Model.ValueObjects;
+using Trazza.Platform.Shared.Domain.Model.Entities;
 
-namespace TrazzaPlatform.API.Iam.Domain.Model.Aggregates;
+namespace Trazza.Platform.Iam.Domain.Model.Aggregates;
 
 /// <summary>
 ///     Driver of a fleet (<c>drivers</c>). Drivers have no account: only name, optional sex and experience (1 to 5 stars).
@@ -30,6 +30,9 @@ public class Driver : IAuditableEntity
     public bool IsActive { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
+
+    DateTimeOffset? IAuditableEntity.CreatedAt { get => CreatedAt; set => CreatedAt = value?.UtcDateTime ?? default; }
+    DateTimeOffset? IAuditableEntity.UpdatedAt { get => UpdatedAt; set => UpdatedAt = value?.UtcDateTime ?? default; }
 
     public void Update(string fullName, DriverSex? sex, byte experienceStars, bool isActive)
     {
@@ -78,6 +81,9 @@ public class Vehicle : IAuditableEntity
     public bool IsActive { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
+
+    DateTimeOffset? IAuditableEntity.CreatedAt { get => CreatedAt; set => CreatedAt = value?.UtcDateTime ?? default; }
+    DateTimeOffset? IAuditableEntity.UpdatedAt { get => UpdatedAt; set => UpdatedAt = value?.UtcDateTime ?? default; }
 
     public void Update(string plate, string model, decimal maxLoadKg, decimal cargoLengthM, decimal cargoWidthM,
         decimal cargoHeightM, decimal cargoVolumeM3, string? photoS3Key, bool isActive)

@@ -1,7 +1,7 @@
-﻿using TrazzaPlatform.API.Billing.Domain.Model.Aggregates;
-using TrazzaPlatform.API.Shared.Domain.Repositories;
+﻿using Trazza.Platform.Billing.Domain.Model.Aggregates;
+using Trazza.Platform.Shared.Domain.Repositories;
  
-namespace TrazzaPlatform.API.Billing.Domain.Repositories;
+namespace Trazza.Platform.Billing.Domain.Repositories;
  
 public interface IPlanRepository
 {

@@ -1,4 +1,4 @@
-﻿namespace TrazzaPlatform.API.Billing.Domain.Model.ValueObjects;
+﻿namespace Trazza.Platform.Billing.Domain.Model.ValueObjects;
  
 public enum MonitoringType
 {

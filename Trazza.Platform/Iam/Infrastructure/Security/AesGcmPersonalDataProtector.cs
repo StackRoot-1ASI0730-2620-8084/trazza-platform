@@ -1,9 +1,9 @@
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Options;
-using TrazzaPlatform.API.Iam.Application.Internal.OutboundServices;
+using Trazza.Platform.Iam.Application.Internal.OutboundServices;
 
-namespace TrazzaPlatform.API.Iam.Infrastructure.Security;
+namespace Trazza.Platform.Iam.Infrastructure.Security;
 
 /// <summary>
 ///     AES-256-GCM encryption stored as <c>nonce (12) + ciphertext + tag (16)</c>, and HMAC-SHA256 of the DNI.

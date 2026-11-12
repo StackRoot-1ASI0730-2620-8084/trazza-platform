@@ -1,6 +1,6 @@
-using TrazzaPlatform.API.Iam.Domain.Model.ValueObjects;
+using Trazza.Platform.Iam.Domain.Model.ValueObjects;
 
-namespace TrazzaPlatform.API.Iam.Infrastructure.Pipeline;
+namespace Trazza.Platform.Iam.Infrastructure.Pipeline;
 
 /// <summary>
 ///     User resolved from the bearer token for the current request.

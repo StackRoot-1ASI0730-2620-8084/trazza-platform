@@ -1,12 +1,12 @@
-using TrazzaPlatform.API.Execution.Interfaces.Acl;
-using TrazzaPlatform.API.Reputation.Domain.Model.Aggregates;
-using TrazzaPlatform.API.Reputation.Domain.Model.Commands;
-using TrazzaPlatform.API.Reputation.Domain.Repositories;
-using TrazzaPlatform.API.Reputation.Domain.Services;
-using TrazzaPlatform.API.Shared.Domain.Model;
-using TrazzaPlatform.API.Shared.Domain.Repositories;
+using Trazza.Platform.Execution.Interfaces.Acl;
+using Trazza.Platform.Reputation.Domain.Model.Aggregates;
+using Trazza.Platform.Reputation.Domain.Model.Commands;
+using Trazza.Platform.Reputation.Domain.Repositories;
+using Trazza.Platform.Reputation.Domain.Services;
+using Trazza.Platform.Shared.Domain.Model;
+using Trazza.Platform.Shared.Domain.Repositories;
 
-namespace TrazzaPlatform.API.Reputation.Application.Internal.CommandServices;
+namespace Trazza.Platform.Reputation.Application.Internal.CommandServices;
 
 /// <summary>
 ///     Ratings of confirmed trips (+2 points for rating) and redemption of loyalty points.

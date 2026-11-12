@@ -1,11 +1,11 @@
-﻿using TrazzaPlatform.API.Billing.Domain.Model.Aggregates;
-using TrazzaPlatform.API.Billing.Domain.Services;
-using TrazzaPlatform.API.Billing.Interfaces.Rest.Resources;
-using TrazzaPlatform.API.Execution.Interfaces.Acl;
-using TrazzaPlatform.API.Iam.Domain.Model.ValueObjects;
-using TrazzaPlatform.API.Shared.Domain.Model.ValueObjects;
+﻿using Trazza.Platform.Billing.Domain.Model.Aggregates;
+using Trazza.Platform.Billing.Domain.Services;
+using Trazza.Platform.Billing.Interfaces.Rest.Resources;
+using Trazza.Platform.Execution.Interfaces.Acl;
+using Trazza.Platform.Iam.Domain.Model.ValueObjects;
+using Trazza.Platform.Shared.Domain.Model.ValueObjects;
  
-namespace TrazzaPlatform.API.Billing.Interfaces.Rest.Transform;
+namespace Trazza.Platform.Billing.Interfaces.Rest.Transform;
  
 public static class BillingResourceAssembler
 {

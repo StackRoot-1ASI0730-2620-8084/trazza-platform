@@ -1,7 +1,7 @@
-﻿using TrazzaPlatform.API.Billing.Domain.Model.Aggregates;
-using TrazzaPlatform.API.Billing.Domain.Repositories;
+﻿using Trazza.Platform.Billing.Domain.Model.Aggregates;
+using Trazza.Platform.Billing.Domain.Repositories;
  
-namespace TrazzaPlatform.API.Billing.Interfaces.Acl;
+namespace Trazza.Platform.Billing.Interfaces.Acl;
  
 public class BillingContextFacade(
     IFreightSettlementRepository settlementRepository,

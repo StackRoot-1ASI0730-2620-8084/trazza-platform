@@ -1,11 +1,11 @@
-﻿using TrazzaPlatform.API.Billing.Domain.Model.Commands;
-using TrazzaPlatform.API.Billing.Domain.Repositories;
-using TrazzaPlatform.API.Billing.Domain.Services;
-using TrazzaPlatform.API.Execution.Interfaces.Acl;
-using TrazzaPlatform.API.Shared.Domain.Model;
-using TrazzaPlatform.API.Shared.Domain.Repositories;
+﻿using Trazza.Platform.Billing.Domain.Model.Commands;
+using Trazza.Platform.Billing.Domain.Repositories;
+using Trazza.Platform.Billing.Domain.Services;
+using Trazza.Platform.Execution.Interfaces.Acl;
+using Trazza.Platform.Shared.Domain.Model;
+using Trazza.Platform.Shared.Domain.Repositories;
  
-namespace TrazzaPlatform.API.Billing.Application.Internal.CommandServices;
+namespace Trazza.Platform.Billing.Application.Internal.CommandServices;
 
 public class SettlementCommandService(
     IFreightSettlementRepository settlementRepository,
