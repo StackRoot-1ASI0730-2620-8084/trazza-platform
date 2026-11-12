@@ -1,11 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using TrazzaPlatform.API.Billing.Domain.Model.Aggregates;
-using TrazzaPlatform.API.Billing.Domain.Model.ValueObjects;
-using TrazzaPlatform.API.Billing.Domain.Repositories;
-using TrazzaPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
-using TrazzaPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using Trazza.Platform.Billing.Domain.Model.Aggregates;
+using Trazza.Platform.Billing.Domain.Model.ValueObjects;
+using Trazza.Platform.Billing.Domain.Repositories;
+using Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
+using Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
  
-namespace TrazzaPlatform.API.Billing.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+namespace Trazza.Platform.Billing.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
  
 public class PlanRepository(AppDbContext context) : IPlanRepository
 {

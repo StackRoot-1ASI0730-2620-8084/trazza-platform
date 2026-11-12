@@ -1,9 +1,9 @@
-using TrazzaPlatform.API.Iam.Interfaces.Acl;
-using TrazzaPlatform.API.Reputation.Domain.Repositories;
-using TrazzaPlatform.API.Reputation.Domain.Services;
-using TrazzaPlatform.API.Shared.Domain.Model;
+using Trazza.Platform.Iam.Interfaces.Acl;
+using Trazza.Platform.Reputation.Domain.Repositories;
+using Trazza.Platform.Reputation.Domain.Services;
+using Trazza.Platform.Shared.Domain.Model;
 
-namespace TrazzaPlatform.API.Reputation.Application.Internal.QueryServices;
+namespace Trazza.Platform.Reputation.Application.Internal.QueryServices;
 
 public class ReputationQueryService(
     IRatingRepository ratingRepository,

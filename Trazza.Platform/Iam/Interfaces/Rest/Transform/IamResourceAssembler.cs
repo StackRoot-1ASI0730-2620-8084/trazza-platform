@@ -1,12 +1,12 @@
-using TrazzaPlatform.API.Iam.Domain.Model.Aggregates;
-using TrazzaPlatform.API.Iam.Domain.Model.Commands;
-using TrazzaPlatform.API.Iam.Domain.Model.ValueObjects;
-using TrazzaPlatform.API.Iam.Domain.Services;
-using TrazzaPlatform.API.Iam.Interfaces.Rest.Resources;
-using TrazzaPlatform.API.Shared.Domain.Model;
-using TrazzaPlatform.API.Shared.Domain.Model.ValueObjects;
+using Trazza.Platform.Iam.Domain.Model.Aggregates;
+using Trazza.Platform.Iam.Domain.Model.Commands;
+using Trazza.Platform.Iam.Domain.Model.ValueObjects;
+using Trazza.Platform.Iam.Domain.Services;
+using Trazza.Platform.Iam.Interfaces.Rest.Resources;
+using Trazza.Platform.Shared.Domain.Model;
+using Trazza.Platform.Shared.Domain.Model.ValueObjects;
 
-namespace TrazzaPlatform.API.Iam.Interfaces.Rest.Transform;
+namespace Trazza.Platform.Iam.Interfaces.Rest.Transform;
 
 /// <summary>
 ///     Converts IAM resources into commands and aggregates into resources.

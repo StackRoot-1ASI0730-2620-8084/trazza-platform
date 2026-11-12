@@ -1,9 +1,9 @@
-using TrazzaPlatform.API.Iam.Application.Internal.OutboundServices;
-using TrazzaPlatform.API.Iam.Domain.Model.Aggregates;
-using TrazzaPlatform.API.Iam.Domain.Repositories;
-using TrazzaPlatform.API.Iam.Domain.Services;
+using Trazza.Platform.Iam.Application.Internal.OutboundServices;
+using Trazza.Platform.Iam.Domain.Model.Aggregates;
+using Trazza.Platform.Iam.Domain.Repositories;
+using Trazza.Platform.Iam.Domain.Services;
 
-namespace TrazzaPlatform.API.Iam.Application.Internal.QueryServices;
+namespace Trazza.Platform.Iam.Application.Internal.QueryServices;
 
 public class UserQueryService(
     IUserRepository userRepository,

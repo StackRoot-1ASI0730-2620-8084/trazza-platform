@@ -1,14 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
-using TrazzaPlatform.API.Iam.Infrastructure.Pipeline;
-using TrazzaPlatform.API.Reputation.Domain.Model.Commands;
-using TrazzaPlatform.API.Reputation.Domain.Services;
-using TrazzaPlatform.API.Reputation.Interfaces.Rest.Resources;
-using TrazzaPlatform.API.Reputation.Interfaces.Rest.Transform;
-using TrazzaPlatform.API.Resources;
-using TrazzaPlatform.API.Shared.Interfaces.Rest;
+using Trazza.Platform.Iam.Infrastructure.Pipeline;
+using Trazza.Platform.Reputation.Domain.Model.Commands;
+using Trazza.Platform.Reputation.Domain.Services;
+using Trazza.Platform.Reputation.Interfaces.Rest.Resources;
+using Trazza.Platform.Reputation.Interfaces.Rest.Transform;
+using Trazza.Platform.Resources;
+using Trazza.Platform.Shared.Interfaces.Rest;
 
-namespace TrazzaPlatform.API.Reputation.Interfaces.Rest.Controllers;
+namespace Trazza.Platform.Reputation.Interfaces.Rest.Controllers;
 
 /// <summary>Ratings between carrier and merchant after a confirmed trip.</summary>
 [Route("api/v1/[controller]")]

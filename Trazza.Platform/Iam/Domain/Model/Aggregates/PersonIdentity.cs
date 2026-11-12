@@ -1,7 +1,7 @@
-using TrazzaPlatform.API.Iam.Domain.Model.ValueObjects;
-using TrazzaPlatform.API.Shared.Domain.Model.Entities;
+using Trazza.Platform.Iam.Domain.Model.ValueObjects;
+using Trazza.Platform.Shared.Domain.Model.Entities;
 
-namespace TrazzaPlatform.API.Iam.Domain.Model.Aggregates;
+namespace Trazza.Platform.Iam.Domain.Model.Aggregates;
 
 /// <summary>
 ///     Personal data of the account owner (<c>person_identities</c>). DNI and phone are encrypted by the
@@ -39,6 +39,9 @@ public class PersonIdentity : IAuditableEntity
     public KycStatus KycStatus { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
+
+    DateTimeOffset? IAuditableEntity.CreatedAt { get => CreatedAt; set => CreatedAt = value?.UtcDateTime ?? default; }
+    DateTimeOffset? IAuditableEntity.UpdatedAt { get => UpdatedAt; set => UpdatedAt = value?.UtcDateTime ?? default; }
 
     public void UpdateContact(string fullName, byte[] phoneEncrypted)
     {

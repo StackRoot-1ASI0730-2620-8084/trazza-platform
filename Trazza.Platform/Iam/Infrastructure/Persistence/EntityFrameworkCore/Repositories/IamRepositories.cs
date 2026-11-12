@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
-using TrazzaPlatform.API.Iam.Domain.Model.Aggregates;
-using TrazzaPlatform.API.Iam.Domain.Repositories;
-using TrazzaPlatform.API.Shared.Domain.Model.ValueObjects;
-using TrazzaPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
-using TrazzaPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using Trazza.Platform.Iam.Domain.Model.Aggregates;
+using Trazza.Platform.Iam.Domain.Repositories;
+using Trazza.Platform.Shared.Domain.Model.ValueObjects;
+using Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
+using Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 
-namespace TrazzaPlatform.API.Iam.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+namespace Trazza.Platform.Iam.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 
 public class UserRepository(AppDbContext context) : BaseRepository<User>(context), IUserRepository
 {

@@ -1,7 +1,7 @@
-using TrazzaPlatform.API.Iam.Domain.Model.ValueObjects;
-using TrazzaPlatform.API.Shared.Domain.Model.Entities;
+using Trazza.Platform.Iam.Domain.Model.ValueObjects;
+using Trazza.Platform.Shared.Domain.Model.Entities;
 
-namespace TrazzaPlatform.API.Iam.Domain.Model.Aggregates;
+namespace Trazza.Platform.Iam.Domain.Model.Aggregates;
 
 /// <summary>
 ///     Account aggregate root (<c>users</c> + <c>user_roles</c>). Only the password hash is stored.
@@ -37,6 +37,9 @@ public class User : IAuditableEntity
     public DateTime? LastLoginAt { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
+
+    DateTimeOffset? IAuditableEntity.CreatedAt { get => CreatedAt; set => CreatedAt = value?.UtcDateTime ?? default; }
+    DateTimeOffset? IAuditableEntity.UpdatedAt { get => UpdatedAt; set => UpdatedAt = value?.UtcDateTime ?? default; }
     public DateTime? DeletedAt { get; private set; }
 
     public IReadOnlyCollection<UserRole> Roles => _roles;
