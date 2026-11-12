@@ -12,6 +12,87 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Matchmaking.CapacityExceeded" xml:space="preserve">
+    <value>The shipment exceeds the remaining capacity of the vehicle.</value>
+  </data>
+  <data name="Matchmaking.CarrierProfileNotFound" xml:space="preserve">
+    <value>The user does not have a carrier profile.</value>
+  </data>
+  <data name="Matchmaking.DepartureInPast" xml:space="preserve">
+    <value>The departure must be in the future.</value>
+  </data>
+  <data name="Matchmaking.DriverNotOwned" xml:space="preserve">
+    <value>The driver does not belong to the carrier.</value>
+  </data>
+  <data name="Matchmaking.EmptyMessage" xml:space="preserve">
+    <value>The message cannot be empty.</value>
+  </data>
+  <data name="Matchmaking.InvalidAddress" xml:space="preserve">
+    <value>The address or its coordinates are not valid.</value>
+  </data>
+  <data name="Matchmaking.InvalidCargo" xml:space="preserve">
+    <value>The weight and the volume must be greater than zero.</value>
+  </data>
+  <data name="Matchmaking.InvalidDescription" xml:space="preserve">
+    <value>The description is required and has at most 500 characters.</value>
+  </data>
+  <data name="Matchmaking.InvalidMaxShipments" xml:space="preserve">
+    <value>A route accepts between 1 and 2 shipments.</value>
+  </data>
+  <data name="Matchmaking.InvalidRate" xml:space="preserve">
+    <value>The offered rate must be greater than zero.</value>
+  </data>
+  <data name="Matchmaking.InvalidTimeWindow" xml:space="preserve">
+    <value>The end of the time window must be after its start.</value>
+  </data>
+  <data name="Matchmaking.MatchProposalNotFound" xml:space="preserve">
+    <value>The specified match proposal was not found.</value>
+  </data>
+  <data name="Matchmaking.MerchantProfileNotFound" xml:space="preserve">
+    <value>The user does not have a merchant profile.</value>
+  </data>
+  <data name="Matchmaking.MessageTooLong" xml:space="preserve">
+    <value>The message cannot have more than 2000 characters.</value>
+  </data>
+  <data name="Matchmaking.NotProposalParticipant" xml:space="preserve">
+    <value>The user is not part of this proposal.</value>
+  </data>
+  <data name="Matchmaking.NotRouteOwner" xml:space="preserve">
+    <value>Only the carrier that owns the route can do this.</value>
+  </data>
+  <data name="Matchmaking.NotShipmentOwner" xml:space="preserve">
+    <value>Only the merchant that owns the shipment can do this.</value>
+  </data>
+  <data name="Matchmaking.ProposalAlreadyExists" xml:space="preserve">
+    <value>There is already a proposal for this shipment and route.</value>
+  </data>
+  <data name="Matchmaking.ProposalNotPending" xml:space="preserve">
+    <value>The proposal is not pending.</value>
+  </data>
+  <data name="Matchmaking.ReturnRouteFull" xml:space="preserve">
+    <value>The return route already has all its shipments.</value>
+  </data>
+  <data name="Matchmaking.ReturnRouteNotCancellable" xml:space="preserve">
+    <value>The return route can no longer be cancelled.</value>
+  </data>
+  <data name="Matchmaking.ReturnRouteNotFound" xml:space="preserve">
+    <value>The specified return route was not found.</value>
+  </data>
+  <data name="Matchmaking.ReturnRouteNotPublished" xml:space="preserve">
+    <value>The return route is not published.</value>
+  </data>
+  <data name="Matchmaking.ShipmentRequestNotCancellable" xml:space="preserve">
+    <value>The shipment request can no longer be cancelled.</value>
+  </data>
+  <data name="Matchmaking.ShipmentRequestNotFound" xml:space="preserve">
+    <value>The specified shipment request was not found.</value>
+  </data>
+  <data name="Matchmaking.ShipmentRequestNotOpen" xml:space="preserve">
+    <value>The shipment request is not open.</value>
+  </data>
+  <data name="Matchmaking.VehicleNotOwned" xml:space="preserve">
+    <value>The vehicle does not belong to the carrier.</value>
+  </data>
   <data name="Shared.BadRequest" xml:space="preserve">
     <value>The request is not valid.</value>
   </data>
