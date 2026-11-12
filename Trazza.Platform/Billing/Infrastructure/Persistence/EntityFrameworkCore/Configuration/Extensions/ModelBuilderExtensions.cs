@@ -1,76 +1,77 @@
-using Trazza.Platform.Billing.Domain.Model.Aggregates;
-using Trazza.Platform.Billing.Domain.Model.ValueObjects;
-using Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration.ValueConverters;
 using Microsoft.EntityFrameworkCore;
-
-namespace Trazza.Platform.Billing.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
+using TrazzaPlatform.API.Billing.Domain.Model.Aggregates;
+using TrazzaPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
+ 
+namespace TrazzaPlatform.API.Billing.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 
 public static class ModelBuilderExtensions
 {
     public static void ApplyBillingConfiguration(this ModelBuilder builder)
     {
-        builder.Entity<PaymentTransaction>().HasKey(t => t.Id);
-        builder.Entity<PaymentTransaction>().Property(t => t.Id)
-            .HasConversion(new StronglyTypedIdConverter<PaymentTransactionId, int>(id => id.Value,
-                value => new PaymentTransactionId(value)))
-            .IsRequired()
-            .ValueGeneratedOnAdd();
-        builder.Entity<PaymentTransaction>().Property(t => t.UserId)
-            .HasConversion(new StronglyTypedIdConverter<UserId, int>(id => id.Value, value => new UserId(value)))
-            .IsRequired();
-        builder.Entity<PaymentTransaction>().HasIndex(t => t.UserId);
-        builder.Entity<PaymentTransaction>().Property(t => t.Plan)
-            .HasConversion(plan => plan.Code, value => new SubscriptionPlan(value))
-            .IsRequired()
-            .HasMaxLength(20);
-        builder.Entity<PaymentTransaction>().OwnsOne(t => t.Amount, amount =>
+        builder.Entity<Plan>(entity =>
         {
-            amount.Property(m => m.Amount).HasColumnName("Amount").HasPrecision(10, 2).IsRequired();
-            amount.Property(m => m.Currency).HasColumnName("Currency").HasMaxLength(3).IsRequired();
+            entity.ToTable("plans");
+            entity.HasKey(plan => plan.Id);
+            entity.Property(plan => plan.Code).HasMaxLength(30).IsRequired();
+            entity.Property(plan => plan.Name).HasMaxLength(100).IsRequired();
+            entity.Property(plan => plan.MonitoringType).HasEnumText();
+            entity.Property(plan => plan.PricingUnit).HasEnumText();
+            entity.Property(plan => plan.BillingPeriod).HasEnumText();
+            entity.Property(plan => plan.Price).HasPrecision(10, 2);
+            entity.Property(plan => plan.Currency).HasMaxLength(3).IsFixedLength();
+            entity.Ignore(plan => plan.IncludesIot);
         });
-        builder.Entity<PaymentTransaction>().Navigation(t => t.Amount).IsRequired();
-        builder.Entity<PaymentTransaction>().OwnsOne(t => t.Method, method =>
+ 
+        builder.Entity<Subscription>(entity =>
         {
-            method.Property(m => m.Brand).HasColumnName("CardBrand").HasMaxLength(20).IsRequired();
-            method.Property(m => m.Last4).HasColumnName("CardLast4").HasMaxLength(4).IsRequired();
-            method.Property(m => m.HolderName).HasColumnName("CardHolderName").HasMaxLength(120).IsRequired();
-            method.Property(m => m.Expiry).HasColumnName("CardExpiry").HasMaxLength(5).IsRequired();
+            entity.ToTable("subscriptions");
+            entity.HasKey(subscription => subscription.Id);
+            entity.Property(subscription => subscription.Id).ValueGeneratedOnAdd();
+            entity.Property(subscription => subscription.Status).HasEnumText();
+            entity.Property(subscription => subscription.GatewaySubscriptionId).HasMaxLength(100);
+            entity.Ignore(subscription => subscription.IsActive);
+            entity.HasMany(subscription => subscription.Vehicles).WithOne()
+                .HasForeignKey(vehicle => vehicle.SubscriptionId);
+            entity.Navigation(subscription => subscription.Vehicles).UsePropertyAccessMode(PropertyAccessMode.Field);
         });
-        builder.Entity<PaymentTransaction>().Navigation(t => t.Method).IsRequired();
-        builder.Entity<PaymentTransaction>().Property(t => t.Status).HasConversion<string>().IsRequired()
-            .HasMaxLength(20);
-        builder.Entity<PaymentTransaction>().Property(t => t.AuthorizationCode).HasMaxLength(40);
-
-        builder.Entity<Receipt>().HasKey(r => r.Id);
-        builder.Entity<Receipt>().Property(r => r.Id)
-            .HasConversion(new StronglyTypedIdConverter<ReceiptId, int>(id => id.Value, value => new ReceiptId(value)))
-            .IsRequired()
-            .ValueGeneratedOnAdd();
-        builder.Entity<Receipt>().Property(r => r.TransactionId)
-            .HasConversion(new StronglyTypedIdConverter<PaymentTransactionId, int>(id => id.Value,
-                value => new PaymentTransactionId(value)))
-            .IsRequired();
-        builder.Entity<Receipt>().HasIndex(r => r.TransactionId).IsUnique();
-        builder.Entity<Receipt>().HasOne<PaymentTransaction>().WithMany().HasForeignKey(r => r.TransactionId)
-            .OnDelete(DeleteBehavior.Restrict);
-        builder.Entity<Receipt>().Property(r => r.UserId)
-            .HasConversion(new StronglyTypedIdConverter<UserId, int>(id => id.Value, value => new UserId(value)))
-            .IsRequired();
-        builder.Entity<Receipt>().HasIndex(r => r.UserId);
-        builder.Entity<Receipt>().Property(r => r.Type)
-            .HasConversion(type => type.Value, value => new ReceiptType(value))
-            .IsRequired()
-            .HasMaxLength(10);
-        builder.Entity<Receipt>().Property(r => r.Number).IsRequired();
-        builder.Entity<Receipt>().HasIndex(r => new { r.Type, r.Number }).IsUnique();
-        builder.Entity<Receipt>().Property(r => r.CustomerName).IsRequired().HasMaxLength(120);
-        builder.Entity<Receipt>().Property(r => r.CustomerDocument).IsRequired().HasMaxLength(11);
-        builder.Entity<Receipt>().OwnsOne(r => r.Total, total =>
+ 
+        builder.Entity<SubscriptionVehicle>(entity =>
         {
-            total.Property(m => m.Amount).HasColumnName("TotalAmount").HasPrecision(10, 2).IsRequired();
-            total.Property(m => m.Currency).HasColumnName("TotalCurrency").HasMaxLength(3).IsRequired();
+            entity.ToTable("subscription_vehicles");
+            entity.HasKey(vehicle => new { vehicle.SubscriptionId, vehicle.VehicleId });
         });
-        builder.Entity<Receipt>().Navigation(r => r.Total).IsRequired();
-        builder.Entity<Receipt>().Property(r => r.IssuedAt).IsRequired();
+ 
+        builder.Entity<SubscriptionPayment>(entity =>
+        {
+            entity.ToTable("subscription_payments");
+            entity.HasKey(payment => payment.Id);
+            entity.Property(payment => payment.Id).ValueGeneratedOnAdd();
+            entity.Property(payment => payment.Amount).HasPrecision(10, 2);
+            entity.Property(payment => payment.Currency).HasMaxLength(3).IsFixedLength();
+            entity.Property(payment => payment.Status).HasEnumText();
+            entity.Property(payment => payment.GatewayPaymentId).HasMaxLength(100);
+        });
+ 
+        builder.Entity<FreightSettlement>(entity =>
+        {
+            entity.ToTable("freight_settlements");
+            entity.HasKey(settlement => settlement.TripId);
+            entity.Property(settlement => settlement.TripId).ValueGeneratedNever();
+            entity.Property(settlement => settlement.Amount).HasPrecision(10, 2);
+            entity.Property(settlement => settlement.Currency).HasMaxLength(3).IsFixedLength();
+            entity.Property(settlement => settlement.ExternalReference).HasMaxLength(100);
+            entity.Ignore(settlement => settlement.Status);
+        });
+ 
+        builder.Entity<CancellationCompensation>(entity =>
+        {
+            entity.ToTable("cancellation_compensations");
+            entity.HasKey(compensation => compensation.TripId);
+            entity.Property(compensation => compensation.TripId).ValueGeneratedNever();
+            entity.Property(compensation => compensation.Amount).HasPrecision(10, 2);
+            entity.Property(compensation => compensation.Currency).HasMaxLength(3).IsFixedLength();
+            entity.Property(compensation => compensation.Status).HasEnumText();
+            entity.Ignore(compensation => compensation.IsOpen);
+        });
     }
 }
