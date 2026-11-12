@@ -1,0 +1,50 @@
+using TrazzaPlatform.API.Iam.Domain.Model.ValueObjects;
+using TrazzaPlatform.API.Shared.Domain.Model.Entities;
+
+namespace TrazzaPlatform.API.Iam.Domain.Model.Aggregates;
+
+/// <summary>
+///     Personal data of the account owner (<c>person_identities</c>). DNI and phone are encrypted by the
+///     application (AES-256-GCM); the DNI is also kept as an HMAC-SHA256 hash to check uniqueness.
+/// </summary>
+public class PersonIdentity : IAuditableEntity
+{
+    protected PersonIdentity()
+    {
+        FullName = string.Empty;
+        DniEncrypted = [];
+        DniHash = [];
+        DniLast3 = string.Empty;
+        PhoneEncrypted = [];
+    }
+
+    public PersonIdentity(ulong userId, string fullName, byte[] dniEncrypted, byte[] dniHash, string dniLast3,
+        byte[] phoneEncrypted)
+    {
+        UserId = userId;
+        FullName = fullName;
+        DniEncrypted = dniEncrypted;
+        DniHash = dniHash;
+        DniLast3 = dniLast3;
+        PhoneEncrypted = phoneEncrypted;
+        KycStatus = KycStatus.Pending;
+    }
+
+    public ulong UserId { get; private set; }
+    public string FullName { get; private set; }
+    public byte[] DniEncrypted { get; private set; }
+    public byte[] DniHash { get; private set; }
+    public string DniLast3 { get; private set; }
+    public byte[] PhoneEncrypted { get; private set; }
+    public KycStatus KycStatus { get; private set; }
+    public DateTime CreatedAt { get; private set; }
+    public DateTime UpdatedAt { get; private set; }
+
+    public void UpdateContact(string fullName, byte[] phoneEncrypted)
+    {
+        FullName = fullName;
+        PhoneEncrypted = phoneEncrypted;
+    }
+
+    public void SetKycStatus(KycStatus status) => KycStatus = status;
+}
