@@ -5,19 +5,19 @@ using Trazza.Platform.Shared.Interfaces.Rest.Transform;
 
 namespace Trazza.Platform.Billing.Interfaces.Rest.Transform;
 
-public static class SubscriptionResourceAssembler
+public static class SubscriptionResourceFromEntityAssembler
 {
-    public static SubscriptionPlanResource ToResourceFromPlan(SubscriptionPlan plan)
+    public static PlanResource ToResourceFromPlan(SubscriptionPlan plan)
     {
-        return new SubscriptionPlanResource(plan.Code, MoneyResourceAssembler.ToResourceFromValueObject(plan.Price),
+        return new PlanResource(plan.Code, MoneyResourceAssembler.ToResourceFromValueObject(plan.Price),
             plan.MonthlyPublications);
     }
 
-    public static UserSubscriptionResource ToResourceFromActiveSubscription(int userId,
+    public static SubscriptionResource ToResourceFromActiveSubscription(int userId,
         PaymentTransaction? activeSubscription)
     {
         var plan = activeSubscription?.Plan ?? new SubscriptionPlan(SubscriptionPlan.Free);
-        return new UserSubscriptionResource(userId, plan.Code,
+        return new SubscriptionResource(userId, plan.Code,
             MoneyResourceAssembler.ToResourceFromValueObject(plan.Price), plan.MonthlyPublications,
             activeSubscription?.PeriodStart, activeSubscription?.PeriodEnd);
     }

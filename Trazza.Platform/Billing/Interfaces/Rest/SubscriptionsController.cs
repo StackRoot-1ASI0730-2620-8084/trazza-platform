@@ -14,17 +14,17 @@ namespace Trazza.Platform.Billing.Interfaces.Rest;
 [Route("api/v1/users/{userId:int}/subscription")]
 [Produces(MediaTypeNames.Application.Json)]
 [Tags("Subscriptions")]
-public class UserSubscriptionController(IPaymentTransactionQueryService paymentTransactionQueryService)
+public class SubscriptionsController(IPaymentTransactionQueryService paymentTransactionQueryService)
     : ControllerBase
 {
     [HttpGet]
     [EndpointSummary("Get user subscription")]
     [EndpointDescription("Gets the current plan of a user; Free when there is no paid period covering today.")]
-    [ProducesResponseType(typeof(UserSubscriptionResource), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(SubscriptionResource), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetUserSubscription(int userId, CancellationToken cancellationToken)
     {
         var activeSubscription = await paymentTransactionQueryService.Handle(
-            new GetActiveSubscriptionByUserIdQuery(new UserId(userId)), cancellationToken);
-        return Ok(SubscriptionResourceAssembler.ToResourceFromActiveSubscription(userId, activeSubscription));
+            new GetActiveSubscriptionsByUserIdQuery(new UserId(userId)), cancellationToken);
+        return Ok(SubscriptionResourceFromEntityAssembler.ToResourceFromActiveSubscription(userId, activeSubscription));
     }
 }

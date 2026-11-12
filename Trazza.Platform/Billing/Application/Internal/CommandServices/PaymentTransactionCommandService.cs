@@ -38,7 +38,7 @@ public class PaymentTransactionCommandService(
             return Result<PaymentTransaction>.Failure(BillingErrors.UserNotFound);
 
         var activeSubscription = await paymentTransactionQueryService.Handle(
-            new GetActiveSubscriptionByUserIdQuery(command.UserId), cancellationToken);
+            new GetActiveSubscriptionsByUserIdQuery(command.UserId), cancellationToken);
         if (activeSubscription is not null)
             return Result<PaymentTransaction>.Failure(BillingErrors.PlanAlreadyActive);
 

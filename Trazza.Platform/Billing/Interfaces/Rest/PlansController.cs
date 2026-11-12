@@ -12,15 +12,15 @@ namespace Trazza.Platform.Billing.Interfaces.Rest;
 [Route("api/v1/[controller]")]
 [Produces(MediaTypeNames.Application.Json)]
 [Tags("Subscriptions")]
-public class SubscriptionPlansController : ControllerBase
+public class PlansController : ControllerBase
 {
     [HttpGet]
     [AllowAnonymous]
     [EndpointSummary("Get subscription plans")]
     [EndpointDescription("Gets the catalog of subscription plans with price and monthly publication limit.")]
-    [ProducesResponseType(typeof(IEnumerable<SubscriptionPlanResource>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IEnumerable<PlanResource>), StatusCodes.Status200OK)]
     public IActionResult GetSubscriptionPlans()
     {
-        return Ok(SubscriptionPlan.All.Select(SubscriptionResourceAssembler.ToResourceFromPlan));
+        return Ok(SubscriptionPlan.All.Select(SubscriptionResourceFromEntityAssembler.ToResourceFromPlan));
     }
 }
