@@ -7,62 +7,61 @@ using Trazza.Platform.Shared.Domain.Model.ValueObjects;
 
 namespace Trazza.Platform.Billing.Domain.Model.Aggregates;
 
-public partial class SubscriptionPayment : AggregateRoot
+/// <summary>
+///     Monthly charge of a subscription (table subscription_payments). Payments are simulated:
+///     only the id returned by the gateway is stored, never card data.
+/// </summary>
+public class SubscriptionPayment : AggregateRoot
 {
     public SubscriptionPayment()
     {
-        Plan = new Plan();
-        Amount = new Money();
-        Method = new PaymentMethod();
+        Amount = new Money(0m, Money.Dollars);
     }
 
-    public SubscriptionPayment(UserId userId, Plan plan, PaymentMethod method) : this()
+    public SubscriptionPayment(SubscriptionId subscriptionId, Money amount) : this()
     {
-        UserId = userId;
-        Plan = plan;
-        Amount = plan.Price;
-        Method = method;
+        SubscriptionId = subscriptionId;
+        Amount = amount;
         Status = ESubscriptionPaymentStatus.Pending;
     }
 
     public SubscriptionPaymentId Id { get; }
-    public UserId UserId { get; private set; }
-    public Plan Plan { get; private set; }
+    public SubscriptionId SubscriptionId { get; private set; }
     public Money Amount { get; private set; }
-    public PaymentMethod Method { get; private set; }
     public ESubscriptionPaymentStatus Status { get; private set; }
-    public string? AuthorizationCode { get; private set; }
+    public string? GatewayPaymentId { get; private set; }
     public DateTimeOffset? PaidAt { get; private set; }
-    public DateOnly? PeriodStart { get; private set; }
-    public DateOnly? PeriodEnd { get; private set; }
-
-    public bool IsPaid => Status == ESubscriptionPaymentStatus.Paid;
+    public DateTimeOffset CreatedAt { get; private set; }
 
     public bool IsPending => Status == ESubscriptionPaymentStatus.Pending;
 
-    public Error MarkPaid(string authorizationCode, DateTimeOffset now)
-    {
-        if (!IsPending) return BillingErrors.TransactionNotPending;
-        if (string.IsNullOrWhiteSpace(authorizationCode)) return BillingErrors.AuthorizationRequired;
+    public bool IsPaid => Status == ESubscriptionPaymentStatus.Paid;
 
-        var start = DateOnly.FromDateTime(now.ToOffset(LimaCalendar.UtcOffset).DateTime);
+    public Error MarkPaid(string gatewayPaymentId, DateTimeOffset now)
+    {
+        if (!IsPending) return BillingErrors.PaymentNotPending;
+        if (string.IsNullOrWhiteSpace(gatewayPaymentId)) return BillingErrors.GatewayPaymentIdRequired;
+
         Status = ESubscriptionPaymentStatus.Paid;
-        AuthorizationCode = authorizationCode;
+        GatewayPaymentId = gatewayPaymentId;
         PaidAt = now;
-        PeriodStart = start;
-        PeriodEnd = start.AddMonths(1).AddDays(-1);
-        AddDomainEvent(new SubscriptionPaymentPaidEvent(UserId, Plan.Code, PeriodEnd.Value));
+        AddDomainEvent(new SubscriptionPaymentPaidEvent(SubscriptionId, Amount, now));
         return Error.None;
     }
 
     public Error MarkFailed()
     {
-        if (!IsPending) return BillingErrors.TransactionNotPending;
+        if (!IsPending) return BillingErrors.PaymentNotPending;
 
         Status = ESubscriptionPaymentStatus.Failed;
         return Error.None;
     }
 
-    public bool Covers(DateOnly today) =>
-        IsPaid && PeriodStart <= today && today <= PeriodEnd;
+    public Error Refund()
+    {
+        if (!IsPaid) return BillingErrors.PaymentNotPaid;
+
+        Status = ESubscriptionPaymentStatus.Refunded;
+        return Error.None;
+    }
 }

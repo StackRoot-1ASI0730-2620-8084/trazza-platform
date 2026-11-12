@@ -1,5 +1,4 @@
 using System.Net.Mime;
-using Trazza.Platform.Billing.Application.CommandServices;
 using Trazza.Platform.Billing.Application.QueryServices;
 using Trazza.Platform.Billing.Domain.Model.Errors;
 using Trazza.Platform.Billing.Domain.Model.Queries;
@@ -14,66 +13,43 @@ namespace Trazza.Platform.Billing.Interfaces.Rest;
 
 [Authorize]
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/v1/subscriptions/{subscriptionId}/payments")]
 [Produces(MediaTypeNames.Application.Json)]
-[Tags("Payment Transactions")]
+[Tags("Subscriptions")]
 public class SubscriptionPaymentsController(
-    ISubscriptionCommandService paymentTransactionCommandService,
-    ISubscriptionPaymentQueryService paymentTransactionQueryService,
+    ISubscriptionPaymentQueryService subscriptionPaymentQueryService,
     ProblemDetailsFactory problemDetailsFactory)
     : ControllerBase
 {
     [HttpGet]
-    [EndpointSummary("Get payment transactions")]
-    [EndpointDescription("Gets all payment transactions, optionally filtered by user id.")]
+    [EndpointSummary("Get subscription payments")]
+    [EndpointDescription("Gets the monthly payments of a subscription, newest first.")]
     [ProducesResponseType(typeof(IEnumerable<SubscriptionPaymentResource>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetPaymentTransactions([FromQuery] int? userId,
+    public async Task<IActionResult> GetSubscriptionPayments(ulong subscriptionId,
         CancellationToken cancellationToken)
     {
-        var transactions = userId.HasValue
-            ? await paymentTransactionQueryService.Handle(
-                new GetPaymentsBySubscriptionIdQuery(new UserId(userId.Value)), cancellationToken)
-            : await paymentTransactionQueryService.Handle(new GetAllPaymentTransactionsQuery(), cancellationToken);
-        return Ok(transactions.Select(SubscriptionPaymentResourceFromEntityAssembler.ToResourceFromEntity));
+        var payments = await subscriptionPaymentQueryService.Handle(
+            new GetPaymentsBySubscriptionIdQuery(new SubscriptionId(subscriptionId)), cancellationToken);
+        return Ok(payments.Select(SubscriptionPaymentResourceFromEntityAssembler.ToResourceFromEntity));
     }
 
-    [HttpGet("{paymentTransactionId:int}")]
-    [EndpointSummary("Get payment transaction by id")]
-    [EndpointDescription("Gets a payment transaction by its unique identifier.")]
+    [HttpGet("{paymentId}")]
+    [EndpointSummary("Get subscription payment by id")]
+    [EndpointDescription("Gets one payment of a subscription by its identifier.")]
     [ProducesResponseType(typeof(SubscriptionPaymentResource), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetPaymentTransactionById(int paymentTransactionId,
+    public async Task<IActionResult> GetSubscriptionPaymentById(ulong subscriptionId, ulong paymentId,
         CancellationToken cancellationToken)
     {
-        var transaction = await paymentTransactionQueryService.Handle(
-            new GetSubscriptionPaymentByIdQuery(new SubscriptionPaymentId(paymentTransactionId)), cancellationToken);
+        var payment = await subscriptionPaymentQueryService.Handle(
+            new GetSubscriptionPaymentByIdQuery(new SubscriptionPaymentId(paymentId)), cancellationToken);
+        if (payment is not null && payment.SubscriptionId.Value != subscriptionId) payment = null;
 
         return BillingActionResultAssembler.ToActionResultFromEntity(
             this,
-            transaction,
-            BillingErrors.PaymentTransactionNotFound,
+            payment,
+            BillingErrors.SubscriptionPaymentNotFound,
             problemDetailsFactory,
             found => Ok(SubscriptionPaymentResourceFromEntityAssembler.ToResourceFromEntity(found)));
-    }
-
-    [HttpPost]
-    [EndpointSummary("Upgrade plan")]
-    [EndpointDescription("Charges the Pro plan to the card through the payment gateway and records the transaction as paid or failed.")]
-    [ProducesResponseType(typeof(SubscriptionPaymentResource), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> CreatePaymentTransaction([FromBody] CreateSubscriptionResource resource,
-        CancellationToken cancellationToken)
-    {
-        var command = SubscribeToPlanCommandFromResourceAssembler.ToCommandFromResource(resource);
-        var result = await paymentTransactionCommandService.Handle(command, cancellationToken);
-
-        return BillingActionResultAssembler.ToActionResultFromResult(
-            this,
-            result,
-            problemDetailsFactory,
-            created => CreatedAtAction(nameof(GetPaymentTransactionById),
-                new { paymentTransactionId = created.Id.Value },
-                SubscriptionPaymentResourceFromEntityAssembler.ToResourceFromEntity(created)));
     }
 }

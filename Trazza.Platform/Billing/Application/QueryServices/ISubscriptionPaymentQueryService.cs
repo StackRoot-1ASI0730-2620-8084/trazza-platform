@@ -5,13 +5,8 @@ namespace Trazza.Platform.Billing.Application.QueryServices;
 
 public interface ISubscriptionPaymentQueryService
 {
-    Task<IEnumerable<SubscriptionPayment>> Handle(GetAllPaymentTransactionsQuery query,
-        CancellationToken cancellationToken);
-
     Task<IEnumerable<SubscriptionPayment>> Handle(GetPaymentsBySubscriptionIdQuery query,
         CancellationToken cancellationToken);
 
     Task<SubscriptionPayment?> Handle(GetSubscriptionPaymentByIdQuery query, CancellationToken cancellationToken);
-
-    Task<SubscriptionPayment?> Handle(GetActiveSubscriptionsByUserIdQuery query, CancellationToken cancellationToken);
 }

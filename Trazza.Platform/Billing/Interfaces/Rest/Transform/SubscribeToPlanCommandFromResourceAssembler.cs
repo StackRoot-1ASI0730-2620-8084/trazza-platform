@@ -8,13 +8,11 @@ public static class SubscribeToPlanCommandFromResourceAssembler
 {
     public static SubscribeToPlanCommand ToCommandFromResource(CreateSubscriptionResource resource)
     {
-        var method = resource.Method is null
-            ? new PaymentMethod()
-            : string.IsNullOrWhiteSpace(resource.Method.CardNumber)
-                ? PaymentMethod.Create(resource.Method.Brand, resource.Method.Last4, resource.Method.HolderName,
-                    resource.Method.Expiry)
-                : PaymentMethod.FromCard(resource.Method.CardNumber, resource.Method.HolderName,
-                    resource.Method.Expiry);
-        return new SubscribeToPlanCommand(new UserId(resource.UserId), resource.Plan, method);
+        var vehicleIds = (resource.VehicleIds ?? []).Select(id => new VehicleId(id)).ToList();
+        return new SubscribeToPlanCommand(
+            new UserId(resource.UserId),
+            (resource.PlanCode ?? string.Empty).Trim().ToUpperInvariant(),
+            vehicleIds,
+            resource.PaymentToken ?? string.Empty);
     }
 }
