@@ -40,14 +40,18 @@ using ProblemDetailsFactory = Trazza.Platform.Shared.Interfaces.Rest.ProblemDeta
 // using Trazza.Platform.Profiles.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 // using Trazza.Platform.Profiles.Interfaces.Acl;
 // Matchmaking (feature/matchmaking)
-// using Trazza.Platform.Matchmaking.Application.CommandServices;
-// using Trazza.Platform.Matchmaking.Application.Internal.CommandServices;
-// using Trazza.Platform.Matchmaking.Application.Internal.OutboundServices;
-// using Trazza.Platform.Matchmaking.Application.Internal.QueryServices;
-// using Trazza.Platform.Matchmaking.Application.QueryServices;
-// using Trazza.Platform.Matchmaking.Domain.Repositories;
-// using Trazza.Platform.Matchmaking.Domain.Services;
-// using Trazza.Platform.Matchmaking.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using Trazza.Platform.Matchmaking.Application.Acl;
+using Trazza.Platform.Matchmaking.Application.CommandServices;
+using Trazza.Platform.Matchmaking.Application.Internal.CommandServices;
+using Trazza.Platform.Matchmaking.Application.Internal.OutboundServices;
+using Trazza.Platform.Matchmaking.Application.Internal.QueryServices;
+using Trazza.Platform.Matchmaking.Application.QueryServices;
+using Trazza.Platform.Matchmaking.Domain.Repositories;
+using Trazza.Platform.Matchmaking.Domain.Services;
+using Trazza.Platform.Matchmaking.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using Trazza.Platform.Matchmaking.Infrastructure.Profiles;
+using Trazza.Platform.Matchmaking.Infrastructure.Services;
+using Trazza.Platform.Matchmaking.Interfaces.Acl;
 // Execution (feature/execution)
 // using Trazza.Platform.Execution.Application.Acl;
 // using Trazza.Platform.Execution.Application.CommandServices;
@@ -161,17 +165,22 @@ builder.Services.AddScoped<DispatchDomainEventsInterceptor>();
 // builder.Services.AddScoped<IProfilesContextFacade, ProfilesContextFacade>();
 
 // Matchmaking (feature/matchmaking)
-// builder.Services.AddScoped<IReturnRouteRepository, ReturnRouteRepository>();
-// builder.Services.AddScoped<IFreightRequestRepository, FreightRequestRepository>();
-// builder.Services.AddScoped<IMatchProposalRepository, MatchProposalRepository>();
-// builder.Services.AddScoped<IRouteMatchingService, RouteMatchingService>();
-// builder.Services.AddScoped<PublicationPolicy>();
-// builder.Services.AddScoped<IReturnRouteCommandService, ReturnRouteCommandService>();
-// builder.Services.AddScoped<IReturnRouteQueryService, ReturnRouteQueryService>();
-// builder.Services.AddScoped<IFreightRequestCommandService, FreightRequestCommandService>();
-// builder.Services.AddScoped<IFreightRequestQueryService, FreightRequestQueryService>();
-// builder.Services.AddScoped<IMatchProposalCommandService, MatchProposalCommandService>();
-// builder.Services.AddScoped<IMatchProposalQueryService, MatchProposalQueryService>();
+builder.Services.AddScoped<IReturnRouteRepository, ReturnRouteRepository>();
+builder.Services.AddScoped<IShipmentRequestRepository, ShipmentRequestRepository>();
+builder.Services.AddScoped<IMatchProposalRepository, MatchProposalRepository>();
+builder.Services.AddScoped<IMessageRepository, MessageRepository>();
+builder.Services.AddScoped<IRouteMatchingService, RouteMatchingService>();
+// Temporary: replace it with the adapter to the Profiles context when feature/profiles is merged.
+builder.Services.AddScoped<IProfilesService, FakeProfilesService>();
+builder.Services.AddScoped<IReturnRouteCommandService, ReturnRouteCommandService>();
+builder.Services.AddScoped<IReturnRouteQueryService, ReturnRouteQueryService>();
+builder.Services.AddScoped<IShipmentRequestCommandService, ShipmentRequestCommandService>();
+builder.Services.AddScoped<IShipmentRequestQueryService, ShipmentRequestQueryService>();
+builder.Services.AddScoped<IMatchProposalCommandService, MatchProposalCommandService>();
+builder.Services.AddScoped<IMatchProposalQueryService, MatchProposalQueryService>();
+builder.Services.AddScoped<IMessageCommandService, MessageCommandService>();
+builder.Services.AddScoped<IMessageQueryService, MessageQueryService>();
+builder.Services.AddScoped<IMatchmakingContextFacade, MatchmakingContextFacade>();
 
 // Execution (feature/execution)
 // builder.Services.AddScoped<IShipmentRepository, ShipmentRepository>();
