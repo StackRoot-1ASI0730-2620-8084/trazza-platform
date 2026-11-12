@@ -29,9 +29,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Billing\Application\Acl\" />
-      <Folder Include="Billing\Application\CommandServices\" />
-      <Folder Include="Billing\Application\Internal\OutboundServices\" />
       <Folder Include="Billing\Infrastructure\Payments\Simulated\Services\" />
     </ItemGroup>
 
