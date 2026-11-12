@@ -4,11 +4,11 @@ using Trazza.Platform.Shared.Domain.Repositories;
 
 namespace Trazza.Platform.Billing.Domain.Repositories;
 
-public interface IPaymentTransactionRepository : IBaseRepository<PaymentTransaction>
+public interface ISubscriptionPaymentRepository : IBaseRepository<SubscriptionPayment>
 {
-    Task<IEnumerable<PaymentTransaction>> FindByUserIdAsNoTrackingAsync(UserId userId,
+    Task<IEnumerable<SubscriptionPayment>> FindByUserIdAsNoTrackingAsync(UserId userId,
         CancellationToken cancellationToken);
 
-    Task<IEnumerable<PaymentTransaction>> FindPaidByUserIdAsNoTrackingAsync(UserId userId,
+    Task<IEnumerable<SubscriptionPayment>> FindPaidByUserIdAsNoTrackingAsync(UserId userId,
         CancellationToken cancellationToken);
 }

@@ -2,7 +2,7 @@ using Trazza.Platform.Shared.Interfaces.Rest.Resources;
 
 namespace Trazza.Platform.Billing.Interfaces.Rest.Resources;
 
-public record PaymentTransactionResource(
+public record SubscriptionPaymentResource(
     int Id,
     int UserId,
     string Plan,

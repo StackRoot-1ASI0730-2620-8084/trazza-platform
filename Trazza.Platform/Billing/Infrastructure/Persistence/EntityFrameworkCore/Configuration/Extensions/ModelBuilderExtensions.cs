@@ -9,37 +9,37 @@ public static class ModelBuilderExtensions
 {
     public static void ApplyBillingConfiguration(this ModelBuilder builder)
     {
-        builder.Entity<PaymentTransaction>().HasKey(t => t.Id);
-        builder.Entity<PaymentTransaction>().Property(t => t.Id)
-            .HasConversion(new StronglyTypedIdConverter<PaymentTransactionId, int>(id => id.Value,
-                value => new PaymentTransactionId(value)))
+        builder.Entity<SubscriptionPayment>().HasKey(t => t.Id);
+        builder.Entity<SubscriptionPayment>().Property(t => t.Id)
+            .HasConversion(new StronglyTypedIdConverter<SubscriptionPaymentId, int>(id => id.Value,
+                value => new SubscriptionPaymentId(value)))
             .IsRequired()
             .ValueGeneratedOnAdd();
-        builder.Entity<PaymentTransaction>().Property(t => t.UserId)
+        builder.Entity<SubscriptionPayment>().Property(t => t.UserId)
             .HasConversion(new StronglyTypedIdConverter<UserId, int>(id => id.Value, value => new UserId(value)))
             .IsRequired();
-        builder.Entity<PaymentTransaction>().HasIndex(t => t.UserId);
-        builder.Entity<PaymentTransaction>().Property(t => t.Plan)
-            .HasConversion(plan => plan.Code, value => new SubscriptionPlan(value))
+        builder.Entity<SubscriptionPayment>().HasIndex(t => t.UserId);
+        builder.Entity<SubscriptionPayment>().Property(t => t.Plan)
+            .HasConversion(plan => plan.Code, value => new Plan(value))
             .IsRequired()
             .HasMaxLength(20);
-        builder.Entity<PaymentTransaction>().OwnsOne(t => t.Amount, amount =>
+        builder.Entity<SubscriptionPayment>().OwnsOne(t => t.Amount, amount =>
         {
             amount.Property(m => m.Amount).HasColumnName("Amount").HasPrecision(10, 2).IsRequired();
             amount.Property(m => m.Currency).HasColumnName("Currency").HasMaxLength(3).IsRequired();
         });
-        builder.Entity<PaymentTransaction>().Navigation(t => t.Amount).IsRequired();
-        builder.Entity<PaymentTransaction>().OwnsOne(t => t.Method, method =>
+        builder.Entity<SubscriptionPayment>().Navigation(t => t.Amount).IsRequired();
+        builder.Entity<SubscriptionPayment>().OwnsOne(t => t.Method, method =>
         {
             method.Property(m => m.Brand).HasColumnName("CardBrand").HasMaxLength(20).IsRequired();
             method.Property(m => m.Last4).HasColumnName("CardLast4").HasMaxLength(4).IsRequired();
             method.Property(m => m.HolderName).HasColumnName("CardHolderName").HasMaxLength(120).IsRequired();
             method.Property(m => m.Expiry).HasColumnName("CardExpiry").HasMaxLength(5).IsRequired();
         });
-        builder.Entity<PaymentTransaction>().Navigation(t => t.Method).IsRequired();
-        builder.Entity<PaymentTransaction>().Property(t => t.Status).HasConversion<string>().IsRequired()
+        builder.Entity<SubscriptionPayment>().Navigation(t => t.Method).IsRequired();
+        builder.Entity<SubscriptionPayment>().Property(t => t.Status).HasConversion<string>().IsRequired()
             .HasMaxLength(20);
-        builder.Entity<PaymentTransaction>().Property(t => t.AuthorizationCode).HasMaxLength(40);
+        builder.Entity<SubscriptionPayment>().Property(t => t.AuthorizationCode).HasMaxLength(40);
 
         builder.Entity<Receipt>().HasKey(r => r.Id);
         builder.Entity<Receipt>().Property(r => r.Id)
@@ -47,11 +47,11 @@ public static class ModelBuilderExtensions
             .IsRequired()
             .ValueGeneratedOnAdd();
         builder.Entity<Receipt>().Property(r => r.TransactionId)
-            .HasConversion(new StronglyTypedIdConverter<PaymentTransactionId, int>(id => id.Value,
-                value => new PaymentTransactionId(value)))
+            .HasConversion(new StronglyTypedIdConverter<SubscriptionPaymentId, int>(id => id.Value,
+                value => new SubscriptionPaymentId(value)))
             .IsRequired();
         builder.Entity<Receipt>().HasIndex(r => r.TransactionId).IsUnique();
-        builder.Entity<Receipt>().HasOne<PaymentTransaction>().WithMany().HasForeignKey(r => r.TransactionId)
+        builder.Entity<Receipt>().HasOne<SubscriptionPayment>().WithMany().HasForeignKey(r => r.TransactionId)
             .OnDelete(DeleteBehavior.Restrict);
         builder.Entity<Receipt>().Property(r => r.UserId)
             .HasConversion(new StronglyTypedIdConverter<UserId, int>(id => id.Value, value => new UserId(value)))

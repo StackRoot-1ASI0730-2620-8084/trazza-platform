@@ -5,7 +5,7 @@ using Trazza.Platform.Billing.Interfaces.Acl;
 
 namespace Trazza.Platform.Billing.Application.Acl;
 
-public class BillingContextFacade(IPaymentTransactionQueryService paymentTransactionQueryService)
+public class BillingContextFacade(ISubscriptionPaymentQueryService paymentTransactionQueryService)
     : IBillingContextFacade
 {
     public async Task<bool> CanPublish(int userId, int usedThisMonth, CancellationToken cancellationToken)
@@ -20,10 +20,10 @@ public class BillingContextFacade(IPaymentTransactionQueryService paymentTransac
         return plan.Code;
     }
 
-    private async Task<SubscriptionPlan> FetchCurrentPlan(int userId, CancellationToken cancellationToken)
+    private async Task<Plan> FetchCurrentPlan(int userId, CancellationToken cancellationToken)
     {
         var activeSubscription = await paymentTransactionQueryService.Handle(
             new GetActiveSubscriptionsByUserIdQuery(new UserId(userId)), cancellationToken);
-        return activeSubscription?.Plan ?? new SubscriptionPlan(SubscriptionPlan.Free);
+        return activeSubscription?.Plan ?? new Plan(Plan.Free);
     }
 }

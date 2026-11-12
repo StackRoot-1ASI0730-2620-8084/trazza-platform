@@ -3,4 +3,4 @@ using Trazza.Platform.Shared.Domain.Model.Events;
 
 namespace Trazza.Platform.Billing.Domain.Model.Events;
 
-public record PaymentTransactionPaidEvent(UserId UserId, string Plan, DateOnly PeriodEnd) : IEvent;
+public record SubscriptionPaymentPaidEvent(UserId UserId, string Plan, DateOnly PeriodEnd) : IEvent;

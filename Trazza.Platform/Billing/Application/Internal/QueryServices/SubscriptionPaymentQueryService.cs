@@ -6,29 +6,29 @@ using Trazza.Platform.Shared.Domain.Model.ValueObjects;
 
 namespace Trazza.Platform.Billing.Application.Internal.QueryServices;
 
-public class PaymentTransactionQueryService(IPaymentTransactionRepository paymentTransactionRepository)
-    : IPaymentTransactionQueryService
+public class SubscriptionPaymentQueryService(ISubscriptionPaymentRepository paymentTransactionRepository)
+    : ISubscriptionPaymentQueryService
 {
-    public async Task<IEnumerable<PaymentTransaction>> Handle(GetAllPaymentTransactionsQuery query,
+    public async Task<IEnumerable<SubscriptionPayment>> Handle(GetAllPaymentTransactionsQuery query,
         CancellationToken cancellationToken)
     {
         return await paymentTransactionRepository.ListAsNoTrackingAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<PaymentTransaction>> Handle(GetPaymentTransactionsByUserIdQuery query,
+    public async Task<IEnumerable<SubscriptionPayment>> Handle(GetPaymentsBySubscriptionIdQuery query,
         CancellationToken cancellationToken)
     {
         return await paymentTransactionRepository.FindByUserIdAsNoTrackingAsync(query.UserId, cancellationToken);
     }
 
-    public async Task<PaymentTransaction?> Handle(GetPaymentTransactionByIdQuery query,
+    public async Task<SubscriptionPayment?> Handle(GetSubscriptionPaymentByIdQuery query,
         CancellationToken cancellationToken)
     {
-        return await paymentTransactionRepository.FindByIdAsNoTrackingAsync(query.PaymentTransactionId,
+        return await paymentTransactionRepository.FindByIdAsNoTrackingAsync(query.SubscriptionPaymentId,
             cancellationToken);
     }
 
-    public async Task<PaymentTransaction?> Handle(GetActiveSubscriptionsByUserIdQuery query,
+    public async Task<SubscriptionPayment?> Handle(GetActiveSubscriptionsByUserIdQuery query,
         CancellationToken cancellationToken)
     {
         var paidTransactions =

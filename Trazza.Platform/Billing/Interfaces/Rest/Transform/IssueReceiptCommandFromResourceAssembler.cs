@@ -8,7 +8,7 @@ public static class IssueReceiptCommandFromResourceAssembler
 {
     public static IssueReceiptCommand ToCommandFromResource(IssueReceiptResource resource)
     {
-        return new IssueReceiptCommand(new PaymentTransactionId(resource.TransactionId), resource.Type,
+        return new IssueReceiptCommand(new SubscriptionPaymentId(resource.TransactionId), resource.Type,
             resource.CustomerName, resource.CustomerDocument);
     }
 }

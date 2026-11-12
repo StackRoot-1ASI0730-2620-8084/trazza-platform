@@ -3,4 +3,4 @@ using Trazza.Platform.Shared.Domain.Model.Events;
 
 namespace Trazza.Platform.Billing.Domain.Model.Events;
 
-public record ReceiptIssuedEvent(UserId UserId, PaymentTransactionId TransactionId, string Type) : IEvent;
+public record ReceiptIssuedEvent(UserId UserId, SubscriptionPaymentId TransactionId, string Type) : IEvent;

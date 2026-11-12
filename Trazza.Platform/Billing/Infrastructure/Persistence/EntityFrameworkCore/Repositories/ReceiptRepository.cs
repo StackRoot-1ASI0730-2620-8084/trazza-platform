@@ -26,7 +26,7 @@ public class ReceiptRepository(AppDbContext context) : BaseRepository<Receipt>(c
             .MaxAsync(cancellationToken) ?? 0;
     }
 
-    public async Task<bool> ExistsByTransactionIdAsync(PaymentTransactionId transactionId,
+    public async Task<bool> ExistsByTransactionIdAsync(SubscriptionPaymentId transactionId,
         CancellationToken cancellationToken)
     {
         return await Context.Set<Receipt>().AnyAsync(receipt => receipt.TransactionId == transactionId,
