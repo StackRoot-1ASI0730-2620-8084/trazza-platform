@@ -21,6 +21,6 @@ public class PlansController : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<PlanResource>), StatusCodes.Status200OK)]
     public IActionResult GetSubscriptionPlans()
     {
-        return Ok(SubscriptionPlan.All.Select(SubscriptionResourceFromEntityAssembler.ToResourceFromPlan));
+        return Ok(Plan.All.Select(SubscriptionResourceFromEntityAssembler.ToResourceFromPlan));
     }
 }

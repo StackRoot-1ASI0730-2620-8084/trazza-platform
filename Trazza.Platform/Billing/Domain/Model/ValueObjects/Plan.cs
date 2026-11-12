@@ -2,7 +2,7 @@ using Trazza.Platform.Shared.Domain.Model.ValueObjects;
 
 namespace Trazza.Platform.Billing.Domain.Model.ValueObjects;
 
-public record SubscriptionPlan(string Code)
+public record Plan(string Code)
 {
     public const string Free = "free";
     public const string Pro = "pro";
@@ -14,13 +14,13 @@ public record SubscriptionPlan(string Code)
             [Pro] = (39.90m, null)
         };
 
-    public SubscriptionPlan() : this(string.Empty)
+    public Plan() : this(string.Empty)
     {
     }
 
-    public static IReadOnlyList<SubscriptionPlan> All => Catalog.Keys.Select(code => new SubscriptionPlan(code)).ToList();
+    public static IReadOnlyList<Plan> All => Catalog.Keys.Select(code => new Plan(code)).ToList();
 
-    public static SubscriptionPlan From(string? code) => new((code ?? string.Empty).Trim().ToLowerInvariant());
+    public static Plan From(string? code) => new((code ?? string.Empty).Trim().ToLowerInvariant());
 
     public bool IsValid => Catalog.ContainsKey(Code);
 

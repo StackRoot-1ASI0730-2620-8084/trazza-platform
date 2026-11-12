@@ -4,8 +4,8 @@ using Trazza.Platform.Shared.Application.Model;
 
 namespace Trazza.Platform.Billing.Application.CommandServices;
 
-public interface IPaymentTransactionCommandService
+public interface ISubscriptionCommandService
 {
-    Task<Result<PaymentTransaction>> Handle(CreatePaymentTransactionCommand command,
+    Task<Result<SubscriptionPayment>> Handle(SubscribeToPlanCommand command,
         CancellationToken cancellationToken);
 }

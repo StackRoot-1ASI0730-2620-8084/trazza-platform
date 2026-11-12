@@ -7,38 +7,38 @@ using Trazza.Platform.Shared.Domain.Model.ValueObjects;
 
 namespace Trazza.Platform.Billing.Domain.Model.Aggregates;
 
-public partial class PaymentTransaction : AggregateRoot
+public partial class SubscriptionPayment : AggregateRoot
 {
-    public PaymentTransaction()
+    public SubscriptionPayment()
     {
-        Plan = new SubscriptionPlan();
+        Plan = new Plan();
         Amount = new Money();
         Method = new PaymentMethod();
     }
 
-    public PaymentTransaction(UserId userId, SubscriptionPlan plan, PaymentMethod method) : this()
+    public SubscriptionPayment(UserId userId, Plan plan, PaymentMethod method) : this()
     {
         UserId = userId;
         Plan = plan;
         Amount = plan.Price;
         Method = method;
-        Status = EPaymentStatus.Pending;
+        Status = ESubscriptionPaymentStatus.Pending;
     }
 
-    public PaymentTransactionId Id { get; }
+    public SubscriptionPaymentId Id { get; }
     public UserId UserId { get; private set; }
-    public SubscriptionPlan Plan { get; private set; }
+    public Plan Plan { get; private set; }
     public Money Amount { get; private set; }
     public PaymentMethod Method { get; private set; }
-    public EPaymentStatus Status { get; private set; }
+    public ESubscriptionPaymentStatus Status { get; private set; }
     public string? AuthorizationCode { get; private set; }
     public DateTimeOffset? PaidAt { get; private set; }
     public DateOnly? PeriodStart { get; private set; }
     public DateOnly? PeriodEnd { get; private set; }
 
-    public bool IsPaid => Status == EPaymentStatus.Paid;
+    public bool IsPaid => Status == ESubscriptionPaymentStatus.Paid;
 
-    public bool IsPending => Status == EPaymentStatus.Pending;
+    public bool IsPending => Status == ESubscriptionPaymentStatus.Pending;
 
     public Error MarkPaid(string authorizationCode, DateTimeOffset now)
     {
@@ -46,12 +46,12 @@ public partial class PaymentTransaction : AggregateRoot
         if (string.IsNullOrWhiteSpace(authorizationCode)) return BillingErrors.AuthorizationRequired;
 
         var start = DateOnly.FromDateTime(now.ToOffset(LimaCalendar.UtcOffset).DateTime);
-        Status = EPaymentStatus.Paid;
+        Status = ESubscriptionPaymentStatus.Paid;
         AuthorizationCode = authorizationCode;
         PaidAt = now;
         PeriodStart = start;
         PeriodEnd = start.AddMonths(1).AddDays(-1);
-        AddDomainEvent(new PaymentTransactionPaidEvent(UserId, Plan.Code, PeriodEnd.Value));
+        AddDomainEvent(new SubscriptionPaymentPaidEvent(UserId, Plan.Code, PeriodEnd.Value));
         return Error.None;
     }
 
@@ -59,7 +59,7 @@ public partial class PaymentTransaction : AggregateRoot
     {
         if (!IsPending) return BillingErrors.TransactionNotPending;
 
-        Status = EPaymentStatus.Failed;
+        Status = ESubscriptionPaymentStatus.Failed;
         return Error.None;
     }
 

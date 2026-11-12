@@ -4,9 +4,9 @@ using Trazza.Platform.Billing.Interfaces.Rest.Resources;
 
 namespace Trazza.Platform.Billing.Interfaces.Rest.Transform;
 
-public static class PaymentTransactionCommandFromResourceAssembler
+public static class SubscribeToPlanCommandFromResourceAssembler
 {
-    public static CreatePaymentTransactionCommand ToCommandFromResource(CreatePaymentTransactionResource resource)
+    public static SubscribeToPlanCommand ToCommandFromResource(CreateSubscriptionResource resource)
     {
         var method = resource.Method is null
             ? new PaymentMethod()
@@ -15,6 +15,6 @@ public static class PaymentTransactionCommandFromResourceAssembler
                     resource.Method.Expiry)
                 : PaymentMethod.FromCard(resource.Method.CardNumber, resource.Method.HolderName,
                     resource.Method.Expiry);
-        return new CreatePaymentTransactionCommand(new UserId(resource.UserId), resource.Plan, method);
+        return new SubscribeToPlanCommand(new UserId(resource.UserId), resource.Plan, method);
     }
 }

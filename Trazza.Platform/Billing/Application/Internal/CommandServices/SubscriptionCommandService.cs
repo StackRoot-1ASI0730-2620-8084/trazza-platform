@@ -14,35 +14,35 @@ using Trazza.Platform.Shared.Domain.Repositories;
 
 namespace Trazza.Platform.Billing.Application.Internal.CommandServices;
 
-public class PaymentTransactionCommandService(
-    IPaymentTransactionRepository paymentTransactionRepository,
-    IPaymentTransactionQueryService paymentTransactionQueryService,
+public class SubscriptionCommandService(
+    ISubscriptionPaymentRepository paymentTransactionRepository,
+    ISubscriptionPaymentQueryService paymentTransactionQueryService,
     IPaymentGateway paymentGateway,
     IIamContextFacade iamContextFacade,
     IUnitOfWork unitOfWork)
-    : IPaymentTransactionCommandService
+    : ISubscriptionCommandService
 {
-    public async Task<Result<PaymentTransaction>> Handle(CreatePaymentTransactionCommand command,
+    public async Task<Result<SubscriptionPayment>> Handle(SubscribeToPlanCommand command,
         CancellationToken cancellationToken)
     {
-        var plan = SubscriptionPlan.From(command.Plan);
+        var plan = Plan.From(command.Plan);
         if (!plan.IsValid)
-            return Result<PaymentTransaction>.Failure(BillingErrors.InvalidPlan);
+            return Result<SubscriptionPayment>.Failure(BillingErrors.InvalidPlan);
         if (plan.IsFree)
-            return Result<PaymentTransaction>.Failure(BillingErrors.PlanFreeNotChargeable);
+            return Result<SubscriptionPayment>.Failure(BillingErrors.PlanFreeNotChargeable);
         if (!command.Method.IsValid)
-            return Result<PaymentTransaction>.Failure(BillingErrors.InvalidPaymentMethod);
+            return Result<SubscriptionPayment>.Failure(BillingErrors.InvalidPaymentMethod);
         if (command.Method.IsExpired(LimaCalendar.Today))
-            return Result<PaymentTransaction>.Failure(BillingErrors.CardExpired);
+            return Result<SubscriptionPayment>.Failure(BillingErrors.CardExpired);
         if (!await iamContextFacade.ExistsUserById(command.UserId, cancellationToken))
-            return Result<PaymentTransaction>.Failure(BillingErrors.UserNotFound);
+            return Result<SubscriptionPayment>.Failure(BillingErrors.UserNotFound);
 
         var activeSubscription = await paymentTransactionQueryService.Handle(
             new GetActiveSubscriptionsByUserIdQuery(command.UserId), cancellationToken);
         if (activeSubscription is not null)
-            return Result<PaymentTransaction>.Failure(BillingErrors.PlanAlreadyActive);
+            return Result<SubscriptionPayment>.Failure(BillingErrors.PlanAlreadyActive);
 
-        var transaction = new PaymentTransaction(command.UserId, plan, command.Method);
+        var transaction = new SubscriptionPayment(command.UserId, plan, command.Method);
         var response = await paymentGateway.Charge(transaction.Amount, transaction.Method, cancellationToken);
         if (response.Approved)
             transaction.MarkPaid(response.AuthorizationCode ?? string.Empty, DateTimeOffset.UtcNow);
@@ -51,6 +51,6 @@ public class PaymentTransactionCommandService(
 
         await paymentTransactionRepository.AddAsync(transaction, cancellationToken);
         await unitOfWork.CompleteAsync(cancellationToken);
-        return Result<PaymentTransaction>.Success(transaction);
+        return Result<SubscriptionPayment>.Success(transaction);
     }
 }

@@ -11,7 +11,7 @@ namespace Trazza.Platform.Billing.Application.Internal.CommandServices;
 
 public class ReceiptCommandService(
     IReceiptRepository receiptRepository,
-    IPaymentTransactionRepository paymentTransactionRepository,
+    ISubscriptionPaymentRepository paymentTransactionRepository,
     IUnitOfWork unitOfWork)
     : IReceiptCommandService
 {

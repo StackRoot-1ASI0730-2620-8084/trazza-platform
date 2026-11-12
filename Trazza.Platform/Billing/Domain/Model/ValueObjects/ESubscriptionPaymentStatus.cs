@@ -1,6 +1,6 @@
 namespace Trazza.Platform.Billing.Domain.Model.ValueObjects;
 
-public enum EPaymentStatus
+public enum ESubscriptionPaymentStatus
 {
     Pending,
     Paid,

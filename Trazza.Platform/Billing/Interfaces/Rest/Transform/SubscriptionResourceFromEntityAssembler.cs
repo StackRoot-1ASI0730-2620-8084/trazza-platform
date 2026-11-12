@@ -7,16 +7,16 @@ namespace Trazza.Platform.Billing.Interfaces.Rest.Transform;
 
 public static class SubscriptionResourceFromEntityAssembler
 {
-    public static PlanResource ToResourceFromPlan(SubscriptionPlan plan)
+    public static PlanResource ToResourceFromPlan(Plan plan)
     {
         return new PlanResource(plan.Code, MoneyResourceAssembler.ToResourceFromValueObject(plan.Price),
             plan.MonthlyPublications);
     }
 
     public static SubscriptionResource ToResourceFromActiveSubscription(int userId,
-        PaymentTransaction? activeSubscription)
+        SubscriptionPayment? activeSubscription)
     {
-        var plan = activeSubscription?.Plan ?? new SubscriptionPlan(SubscriptionPlan.Free);
+        var plan = activeSubscription?.Plan ?? new Plan(Plan.Free);
         return new SubscriptionResource(userId, plan.Code,
             MoneyResourceAssembler.ToResourceFromValueObject(plan.Price), plan.MonthlyPublications,
             activeSubscription?.PeriodStart, activeSubscription?.PeriodEnd);

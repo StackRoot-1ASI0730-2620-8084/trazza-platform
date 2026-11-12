@@ -18,7 +18,7 @@ public partial class Receipt : AggregateRoot
         Total = new Money();
     }
 
-    public Receipt(PaymentTransaction transaction, ReceiptType type, int number, string customerName,
+    public Receipt(SubscriptionPayment transaction, ReceiptType type, int number, string customerName,
         string customerDocument, DateTimeOffset issuedAt) : this()
     {
         TransactionId = transaction.Id;
@@ -33,7 +33,7 @@ public partial class Receipt : AggregateRoot
     }
 
     public ReceiptId Id { get; }
-    public PaymentTransactionId TransactionId { get; private set; }
+    public SubscriptionPaymentId TransactionId { get; private set; }
     public UserId UserId { get; private set; }
     public ReceiptType Type { get; private set; }
     public int Number { get; private set; }

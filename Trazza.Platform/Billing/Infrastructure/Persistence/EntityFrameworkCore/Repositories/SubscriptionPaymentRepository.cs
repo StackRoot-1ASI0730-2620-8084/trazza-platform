@@ -7,24 +7,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Trazza.Platform.Billing.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 
-public class PaymentTransactionRepository(AppDbContext context)
-    : BaseRepository<PaymentTransaction>(context), IPaymentTransactionRepository
+public class SubscriptionPaymentRepository(AppDbContext context)
+    : BaseRepository<SubscriptionPayment>(context), ISubscriptionPaymentRepository
 {
-    public async Task<IEnumerable<PaymentTransaction>> FindByUserIdAsNoTrackingAsync(UserId userId,
+    public async Task<IEnumerable<SubscriptionPayment>> FindByUserIdAsNoTrackingAsync(UserId userId,
         CancellationToken cancellationToken)
     {
-        return await Context.Set<PaymentTransaction>()
+        return await Context.Set<SubscriptionPayment>()
             .AsNoTracking()
             .Where(transaction => transaction.UserId == userId)
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<IEnumerable<PaymentTransaction>> FindPaidByUserIdAsNoTrackingAsync(UserId userId,
+    public async Task<IEnumerable<SubscriptionPayment>> FindPaidByUserIdAsNoTrackingAsync(UserId userId,
         CancellationToken cancellationToken)
     {
-        return await Context.Set<PaymentTransaction>()
+        return await Context.Set<SubscriptionPayment>()
             .AsNoTracking()
-            .Where(transaction => transaction.UserId == userId && transaction.Status == EPaymentStatus.Paid)
+            .Where(transaction => transaction.UserId == userId && transaction.Status == ESubscriptionPaymentStatus.Paid)
             .ToListAsync(cancellationToken);
     }
 }

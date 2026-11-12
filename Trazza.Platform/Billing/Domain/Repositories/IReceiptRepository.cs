@@ -10,5 +10,5 @@ public interface IReceiptRepository : IBaseRepository<Receipt>
 
     Task<int> FindLastNumberByTypeAsync(ReceiptType type, CancellationToken cancellationToken);
 
-    Task<bool> ExistsByTransactionIdAsync(PaymentTransactionId transactionId, CancellationToken cancellationToken);
+    Task<bool> ExistsByTransactionIdAsync(SubscriptionPaymentId transactionId, CancellationToken cancellationToken);
 }

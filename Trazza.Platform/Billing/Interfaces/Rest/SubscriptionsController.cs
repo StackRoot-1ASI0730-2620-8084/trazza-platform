@@ -14,7 +14,7 @@ namespace Trazza.Platform.Billing.Interfaces.Rest;
 [Route("api/v1/users/{userId:int}/subscription")]
 [Produces(MediaTypeNames.Application.Json)]
 [Tags("Subscriptions")]
-public class SubscriptionsController(IPaymentTransactionQueryService paymentTransactionQueryService)
+public class SubscriptionsController(ISubscriptionPaymentQueryService paymentTransactionQueryService)
     : ControllerBase
 {
     [HttpGet]

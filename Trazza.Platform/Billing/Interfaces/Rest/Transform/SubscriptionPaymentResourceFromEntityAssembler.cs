@@ -6,11 +6,11 @@ using Trazza.Platform.Shared.Interfaces.Rest.Transform;
 
 namespace Trazza.Platform.Billing.Interfaces.Rest.Transform;
 
-public static class PaymentTransactionResourceFromEntityAssembler
+public static class SubscriptionPaymentResourceFromEntityAssembler
 {
-    public static PaymentTransactionResource ToResourceFromEntity(PaymentTransaction transaction)
+    public static SubscriptionPaymentResource ToResourceFromEntity(SubscriptionPayment transaction)
     {
-        return new PaymentTransactionResource(
+        return new SubscriptionPaymentResource(
             transaction.Id,
             transaction.UserId,
             transaction.Plan.Code,
