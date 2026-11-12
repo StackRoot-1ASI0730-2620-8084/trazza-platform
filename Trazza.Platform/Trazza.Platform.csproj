@@ -28,4 +28,9 @@
         <PackageReference Include="Cortex.Mediator" Version="3.1.2"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Billing\Application\CommandServices\" />
+      <Folder Include="Billing\Application\QueryServices\" />
+    </ItemGroup>
+
 </Project>
