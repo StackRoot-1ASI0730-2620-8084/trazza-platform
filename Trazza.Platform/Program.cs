@@ -57,24 +57,20 @@ using Trazza.Platform.Execution.Domain.Repositories;
 using Trazza.Platform.Execution.Domain.Services;
 using Trazza.Platform.Execution.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 using Trazza.Platform.Execution.Interfaces.Acl;
-// Billing (feature/billing)
-// using Trazza.Platform.Billing.Application.Acl;
-// using Trazza.Platform.Billing.Application.CommandServices;
-// using Trazza.Platform.Billing.Application.Internal.CommandServices;
-// using Trazza.Platform.Billing.Application.Internal.OutboundServices;
-// using Trazza.Platform.Billing.Application.Internal.QueryServices;
-// using Trazza.Platform.Billing.Application.QueryServices;
-// using Trazza.Platform.Billing.Domain.Repositories;
-// using Trazza.Platform.Billing.Infrastructure.Payments.Simulated.Services;
-// using Trazza.Platform.Billing.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
-// using Trazza.Platform.Billing.Interfaces.Acl;
-// Reputation (feature/reputation)
-// using Trazza.Platform.Reputation.Application.CommandServices;
-// using Trazza.Platform.Reputation.Application.Internal.CommandServices;
-// using Trazza.Platform.Reputation.Application.Internal.QueryServices;
-// using Trazza.Platform.Reputation.Application.QueryServices;
-// using Trazza.Platform.Reputation.Domain.Repositories;
-// using Trazza.Platform.Reputation.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using Trazza.Platform.Billing.Application.Internal;
+using Trazza.Platform.Billing.Application.Internal.CommandServices;
+using Trazza.Platform.Billing.Application.Internal.QueryServices;
+using Trazza.Platform.Billing.Domain.Repositories;
+using Trazza.Platform.Billing.Domain.Services;
+using Trazza.Platform.Billing.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using Trazza.Platform.Billing.Interfaces.Acl;
+using Trazza.Platform.Reputation.Application.Internal;
+using Trazza.Platform.Reputation.Application.Internal.CommandServices;
+using Trazza.Platform.Reputation.Application.Internal.QueryServices;
+using Trazza.Platform.Reputation.Domain.Repositories;
+using Trazza.Platform.Reputation.Domain.Services;
+using Trazza.Platform.Reputation.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using Trazza.Platform.Reputation.Interfaces.Acl;
 
 // Local development: load variables from the .env file at the repository root (never committed).
 LoadDotEnvForDevelopment();
@@ -212,20 +208,25 @@ builder.Services.AddScoped<IIncidentCommandService, IncidentCommandService>();
 builder.Services.AddScoped<IExecutionQueryService, ExecutionQueryService>();
 builder.Services.AddScoped<IExecutionContextFacade, ExecutionContextFacade>();
 
-// Billing (feature/billing)
-// builder.Services.AddScoped<IPaymentTransactionRepository, PaymentTransactionRepository>();
-// builder.Services.AddScoped<IReceiptRepository, ReceiptRepository>();
-// builder.Services.AddScoped<IPaymentGateway, SimulatedPaymentGateway>();
-// builder.Services.AddScoped<IPaymentTransactionCommandService, PaymentTransactionCommandService>();
-// builder.Services.AddScoped<IPaymentTransactionQueryService, PaymentTransactionQueryService>();
-// builder.Services.AddScoped<IReceiptCommandService, ReceiptCommandService>();
-// builder.Services.AddScoped<IReceiptQueryService, ReceiptQueryService>();
-// builder.Services.AddScoped<IBillingContextFacade, BillingContextFacade>();
+// Billing
+builder.Services.AddScoped<IPlanRepository, PlanRepository>();
+builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+builder.Services.AddScoped<ISubscriptionPaymentRepository, SubscriptionPaymentRepository>();
+builder.Services.AddScoped<IFreightSettlementRepository, FreightSettlementRepository>();
+builder.Services.AddScoped<ICancellationCompensationRepository, CancellationCompensationRepository>();
+builder.Services.AddScoped<SubscriptionViewBuilder>();
+builder.Services.AddScoped<ISubscriptionCommandService, SubscriptionCommandService>();
+builder.Services.AddScoped<ISettlementCommandService, SettlementCommandService>();
+builder.Services.AddScoped<IBillingQueryService, BillingQueryService>();
+builder.Services.AddScoped<IBillingContextFacade, BillingContextFacade>();
 
-// Reputation (feature/reputation)
-// builder.Services.AddScoped<IRatingRepository, RatingRepository>();
-// builder.Services.AddScoped<IRatingCommandService, RatingCommandService>();
-// builder.Services.AddScoped<IRatingQueryService, RatingQueryService>();
+// Reputation
+builder.Services.AddScoped<IRatingRepository, RatingRepository>();
+builder.Services.AddScoped<ILoyaltyPointEntryRepository, LoyaltyPointEntryRepository>();
+builder.Services.AddScoped<RatingViewBuilder>();
+builder.Services.AddScoped<IReputationCommandService, ReputationCommandService>();
+builder.Services.AddScoped<IReputationQueryService, ReputationQueryService>();
+builder.Services.AddScoped<IReputationContextFacade, ReputationContextFacade>();
 
 builder.Services.AddScoped(typeof(ICommandPipelineBehavior<>), typeof(LoggingCommandBehavior<>));
 builder.Services.AddScoped(typeof(ICommandPipelineBehavior<>), typeof(ExceptionHandlingCommandBehavior<>));

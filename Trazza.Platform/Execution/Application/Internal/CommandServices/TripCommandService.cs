@@ -1,8 +1,10 @@
+using Trazza.Platform.Billing.Interfaces.Acl;
 using Trazza.Platform.Execution.Domain.Model.Aggregates;
 using Trazza.Platform.Execution.Domain.Model.Commands;
 using Trazza.Platform.Execution.Domain.Services;
 using Trazza.Platform.Iam.Interfaces.Acl;
 using Trazza.Platform.Matchmaking.Interfaces.Acl;
+using Trazza.Platform.Reputation.Interfaces.Acl;
 using Trazza.Platform.Shared.Domain.Model;
 using Trazza.Platform.Shared.Domain.Repositories;
 
@@ -16,6 +18,8 @@ public class TripCommandService(
     TripAccessService tripAccessService,
     IMatchmakingContextFacade matchmakingContextFacade,
     IIamContextFacade iamContextFacade,
+    IBillingContextFacade billingContextFacade,
+    IReputationContextFacade reputationContextFacade,
     IUnitOfWork unitOfWork,
     TimeProvider timeProvider) : ITripCommandService
 {
@@ -56,7 +60,12 @@ public class TripCommandService(
         if (!access.IsCarrier) return CommandError.Forbidden("only-carrier");
 
         var result = access.Trip.Deliver(command.UserId, timeProvider.GetUtcNow().UtcDateTime);
-        if (result.IsSuccess) await matchmakingContextFacade.MarkDeliveredAsync(access.Trip.MatchProposalId, ct);
+        if (result.IsSuccess)
+        {
+            await matchmakingContextFacade.MarkDeliveredAsync(access.Trip.MatchProposalId, ct);
+            await billingContextFacade.CreateFreightSettlementAsync(access.Trip.Id, access.Trip.AgreedRate,
+                access.Trip.Currency, ct);
+        }
 
         return await SaveAsync(access, result, ct);
     }
@@ -72,7 +81,12 @@ public class TripCommandService(
 
         var now = timeProvider.GetUtcNow().UtcDateTime;
         var result = access.Trip.Confirm(command.UserId, now);
-        if (result.IsSuccess) await matchmakingContextFacade.PurgeChatAsync(access.Trip.MatchProposalId, ct);
+        if (result.IsSuccess)
+        {
+            await reputationContextFacade.AwardTripCompletedAsync(access.CarrierUserId, access.Trip.Id, now, ct);
+            await reputationContextFacade.AwardTripCompletedAsync(access.MerchantUserId, access.Trip.Id, now, ct);
+            await matchmakingContextFacade.PurgeChatAsync(access.Trip.MatchProposalId, ct);
+        }
 
         return await SaveAsync(access, result, ct);
     }
@@ -91,6 +105,10 @@ public class TripCommandService(
         {
             await matchmakingContextFacade.ReleaseAsync(access.Trip.MatchProposalId, access.IsMerchant,
                 command.Reason, now, ct);
+            if (access.IsMerchant && now >= access.Context.DepartureAt)
+                await billingContextFacade.CreateCancellationCompensationAsync(access.Trip.Id,
+                    Math.Round(access.Trip.AgreedRate * LostProfitRate, 2, MidpointRounding.AwayFromZero),
+                    access.Trip.Currency, now, ct);
             await matchmakingContextFacade.PurgeChatAsync(access.Trip.MatchProposalId, ct);
         }
 
