@@ -74,7 +74,7 @@ public class MatchmakingContextFacade(
                 cancellationToken);
             if (route is null || shipment is null) continue;
 
-            contexts.Add(new TripContextSnapshot(proposal.Id, proposal.Id, route.Id, shipment.Id,
+            contexts.Add(new TripContextSnapshot(proposal.Id, proposal.PublicId, route.PublicId, shipment.PublicId,
                 route.CarrierProfileId, shipment.MerchantProfileId, route.VehicleId, route.DriverId?.Value,
                 route.Origin.Address, ToLocation(route.Origin), route.Destination.Address,
                 ToLocation(route.Destination), shipment.Pickup.Address, ToLocation(shipment.Pickup),

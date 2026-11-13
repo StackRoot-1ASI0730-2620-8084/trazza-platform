@@ -29,4 +29,15 @@ public interface IMatchProposalRepository : IBaseRepository<MatchProposal>
     /// </summary>
     Task<(int Shipments, decimal WeightKg)> GetAcceptedLoadAsync(ReturnRouteId returnRouteId,
         CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Id of the proposal with the given public id, or null when there is none.
+    /// </summary>
+    Task<MatchProposalId?> FindIdByPublicIdAsync(Guid publicId, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Public ids of the given entities, by id. It reads only the two id columns.
+    /// </summary>
+    Task<IReadOnlyDictionary<ulong, Guid>> FindPublicIdsAsync(IReadOnlyCollection<ulong> ids,
+        CancellationToken cancellationToken);
 }

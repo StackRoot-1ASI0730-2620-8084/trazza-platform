@@ -25,6 +25,7 @@ public class ReturnRouteRepository(AppDbContext context) : BaseRepository<Return
         route.CreatedAt = now;
         route.UpdatedAt = now;
 
+        var publicId = route.PublicId.ToByteArray();
         ulong carrierProfileId = route.CarrierProfileId;
         ulong vehicleId = route.VehicleId;
         ulong? driverId = route.DriverId?.Value;
@@ -35,9 +36,9 @@ public class ReturnRouteRepository(AppDbContext context) : BaseRepository<Return
         var status = route.Status.ToSnakeCaseValue().ToUpperInvariant();
 
         await Context.Database.ExecuteSqlInterpolatedAsync($@"
-            INSERT INTO return_routes (carrier_profile_id, vehicle_id, driver_id, origin_address, origin_location,
+            INSERT INTO return_routes (public_id, carrier_profile_id, vehicle_id, driver_id, origin_address, origin_location,
                 destination_address, destination_location, departure_at, max_shipments, status, created_at, updated_at)
-            VALUES ({carrierProfileId}, {vehicleId}, {driverId},
+            VALUES ({publicId}, {carrierProfileId}, {vehicleId}, {driverId},
                 {origin.Address},
                 ST_PointFromText(CONCAT('POINT(', CAST({origin.Location.Latitude} AS DECIMAL(11,8)), ' ', CAST({origin.Location.Longitude} AS DECIMAL(11,8)), ')'), 4326),
                 {destination.Address},
@@ -159,5 +160,29 @@ public class ReturnRouteRepository(AppDbContext context) : BaseRepository<Return
         public double FirstLongitude { get; set; }
         public double SecondLatitude { get; set; }
         public double SecondLongitude { get; set; }
+    }
+
+    public async Task<ReturnRouteId?> FindIdByPublicIdAsync(Guid publicId, CancellationToken cancellationToken)
+    {
+        var ids = await Context.Set<ReturnRoute>()
+            .AsNoTracking()
+            .Where(route => route.PublicId == publicId)
+            .Select(route => route.Id)
+            .Take(1)
+            .ToListAsync(cancellationToken);
+        return ids.Count == 0 ? null : ids[0];
+    }
+
+    public async Task<IReadOnlyDictionary<ulong, Guid>> FindPublicIdsAsync(IReadOnlyCollection<ulong> ids,
+        CancellationToken cancellationToken)
+    {
+        if (ids.Count == 0) return new Dictionary<ulong, Guid>();
+        var keys = ids.Distinct().Select(id => new ReturnRouteId(id)).ToList();
+        var rows = await Context.Set<ReturnRoute>()
+            .AsNoTracking()
+            .Where(route => keys.Contains(route.Id))
+            .Select(route => new { route.Id, route.PublicId })
+            .ToListAsync(cancellationToken);
+        return rows.ToDictionary(row => row.Id.Value, row => row.PublicId);
     }
 }

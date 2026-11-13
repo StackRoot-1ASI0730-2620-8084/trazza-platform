@@ -24,6 +24,7 @@ public class ReturnRoutesController(
     IReturnRouteQueryService returnRouteQueryService,
     IMatchProposalQueryService matchProposalQueryService,
     IExecutionContextFacade executionContextFacade,
+    IPublicIdQueryService publicIdQueryService,
     IProfilesService profilesService,
     ProblemDetailsFactory problemDetailsFactory)
     : ControllerBase
@@ -50,18 +51,18 @@ public class ReturnRoutesController(
             this,
             result,
             problemDetailsFactory,
-            published => CreatedAtAction(nameof(GetReturnRouteById), new { returnRouteId = published.Id.Value },
+            published => CreatedAtAction(nameof(GetReturnRouteById), new { returnRouteId = published.PublicId },
                 ReturnRouteResourceFromEntityAssembler.ToResourceFromEntity(published, vehiclePublicIds)));
     }
 
-    [HttpGet("{returnRouteId}")]
+    [HttpGet("{returnRouteId:guid}")]
     [EndpointSummary("Get return route by id")]
     [ProducesResponseType(typeof(ReturnRouteResource), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetReturnRouteById(ulong returnRouteId, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetReturnRouteById(Guid returnRouteId, CancellationToken cancellationToken)
     {
-        var route = await returnRouteQueryService.Handle(new GetReturnRouteByIdQuery(new ReturnRouteId(returnRouteId)),
-            cancellationToken);
+        var route = await returnRouteQueryService.Handle(
+            new GetReturnRouteByIdQuery(await FindIdAsync(returnRouteId, cancellationToken)), cancellationToken);
         var vehiclePublicIds = await FetchVehiclePublicIds(route is null ? [] : [route], cancellationToken);
 
         return MatchmakingActionResultAssembler.ToActionResultFromEntity(
@@ -112,32 +113,33 @@ public class ReturnRoutesController(
         return Ok(await ToResources(routes, cancellationToken));
     }
 
-    [HttpGet("{returnRouteId}/proposals")]
+    [HttpGet("{returnRouteId:guid}/proposals")]
     [EndpointSummary("Get proposals of a return route")]
     [ProducesResponseType(typeof(IEnumerable<MatchProposalResource>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetProposalsByReturnRoute(ulong returnRouteId,
+    public async Task<IActionResult> GetProposalsByReturnRoute(Guid returnRouteId,
         CancellationToken cancellationToken)
     {
         var proposals = await matchProposalQueryService.Handle(
-            new GetProposalsByRouteQuery(new ReturnRouteId(returnRouteId)), cancellationToken);
+            new GetProposalsByRouteQuery(await FindIdAsync(returnRouteId, cancellationToken)), cancellationToken);
         var list = proposals.ToList();
         var tripIds = await executionContextFacade.FindTripPublicIdsByProposalIdsAsync(
             list.Select(proposal => proposal.Id.Value).ToList(), cancellationToken);
-        return Ok(MatchProposalResourceFromEntityAssembler.ToResourcesFromEntities(list, tripIds));
+        var publicIds = await publicIdQueryService.FetchProposalPublicIdsAsync(list, cancellationToken);
+        return Ok(MatchProposalResourceFromEntityAssembler.ToResourcesFromEntities(list, publicIds, tripIds));
     }
 
-    [HttpPost("{returnRouteId}/cancel")]
+    [HttpPost("{returnRouteId:guid}/cancel")]
     [EndpointSummary("Cancel return route")]
     [ProducesResponseType(typeof(ReturnRouteResource), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> CancelReturnRoute(ulong returnRouteId, CancellationToken cancellationToken)
+    public async Task<IActionResult> CancelReturnRoute(Guid returnRouteId, CancellationToken cancellationToken)
     {
         if (this.GetCurrentUserId() is not { } userId) return Unauthorized();
 
         var result = await returnRouteCommandService.Handle(
-            new CancelReturnRouteCommand(userId, new ReturnRouteId(returnRouteId)), cancellationToken);
+            new CancelReturnRouteCommand(userId, await FindIdAsync(returnRouteId, cancellationToken)), cancellationToken);
         var vehiclePublicIds = await FetchVehiclePublicIds(result.IsSuccess ? [result.Value] : [], cancellationToken);
 
         return MatchmakingActionResultAssembler.ToActionResultFromResult(
@@ -146,6 +148,12 @@ public class ReturnRoutesController(
             problemDetailsFactory,
             cancelled => Ok(ReturnRouteResourceFromEntityAssembler.ToResourceFromEntity(cancelled, vehiclePublicIds)));
     }
+
+    /// <summary>
+    ///     An unknown public id resolves to id 0, which the services answer as a route not found.
+    /// </summary>
+    private async Task<ReturnRouteId> FindIdAsync(Guid publicId, CancellationToken cancellationToken) =>
+        await publicIdQueryService.FindReturnRouteIdAsync(publicId, cancellationToken) ?? new ReturnRouteId(0);
 
     private Task<IReadOnlyDictionary<VehicleId, Guid>> FetchVehiclePublicIds(IEnumerable<ReturnRoute> routes,
         CancellationToken cancellationToken) =>
