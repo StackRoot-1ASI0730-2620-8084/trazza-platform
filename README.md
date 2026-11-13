@@ -7,11 +7,11 @@
 
 ## Project Overview
 
-The **Trazza Platform** is the RESTful backend of **Trazza**, a logistics SaaS that connects **carriers** who drive back empty after a delivery with **merchants** (small businesses and entrepreneurs) who need to ship goods inside Metropolitan Lima. Carriers publish *return routes* with their free capacity, merchants publish *freight requests*, the platform suggests compatible loads, lets both parties negotiate the rate, tracks the shipment until delivery, bills subscriptions and builds the reputation of both sides.
+The **Trazza Platform** is the RESTful backend of **Trazza**, a logistics SaaS that connects **carriers** who drive back empty after a delivery with **merchants** (small businesses and entrepreneurs) who need to ship goods inside Metropolitan Lima. Carriers publish *return routes* with their free capacity, merchants publish *shipment requests*, the platform suggests compatible matches, lets both parties negotiate proposals and messages, tracks the resulting trip until delivery, manages subscriptions and freight settlements, and builds the reputation and loyalty points of both sides.
 
 Built with **.NET 10** and **C# 14**, it adheres to **Domain-Driven Design (DDD)** tactical patterns and implements **Command Query Responsibility Segregation (CQRS)** with pipeline behaviors. It serves the Vue 3 web application `trazza-webapp`.
 
-The platform is structured into decoupled **Bounded Contexts** (`IAM`, `Profiles`, `Matchmaking`, `Execution`, `Billing`, `Reputation`, `Shared`), ensuring clear separation of concerns, high maintainability, and robust transactional consistency.
+The platform is structured into decoupled **Bounded Contexts** (`Iam`, `Matchmaking`, `Execution`, `Billing`, `Reputation`, and `Shared`), ensuring clear separation of concerns, high maintainability, and transactional consistency.
 
 ---
 
@@ -21,8 +21,7 @@ The platform is structured into decoupled **Bounded Contexts** (`IAM`, `Profiles
 2. [Domain-Driven Design (DDD) Concepts](#domain-driven-design-ddd-concepts)
 3. [Key Features & Best Practices](#key-features--best-practices)
 4. [Bounded Contexts](#bounded-contexts)
-   * [IAM (Identity & Access Management)](#iam-identity-and-access-management)
-   * [Profiles](#profiles)
+   * [IAM & Fleet (Identity, Profiles & Fleet Management)](#iam--fleet-identity-profiles--fleet-management)
    * [Matchmaking & Routing](#matchmaking--routing)
    * [Service Execution & Monitoring](#service-execution--monitoring)
    * [Payment & Billing](#payment--billing)
@@ -31,6 +30,7 @@ The platform is structured into decoupled **Bounded Contexts** (`IAM`, `Profiles
 5. [Technologies Used](#technologies-used)
 6. [Getting Started](#getting-started)
    * [Prerequisites](#prerequisites)
+   * [Configuration](#configuration)
    * [Setup Instructions](#setup-instructions)
 7. [Project Structure](#project-structure)
 8. [Documentation](#documentation)
@@ -44,108 +44,92 @@ The platform is structured into decoupled **Bounded Contexts** (`IAM`, `Profiles
 
 The platform architecture follows **Domain-Driven Design (DDD)** and **Command Query Responsibility Segregation (CQRS)**:
 
-* **Domain Layer**: Encapsulates aggregates (`AggregateRoot`), entities, value objects, domain events (`IEvent`), domain services (`RouteMatchingService`), error catalogs and repository contracts. Contains zero outward dependencies.
-* **Application Layer**: Coordinates domain operations through explicit **Command Services** (write side) and **Query Services** (read side), event handlers that react to domain events, outbound service contracts (`ITokenService`, `IHashingService`, `IPaymentGateway`) and ACL facades.
-* **Infrastructure Layer**: Implements persistence via Entity Framework Core (MySQL), strongly-typed ID value converters, JWT token services, BCrypt hashing, the simulated payment gateway and the interceptor-based domain event dispatcher.
-* **Interfaces Layer (Presentation)**: Exposes RESTful controllers, resources and assemblers, RFC 9457 `ProblemDetails` error responses and ACL facade contracts.
+* **Domain Layer**: Encapsulates aggregates (`AggregateRoot`), entities, value objects, domain events (`IEvent`), domain services (`RouteMatchingService`), error catalogs, and repository contracts.
+* **Application Layer**: Coordinates domain operations through **Command Services** (write side) and **Query Services** (read side), outbound service contracts (`ITokenService`, `IHashingService`, `IPersonalDataProtector`, `IIdentityVerificationProvider`), and ACL facades.
+* **Infrastructure Layer**: Implements persistence via Entity Framework Core (MySQL), strongly-typed ID value converters, JWT token services, BCrypt hashing, AES-GCM personal data protection, and interceptor-based domain event dispatching.
+* **Interfaces Layer (Presentation)**: Exposes RESTful controllers, resources and assemblers, RFC 9457 `ProblemDetails` error responses, and ACL facade contracts.
 
 ---
 
 ## Domain-Driven Design (DDD) Concepts
 
-* **Bounded Contexts**: Independent business domains (`IAM`, `Profiles`, `Matchmaking`, `Execution`, `Billing`, `Reputation`, and `Shared`).
-* **Aggregates & Invariant Protection**: Aggregates (`User`, `CarrierProfile`, `MerchantProfile`, `ReturnRoute`, `FreightRequest`, `MatchProposal`, `Shipment`, `PaymentTransaction`, `Receipt`, `Rating`) inherit from `AggregateRoot` and guard internal state consistency, returning domain `Error` values when an invariant would be broken.
-* **Strongly-Typed IDs**: Readonly record structs (`UserId`, `CarrierProfileId`, `VehicleId`, `ReturnRouteId`, `FreightRequestId`, `MatchProposalId`, `ShipmentId`, `IncidentId`, `PaymentTransactionId`, `ReceiptId`, `RatingId`) implementing `IEntityId<int>`.
-* **Domain Events**: Aggregates record events (`UserRegisteredEvent`, `UserContactUpdatedEvent`, `ReturnRouteClosedEvent`, `FreightRequestCancelledEvent`, `MatchProposalConfirmedEvent`, `ShipmentDeviatedEvent`, `PaymentTransactionPaidEvent`, `RatingSubmittedEvent`) dispatched through `DispatchDomainEventsInterceptor` and `Cortex.Mediator` after a successful commit.
-* **Value Objects**: Immutable records (`Money`, `Address`, `GeoLocation`, `EmailAddress`, `Dni`, `Ruc`, `LicensePlate`, `LoadCapacity`, `TimeWindow`, `Cargo`, `CargoType`, `Detour`, `IncidentType`, `SubscriptionPlan`, `PaymentMethod`, `ReceiptType`, `Score`, `RatingTarget`).
-* **Domain Service**: `RouteMatchingService` evaluates capacity, time windows, cargo types and detours between return routes and freight requests.
-* **Anti-Corruption Layer (ACL)**: Facades (`IIamContextFacade`, `IProfilesContextFacade`, `IBillingContextFacade`, `IExecutionContextFacade`) isolate cross-context communication.
+* **Bounded Contexts**: Independent business domains (`Iam`, `Matchmaking`, `Execution`, `Billing`, `Reputation`, and `Shared`).
+* **Aggregates & Invariant Protection**: Aggregates (`User`, `CarrierProfile`, `MerchantProfile`, `Vehicle`, `Driver`, `SavedAddress`, `ReturnRoute`, `ShipmentRequest`, `MatchProposal`, `Message`, `Trip`, `Incident`, `Plan`, `Subscription`, `FreightSettlement`, `CancellationCompensation`, `Rating`, `LoyaltyPointEntry`) inherit from `AggregateRoot` and guard internal state consistency.
+* **Public & Internal Identifiers**: Public resources are exposed via `Guid` identifiers (`PublicId`), keeping internal database keys isolated inside each bounded context.
+* **Value Objects**: Immutable records (`Money`, `Address`, `GeoLocation`, `TimeWindow`, `Cargo`, `CargoType`, `Detour`, `RouteGeometry`, `SpatialPoint`).
+* **Domain Service**: `RouteMatchingService` evaluates capacity, time windows, cargo types, and spatial corridors between return routes and shipment requests.
+* **Anti-Corruption Layer (ACL)**: Facades (`IIamContextFacade`, `IMatchmakingContextFacade`, `IExecutionContextFacade`, `IBillingContextFacade`, `IReputationContextFacade`) isolate cross-context communication.
 
 ---
 
 ## Key Features & Best Practices
 
 * **CQRS with Mediator Pipeline Behaviors**:
-  * `TransactionCommandBehavior`: Automatically commits changes via `IUnitOfWork.CompleteAsync()` on successful command execution.
+  * `TransactionCommandBehavior`: Commits changes via `IUnitOfWork.CompleteAsync()` on successful command execution.
   * `ExceptionHandlingCommandBehavior`: Centralizes database and concurrency exception mapping.
   * `LoggingCommandBehavior`: Structured execution tracing.
-* **Query Performance Optimizations**:
-  * Read services use `.AsNoTracking()` and `.AsSplitQuery()` to eliminate change-tracking overhead and prevent Cartesian joins.
 * **Functional Result Pattern**:
-  * Operations return `Result<T>` and strongly-typed `Error` records with `EErrorType` classification (`Validation`, `NotFound`, `Conflict`, `Unauthorized`, `Forbidden`, `Failure`, `Unexpected`), leveraging `.Match()` in the `*ActionResultAssembler` of each context.
+  * Operations return `Result<T>` and strongly-typed `Error` records with `EErrorType` classification (`Validation`, `NotFound`, `Conflict`, `Unauthorized`, `Forbidden`, `Failure`, `Unexpected`).
 * **Interactive Scalar OpenAPI Documentation**:
-  * Built on `Microsoft.AspNetCore.OpenApi` and `Scalar.AspNetCore` at `/scalar/v1`, with JWT Bearer authorization through `BearerSecuritySchemeTransformer` and `IamBearerSecurityOperationTransformer`.
+  * Built on `Microsoft.AspNetCore.OpenApi` and `Scalar.AspNetCore` at `/scalar/v1`, with JWT Bearer authorization through `BearerSecuritySchemeTransformer`.
 * **Standardized Error Handling**:
-  * ASP.NET Core `IExceptionHandler` (`GlobalExceptionHandler`) emitting RFC 9457 `ProblemDetails`, enriched with the domain error `code`.
+  * ASP.NET Core `IExceptionHandler` (`GlobalExceptionHandler`) emitting RFC 9457 `ProblemDetails`.
 * **Internationalization (i18n)**:
   * Localized error messages in English and Spanish via `IStringLocalizer` and `.resx` resource files, selected with `Accept-Language`.
-* **Frontend Compatibility**:
-  * Routes, resources and enumerated values (`snake_case`) match the assemblers of `trazza-webapp`; `PUT` requests are translated into domain transitions.
 
 ---
 
 ## Bounded Contexts
 
-### IAM (Identity and Access Management)
-* **Scope**: Carrier and merchant registration, authentication, JWT issuance and password security.
-* **Aggregates**: `User`
-* **Value Objects**: `UserId`, `EmailAddress`, `PhoneNumber`, `UserRole`
-* **Domain Events**: `UserRegisteredEvent`, `UserContactUpdatedEvent`
+### IAM & Fleet (Identity, Profiles & Fleet Management)
+* **Scope**: User registration, authentication, JWT & refresh tokens, AES-GCM encrypted personal identity (DNI/CE), RENIEC identity verification, carrier & merchant profiles, vehicles, drivers, and saved addresses.
+* **Aggregates**: `User`, `PersonIdentity`, `IdentityVerification`, `RefreshToken`, `CarrierProfile`, `MerchantProfile`, `Vehicle`, `Driver`, `SavedAddress`
 * **RESTful Endpoints**:
-  * `POST /api/v1/authentication/sign-up` — Register user (`201 Created` with `AuthenticatedUserResource`)
-  * `POST /api/v1/authentication/sign-in` — Authenticate (`200 OK` with `AuthenticatedUserResource`)
-  * `GET /api/v1/users/{userId}` — Get user by id
-  * `GET /api/v1/users` — List users
-  * `PUT /api/v1/users/{userId}` — Update contact
-
-### Profiles
-* **Scope**: Carrier profiles with their vehicle fleet and merchant business profiles.
-* **Aggregates & Entities**: `CarrierProfile` → `Vehicle`, `MerchantProfile`
-* **Value Objects**: `CarrierProfileId`, `MerchantProfileId`, `VehicleId`, `Dni`, `Ruc`, `PhoneNumber`, `LicensePlate`, `LoadCapacity`, `VehicleBodyType`
-* **Domain Events**: `CarrierProfileCreatedEvent`, `MerchantProfileCreatedEvent`
-* **RESTful Endpoints**:
-  * `GET|POST /api/v1/carrier-profiles`, `GET|PUT /api/v1/carrier-profiles/{carrierProfileId}`
-  * `POST /api/v1/carrier-profiles/{carrierProfileId}/vehicles`, `PUT|DELETE /api/v1/carrier-profiles/{carrierProfileId}/vehicles/{vehicleId}`
-  * `GET|POST /api/v1/merchant-profiles`, `GET|PUT /api/v1/merchant-profiles/{merchantProfileId}`
+  * `POST /api/v1/authentication/sign-up`, `POST /api/v1/authentication/sign-in`, `POST /api/v1/authentication/refresh`, `POST /api/v1/authentication/sign-out`
+  * `GET /api/v1/users/me`, `PUT /api/v1/users/me/identity`, `POST /api/v1/users/me/roles`, `PUT /api/v1/users/me/merchant-profile`, `GET|POST /api/v1/users/me/identity-verifications`
+  * `GET|POST /api/v1/vehicles`, `PUT|DELETE /api/v1/vehicles/{vehicleId}`
+  * `GET|POST /api/v1/drivers`, `PUT|DELETE /api/v1/drivers/{driverId}`
+  * `GET|POST /api/v1/saved-addresses`, `DELETE /api/v1/saved-addresses/{savedAddressId}`
 
 ### Matchmaking & Routing
-* **Scope**: Core domain. Return routes, freight requests, compatibility evaluation, rate negotiation and match confirmation.
-* **Aggregates**: `ReturnRoute`, `FreightRequest`, `MatchProposal`
-* **Value Objects**: `TimeWindow`, `Cargo`, `CargoType`, `Detour`, `ERouteStatus`, `ERequestStatus`, `EProposalStatus`, `ENegotiationParty`
+* **Scope**: Return routes, shipment requests, compatibility suggestions, match proposals, and proposal negotiation messages.
+* **Aggregates**: `ReturnRoute`, `ShipmentRequest`, `MatchProposal`, `Message`
 * **Domain Service**: `RouteMatchingService`
-* **Domain Events**: `ReturnRouteClosedEvent`, `FreightRequestCancelledEvent`, `MatchProposalConfirmedEvent`
 * **RESTful Endpoints**:
-  * `/api/v1/return-routes` (+ `/{id}/closure`, `/{id}/load-suggestions`)
-  * `/api/v1/freight-requests` (+ `/{id}/publication`, `/{id}/cancellation`, `/{id}/carrier-suggestions`)
-  * `/api/v1/match-proposals` (+ `/{id}/acceptance`, `/{id}/counteroffers`, `/{id}/rejection`, `/{id}/confirmation`)
+  * `/api/v1/return-routes` (`GET`, `POST`, `GET /mine`, `GET /search`, `GET /{id}`, `GET /{id}/proposals`, `GET /{id}/suggested-shipments`, `POST /{id}/cancel`)
+  * `/api/v1/shipment-requests` (`GET`, `POST`, `GET /open`, `GET /mine`, `GET /search`, `GET /{id}`, `GET /{id}/proposals`, `GET /{id}/suggested-routes`, `POST /{id}/cancel`)
+  * `/api/v1/match-proposals` (`GET`, `POST`, `GET /{id}`, `POST /{id}/accept`, `POST /{id}/reject`, `POST /{id}/cancel`)
+  * `/api/v1/match-proposals/{matchProposalId}/messages` (`GET`, `POST`, `POST /read`)
 
 ### Service Execution & Monitoring
-* **Scope**: Shipment lifecycle from match to reception, live location, route deviation and incidents.
-* **Aggregates & Entities**: `Shipment` → `Incident`, `ShipmentEvent`
-* **Value Objects**: `EShipmentStatus`, `IncidentType`, `EIncidentStatus`, `EPartyRole`
-* **Domain Events**: `ShipmentDeviatedEvent`, `ShipmentDeliveredEvent`, `ShipmentClosedEvent`, `IncidentReportedEvent`
+* **Scope**: Trip lifecycle from accepted proposal to confirmed delivery, driver assignment, live GPS tracking points, route deviation alerts, IoT devices, and incidents with evidence.
+* **Aggregates**: `Trip`, `TrackingPoint`, `DeviationAlert`, `Incident`, `IotDevice`
 * **RESTful Endpoints**:
-  * `/api/v1/shipments` (+ `/{id}/pickup`, `/{id}/locations`, `/{id}/delivery`, `/{id}/reception`, `/{id}/cancellation`, `/{id}/incidents`, `/{id}/incidents/{incidentId}/resolution`)
+  * `/api/v1/trips` (`GET`, `GET /{tripId}`, `GET /{tripId}/status-history`, `PUT /{tripId}/driver`, `POST /{tripId}/pick-up`, `POST /{tripId}/deliver`, `POST /{tripId}/confirm`, `POST /{tripId}/cancel`)
+  * `/api/v1/trips/{tripId}/tracking-points` (`GET`, `POST`)
+  * `/api/v1/trips/{tripId}/deviation-alerts` (`GET`, `POST /{alertId}/acknowledge`)
+  * `/api/v1/trips/{tripId}/incidents` (`GET`, `POST`, `POST /{incidentId}/evidences`, `POST /{incidentId}/resolve`)
+  * `/api/v1/iot-devices` (`GET`)
 
 ### Payment & Billing
-* **Scope**: Subscription plans, card payments through a payment gateway and electronic receipts (boleta / factura).
-* **Aggregates**: `PaymentTransaction`, `Receipt`
-* **Value Objects**: `SubscriptionPlan`, `PaymentMethod`, `ReceiptType`, `EPaymentStatus`
-* **Domain Events**: `PaymentTransactionPaidEvent`, `ReceiptIssuedEvent`
+* **Scope**: Carrier subscription plans, active subscriptions with simulated payments, freight settlements per trip, and cancellation compensations.
+* **Aggregates**: `Plan`, `Subscription`, `SubscriptionPayment`, `FreightSettlement`, `CancellationCompensation`
 * **RESTful Endpoints**:
-  * `/api/v1/payment-transactions`, `/api/v1/receipts`, `/api/v1/subscription-plans`, `/api/v1/users/{userId}/subscription`
+  * `/api/v1/plans` (`GET`)
+  * `/api/v1/subscriptions` (`GET`, `POST`, `POST /{subscriptionId}/renew`, `POST /{subscriptionId}/cancel`)
+  * `/api/v1/freight-settlements` (`GET`, `POST /{tripId}/mark-paid`, `POST /{tripId}/confirm`)
+  * `/api/v1/cancellation-compensations` (`GET`, `POST /{tripId}/confirm-paid`, `POST /{tripId}/waive`, `POST /{tripId}/dispute`)
 
 ### Loyalty & Reputation
-* **Scope**: Ratings between carriers and merchants after a delivered shipment and reputation summaries.
-* **Aggregates**: `Rating`
-* **Value Objects**: `Score`, `RatingTarget`, `ReputationSummary`
-* **Domain Events**: `RatingSubmittedEvent`
+* **Scope**: Mutual trip ratings between carriers and merchants, user reputation summaries, and loyalty point accrual and redemptions.
+* **Aggregates**: `Rating`, `LoyaltyPointEntry`
 * **RESTful Endpoints**:
-  * `/api/v1/ratings`, `/api/v1/users/{userId}/reputation`
+  * `/api/v1/ratings` (`POST`, `GET /received`, `GET /given`, `GET /summary/{userId}`)
+  * `/api/v1/loyalty` (`GET /points`, `POST /redemptions`)
 
 ### Shared Kernel
-* **Scope**: Common building blocks used by every context.
-* **Contents**: `AggregateRoot`, `IEntityId<T>`, `Result<T>`, `Error`, `Money`, `Address`, `GeoLocation`, `LimaDistricts`, `LimaCalendar`, interceptors, pipeline behaviors, `ProblemDetailsFactory` and `GlobalExceptionHandler`.
+* **Scope**: Common building blocks used across all contexts.
+* **Contents**: `AggregateRoot`, `IEntityId<T>`, `Result<T>`, `Error`, `Money`, `Address`, `GeoLocation`, `LimaDistricts`, `LimaCalendar`, interceptors, pipeline behaviors, `ProblemDetailsFactory`, `GlobalExceptionHandler`, and `/api/v1/health`.
 
 ---
 
@@ -154,12 +138,12 @@ The platform architecture follows **Domain-Driven Design (DDD)** and **Command Q
 * **.NET 10** & **C# 14**: Core runtime and language.
 * **ASP.NET Core**: Web API framework.
 * **Entity Framework Core**: Relational database ORM (MySQL).
-* **MySQL**: Primary database.
-* **Cortex.Mediator**: In-process mediator, pipeline behaviors and domain event publishing.
+* **MySQL 8**: Primary database (`trazza_database`).
+* **Cortex.Mediator**: In-process mediator, pipeline behaviors, and domain event publishing.
 * **Scalar.AspNetCore** & **Microsoft.AspNetCore.OpenApi**: Interactive OpenAPI documentation.
 * **BCrypt.Net-Next**: Password hashing.
 * **Microsoft.IdentityModel.JsonWebTokens**: JWT token generation and validation.
-* **Humanizer**: Table name pluralization for the snake_case naming convention.
+* **Humanizer**: Table and route naming conventions.
 * **Microsoft.Extensions.Localization**: English and Spanish localization.
 
 ---
@@ -173,28 +157,18 @@ The platform architecture follows **Domain-Driven Design (DDD)** and **Command Q
 
 ### Configuration
 
-No credentials are stored in the repository. Every secret is read from environment variables:
+No credentials are stored in the repository. Every secret is read from environment variables (or a local `.env` file in Development, see `.env.example`):
 
 | Variable | Description | Example |
 |:--|:--|:--|
 | `DATABASE_URL` | MySQL host | `localhost` or the RDS endpoint |
 | `DATABASE_USER` | MySQL user | your own database user |
 | `DATABASE_PASSWORD` | MySQL password | (never commit it) |
-| `DATABASE_SCHEMA` | Database name (Production only; Development always uses `trazza_database`) | `trazza_database` |
+| `DATABASE_SCHEMA` | Database name | `trazza_database` |
 | `TokenSettings__Secret` | JWT signing key used by IAM, at least 32 characters | (never commit it) |
-| `Cors__AllowedOrigins__0` | Web application origin allowed by CORS (optional, Development already allows `http://localhost:5173`) | `https://your-webapp-domain` |
-
-Set them in your shell before running the API:
-
-```bash
-export DATABASE_URL="your-mysql-host"
-export DATABASE_USER="your-user"
-export DATABASE_PASSWORD="your-password"
-export DATABASE_SCHEMA="trazza_database"
-export TokenSettings__Secret="a-random-key-of-at-least-32-characters"
-```
-
-In Rider, add the same variables in **Run | Edit Configurations | Environment variables**. Do not add them to `launchSettings.json`, because that file is committed.
+| `PersonalData__EncryptionKey` | 32-byte Base64 AES-GCM key for personal data | (never commit it) |
+| `PersonalData__HashKey` | 32-byte Base64 HMAC key for document hashing | (never commit it) |
+| `Cors__AllowedOrigins__0` | Web application origin allowed by CORS | `http://localhost:5173` |
 
 The database schema is managed outside the API (database-first). The API does not create or migrate tables on startup.
 
@@ -206,7 +180,7 @@ The database schema is managed outside the API (database-first). The API does no
    cd trazza-platform
    ```
 
-2. **Set the environment variables** described in [Configuration](#configuration).
+2. **Copy `.env.example` to `.env`** and fill in your local or RDS variables.
 
 3. **Restore and build:**
    ```bash
@@ -223,49 +197,42 @@ The database schema is managed outside the API (database-first). The API does no
    * Scalar Documentation: [http://localhost:5222/scalar/v1](http://localhost:5222/scalar/v1)
    * OpenAPI Specification: [http://localhost:5222/openapi/v1.json](http://localhost:5222/openapi/v1.json)
 
-6. **Connect the web application** setting `VITE_TRAZZA_PLATFORM_API_URL="http://localhost:5222/api/v1"` in `trazza-webapp`.
-
 ---
 
 ## Project Structure
 
 ```
 Trazza.Platform/
-├── Iam/                     # IAM Bounded Context
-│   ├── Application/         # User Command/Query Services, ACL Facade, Outbound Services
-│   ├── Domain/              # User Aggregate, Value Objects, Events, Errors, Repositories
-│   ├── Infrastructure/      # UserRepository, TokenService, HashingService, Authorization Middleware
-│   └── Interfaces/          # AuthenticationController, UsersController, Resources, ACL contract
-├── Profiles/                # Profiles Bounded Context
-│   ├── Application/         # Profile Command/Query Services, Event Handlers, ACL Facade
-│   ├── Domain/              # CarrierProfile, Vehicle, MerchantProfile, Value Objects
-│   ├── Infrastructure/      # Profile Repositories, EF Core configuration
-│   └── Interfaces/          # CarrierProfilesController, MerchantProfilesController
+├── Iam/                     # IAM, Profiles & Fleet Bounded Context
+│   ├── Application/         # User & Fleet Command/Query Services, ACL Facade
+│   ├── Domain/              # User, CarrierProfile, MerchantProfile, Vehicle, Driver, SavedAddress
+│   ├── Infrastructure/      # Repositories, JWT TokenService, BCrypt, AES-GCM, Authorization Middleware
+│   └── Interfaces/          # Authentication, Users, Vehicles, Drivers, SavedAddresses Controllers
 ├── Matchmaking/             # Matchmaking & Routing Bounded Context
-│   ├── Application/         # Route, Request and Proposal Services, Event Handlers, PublicationPolicy
-│   ├── Domain/              # ReturnRoute, FreightRequest, MatchProposal, RouteMatchingService
-│   ├── Infrastructure/      # Repositories, EF Core configuration
-│   └── Interfaces/          # ReturnRoutes, FreightRequests and MatchProposals Controllers
+│   ├── Application/         # ReturnRoute, ShipmentRequest, MatchProposal & Message Services, ACL Facade
+│   ├── Domain/              # ReturnRoute, ShipmentRequest, MatchProposal, Message, RouteMatchingService
+│   ├── Infrastructure/      # Repositories, EF Core configuration, IAM Profile adapter
+│   └── Interfaces/          # ReturnRoutes, ShipmentRequests, MatchProposals, Messages Controllers
 ├── Execution/               # Service Execution & Monitoring Bounded Context
-│   ├── Application/         # Shipment Services, Event Handlers, ACL Facade
-│   ├── Domain/              # Shipment, Incident, ShipmentEvent
-│   ├── Infrastructure/      # ShipmentRepository, EF Core configuration
-│   └── Interfaces/          # ShipmentsController
+│   ├── Application/         # Trip, Tracking, Incident & Query Services, ACL Facade
+│   ├── Domain/              # Trip, TrackingPoint, DeviationAlert, Incident, IotDevice
+│   ├── Infrastructure/      # Execution Repositories, EF Core configuration
+│   └── Interfaces/          # TripsController, IotDevicesController
 ├── Billing/                 # Payment & Billing Bounded Context
-│   ├── Application/         # Payment and Receipt Services, IPaymentGateway, ACL Facade
-│   ├── Domain/              # PaymentTransaction, Receipt, SubscriptionPlan, PaymentMethod
-│   ├── Infrastructure/      # Repositories, SimulatedPaymentGateway
-│   └── Interfaces/          # PaymentTransactions, Receipts and Subscriptions Controllers
+│   ├── Application/         # Subscription, Settlement & Billing Query Services, ACL Facade
+│   ├── Domain/              # Plan, Subscription, SubscriptionPayment, FreightSettlement, CancellationCompensation
+│   ├── Infrastructure/      # Billing Repositories, EF Core configuration
+│   └── Interfaces/          # Plans, Subscriptions, FreightSettlements, CancellationCompensations Controllers
 ├── Reputation/              # Loyalty & Reputation Bounded Context
-│   ├── Application/         # Rating Command/Query Services
-│   ├── Domain/              # Rating, Score, RatingTarget, ReputationSummary
-│   ├── Infrastructure/      # RatingRepository
-│   └── Interfaces/          # RatingsController, UserReputationController
+│   ├── Application/         # Reputation Command/Query Services, ACL Facade
+│   ├── Domain/              # Rating, LoyaltyPointEntry
+│   ├── Infrastructure/      # Reputation Repositories, EF Core configuration
+│   └── Interfaces/          # RatingsController, LoyaltyController
 ├── Shared/                  # Shared Kernel & Infrastructure
 │   ├── Application/         # Result<T>, IEventHandler
 │   ├── Domain/              # AggregateRoot, IEntityId, Error, Money, Address, GeoLocation
 │   ├── Infrastructure/      # AppDbContext, Pipeline Behaviors, Interceptors, OpenAPI, GlobalExceptionHandler
-│   ├── Interfaces/          # ProblemDetailsFactory, shared resources and assemblers
+│   ├── Interfaces/          # HealthController, ProblemDetailsFactory, shared resources
 │   └── Resources/           # Common & Error localization files (en, es)
 ├── Program.cs               # Startup configuration and DI registrations
 └── appsettings.json         # Configuration settings
@@ -281,7 +248,6 @@ Trazza.Platform/
 * **PlantUML Class Diagram**: [`docs/class-diagram.puml`](docs/class-diagram.puml)
 * **Software Architecture DSL (C4)**: [`docs/software-architecture.dsl`](docs/software-architecture.dsl)
 * **Study Guide**: [`docs/study-guide.md`](docs/study-guide.md)
-* **Study Guide Specification**: [`docs/study-guide-spec.md`](docs/study-guide-spec.md)
 
 ---
 

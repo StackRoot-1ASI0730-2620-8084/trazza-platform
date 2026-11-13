@@ -1,116 +1,123 @@
 # Trazza Platform — REST API Endpoints
 
-This catalog lists every endpoint exposed by `Trazza.Platform`, generated from the controllers. All routes are documented interactively with OpenAPI and Scalar at `/scalar/v1` (Development environment).
+This catalog lists every endpoint exposed by `Trazza.Platform`. All routes are documented interactively with OpenAPI and Scalar at `/scalar/v1`.
 
 ## Conventions
 
 - Base path: `/api/v1`, kebab-case resource names, lowercase URLs.
-- Content type: `application/json`, camelCase properties, dates as `yyyy-MM-dd`, timestamps in ISO 8601.
+- Content type: `application/json`, camelCase properties, timestamps in UTC ISO 8601.
 - Authentication: `Authorization: Bearer <token>` obtained from `POST /api/v1/authentication/sign-in` or `sign-up`.
-- Errors: RFC 9457 `ProblemDetails` with `status`, `title`, `detail`, `instance` and the domain error `code` extension. Messages are localized with `Accept-Language: es` or `en`.
-- Enumerated values travel in snake_case (`picked_up`, `in_transit`, `closed_van`, `damaged_goods`).
+- Errors: RFC 9457 `ProblemDetails` with `status`, `title`, `detail`, `instance`, and the domain error `code` extension. Messages are localized with `Accept-Language: es` or `en`.
 
-## IAM
-
-| Method | Route | Summary | Auth | Description |
-|:--|:--|:--|:--|:--|
-| `POST` | `/api/v1/authentication/sign-in` | Sign in | No | Authenticates a user with email and password and returns the user with a JWT bearer token. |
-| `POST` | `/api/v1/authentication/sign-up` | Sign up | No | Registers a carrier or merchant user and returns the user with a JWT bearer token. |
-| `GET` | `/api/v1/users/{userId}` | Get user by id | Yes | Gets a user by its unique identifier. |
-| `GET` | `/api/v1/users` | Get all users | Yes | Gets all registered users. |
-| `PUT` | `/api/v1/users/{userId}` | Update user contact | Yes | Updates the full name and phone of a user and synchronizes the related profile. |
-
-## Profiles
+## IAM & Fleet
 
 | Method | Route | Summary | Auth | Description |
 |:--|:--|:--|:--|:--|
-| `GET` | `/api/v1/carrier-profiles` | Get carrier profiles | Yes | Gets all carrier profiles, optionally filtered by user id. |
-| `GET` | `/api/v1/carrier-profiles/{carrierProfileId}` | Get carrier profile by id | Yes | Gets a carrier profile with its vehicles. |
-| `POST` | `/api/v1/carrier-profiles` | Create carrier profile | Yes | Creates the carrier profile of a user with carrier role. |
-| `PUT` | `/api/v1/carrier-profiles/{carrierProfileId}` | Update carrier profile | Yes | Updates the contact data and synchronizes the vehicle fleet of a carrier profile. |
-| `POST` | `/api/v1/carrier-profiles/{carrierProfileId}/vehicles` | Register vehicle | Yes | Registers a vehicle in the fleet of a carrier profile. |
-| `PUT` | `/api/v1/carrier-profiles/{carrierProfileId}/vehicles/{vehicleId}` | Update vehicle | Yes | Updates the data or the active state of a vehicle. |
-| `DELETE` | `/api/v1/carrier-profiles/{carrierProfileId}/vehicles/{vehicleId}` | Remove vehicle | Yes | Removes a vehicle from the fleet of a carrier profile. |
-| `GET` | `/api/v1/merchant-profiles` | Get merchant profiles | Yes | Gets all merchant profiles, optionally filtered by user id. |
-| `GET` | `/api/v1/merchant-profiles/{merchantProfileId}` | Get merchant profile by id | Yes | Gets a merchant profile by its unique identifier. |
-| `POST` | `/api/v1/merchant-profiles` | Create merchant profile | Yes | Creates the merchant profile of a user with merchant role. |
-| `PUT` | `/api/v1/merchant-profiles/{merchantProfileId}` | Update merchant profile | Yes | Updates the business data of a merchant profile. |
+| `POST` | `/api/v1/authentication/sign-up` | Sign up | No | Registers a new user and returns the authenticated user with access and refresh tokens. |
+| `POST` | `/api/v1/authentication/sign-in` | Sign in | No | Authenticates a user with email and password and returns JWT access and refresh tokens. |
+| `POST` | `/api/v1/authentication/refresh` | Refresh token | No | Issues a new access and refresh token pair from a valid refresh token. |
+| `POST` | `/api/v1/authentication/sign-out` | Sign out | Yes | Revokes the active refresh token for the user session. |
+| `GET` | `/api/v1/users/me` | Get current user | Yes | Gets the profile, roles, and identity status of the authenticated user. |
+| `PUT` | `/api/v1/users/me/identity` | Update personal identity | Yes | Registers or updates encrypted personal identity (DNI/CE) and contact details. |
+| `POST` | `/api/v1/users/me/roles` | Activate role | Yes | Activates the carrier or merchant role for the authenticated user. |
+| `PUT` | `/api/v1/users/me/merchant-profile` | Update merchant profile | Yes | Updates the merchant business profile and RUC information. |
+| `GET` | `/api/v1/users/me/identity-verifications` | List identity verifications | Yes | Lists identity verification attempts for the authenticated user. |
+| `POST` | `/api/v1/users/me/identity-verifications` | Verify identity | Yes | Runs identity verification against the simulated RENIEC provider. |
+| `GET` | `/api/v1/vehicles` | List vehicles | Yes | Lists vehicles belonging to the authenticated carrier. |
+| `POST` | `/api/v1/vehicles` | Register vehicle | Yes | Registers a vehicle in the carrier's fleet. |
+| `PUT` | `/api/v1/vehicles/{vehicleId}` | Update vehicle | Yes | Updates a vehicle's attributes or status by its public `Guid`. |
+| `DELETE` | `/api/v1/vehicles/{vehicleId}` | Delete vehicle | Yes | Removes a vehicle from the carrier's fleet. |
+| `GET` | `/api/v1/drivers` | List drivers | Yes | Lists drivers registered by the authenticated carrier. |
+| `POST` | `/api/v1/drivers` | Register driver | Yes | Adds a driver to the carrier's fleet. |
+| `PUT` | `/api/v1/drivers/{driverId}` | Update driver | Yes | Updates driver license and contact details. |
+| `DELETE` | `/api/v1/drivers/{driverId}` | Delete driver | Yes | Removes a driver from the carrier's fleet. |
+| `GET` | `/api/v1/saved-addresses` | List saved addresses | Yes | Lists saved addresses of the authenticated user. |
+| `POST` | `/api/v1/saved-addresses` | Create saved address | Yes | Saves a frequent origin or destination address. |
+| `DELETE` | `/api/v1/saved-addresses/{savedAddressId}` | Delete saved address | Yes | Deletes a saved address. |
 
 ## Matchmaking & Routing
 
 | Method | Route | Summary | Auth | Description |
 |:--|:--|:--|:--|:--|
-| `GET` | `/api/v1/freight-requests` | Get freight requests | Yes | Gets all freight requests, optionally filtered by merchant user id. |
-| `GET` | `/api/v1/freight-requests/{freightRequestId}` | Get freight request by id | Yes | Gets a freight request by its unique identifier. |
-| `POST` | `/api/v1/freight-requests` | Create freight request | Yes | Creates a freight request as draft or publishes it when status is open. |
-| `PUT` | `/api/v1/freight-requests/{freightRequestId}` | Update freight request | Yes | Edits a draft freight request and applies the requested status transition. |
-| `DELETE` | `/api/v1/freight-requests/{freightRequestId}` | Delete freight request | Yes | Deletes a draft or cancelled freight request. |
-| `POST` | `/api/v1/freight-requests/{freightRequestId}/publication` | Publish freight request | Yes | Publishes a draft freight request, validating the plan publication limit. |
-| `POST` | `/api/v1/freight-requests/{freightRequestId}/cancellation` | Cancel freight request | Yes | Cancels a draft or open freight request and closes its open proposals. |
-| `GET` | `/api/v1/freight-requests/{freightRequestId}/carrier-suggestions` | Get carrier suggestions | Yes | Gets the active return routes compatible with the freight request, ordered by detour. |
-| `GET` | `/api/v1/match-proposals` | Get match proposals | Yes | Gets all match proposals, optionally filtered by a participant user id. |
-| `GET` | `/api/v1/match-proposals/{matchProposalId}` | Get match proposal by id | Yes | Gets a match proposal by its unique identifier. |
-| `POST` | `/api/v1/match-proposals` | Send match proposal | Yes | Sends a rate proposal between a return route and a freight request after evaluating compatibility. |
-| `PUT` | `/api/v1/match-proposals/{matchProposalId}` | Update match proposal | Yes | Applies the negotiation transition expressed by status, rate and last offer party. |
-| `POST` | `/api/v1/match-proposals/{matchProposalId}/acceptance` | Accept match proposal | Yes | Accepts the current rate when it is the turn of the given party. |
-| `POST` | `/api/v1/match-proposals/{matchProposalId}/counteroffers` | Counter match proposal | Yes | Proposes a different rate when it is the turn of the given party. |
-| `POST` | `/api/v1/match-proposals/{matchProposalId}/rejection` | Reject match proposal | Yes | Rejects an open match proposal. |
-| `POST` | `/api/v1/match-proposals/{matchProposalId}/confirmation` | Confirm match | Yes | Confirms an accepted proposal, reserves route capacity, closes competitors and opens the shipment. |
-| `GET` | `/api/v1/return-routes` | Get return routes | Yes | Gets all return routes, optionally filtered by carrier user id. |
-| `GET` | `/api/v1/return-routes/{returnRouteId}` | Get return route by id | Yes | Gets a return route by its unique identifier. |
-| `POST` | `/api/v1/return-routes` | Publish return route | Yes | Publishes a return route for one of the carrier vehicles, validating capacity and the plan limit. |
-| `PUT` | `/api/v1/return-routes/{returnRouteId}` | Update return route | Yes | Applies a status or capacity change to a return route through its domain rules. |
-| `POST` | `/api/v1/return-routes/{returnRouteId}/closure` | Close return route | Yes | Closes a return route and closes its open proposals. |
-| `GET` | `/api/v1/return-routes/{returnRouteId}/load-suggestions` | Get load suggestions | Yes | Gets the open freight requests compatible with the return route, ordered by detour. |
+| `POST` | `/api/v1/return-routes` | Publish return route | Yes | Publishes a carrier return route with vehicle capacity, corridor, and time window. |
+| `GET` | `/api/v1/return-routes` | List return routes | Yes | Lists active return routes. |
+| `GET` | `/api/v1/return-routes/mine` | List my return routes | Yes | Lists return routes published by the authenticated carrier. |
+| `GET` | `/api/v1/return-routes/search` | Search return routes | Yes | Searches return routes by origin, destination, date, and capacity. |
+| `GET` | `/api/v1/return-routes/{returnRouteId}` | Get return route | Yes | Gets a return route by its public `Guid`. |
+| `GET` | `/api/v1/return-routes/{returnRouteId}/proposals` | List route proposals | Yes | Lists match proposals associated with a return route. |
+| `GET` | `/api/v1/return-routes/{returnRouteId}/suggested-shipments` | Suggest shipments | Yes | Returns compatible open shipment requests ranked by `RouteMatchingService`. |
+| `POST` | `/api/v1/return-routes/{returnRouteId}/cancel` | Cancel return route | Yes | Cancels an active return route. |
+| `POST` | `/api/v1/shipment-requests` | Publish shipment request | Yes | Publishes a merchant shipment request with cargo weight, volume, and route endpoints. |
+| `GET` | `/api/v1/shipment-requests` | List shipment requests | Yes | Lists shipment requests. |
+| `GET` | `/api/v1/shipment-requests/open` | List open shipment requests | Yes | Lists open shipment requests available for matching. |
+| `GET` | `/api/v1/shipment-requests/mine` | List my shipment requests | Yes | Lists shipment requests created by the authenticated merchant. |
+| `GET` | `/api/v1/shipment-requests/search` | Search shipment requests | Yes | Searches shipment requests by districts, cargo type, and pickup window. |
+| `GET` | `/api/v1/shipment-requests/{shipmentRequestId}` | Get shipment request | Yes | Gets a shipment request by its public `Guid`. |
+| `GET` | `/api/v1/shipment-requests/{shipmentRequestId}/proposals` | List request proposals | Yes | Lists match proposals submitted for a shipment request. |
+| `GET` | `/api/v1/shipment-requests/{shipmentRequestId}/suggested-routes` | Suggest return routes | Yes | Returns compatible return routes ranked by `RouteMatchingService`. |
+| `POST` | `/api/v1/shipment-requests/{shipmentRequestId}/cancel` | Cancel shipment request | Yes | Cancels an open shipment request. |
+| `POST` | `/api/v1/match-proposals` | Create match proposal | Yes | Submits a match proposal between a return route and a shipment request. |
+| `GET` | `/api/v1/match-proposals` | List match proposals | Yes | Lists match proposals involving the authenticated user. |
+| `GET` | `/api/v1/match-proposals/{matchProposalId}` | Get match proposal | Yes | Gets a match proposal by its public `Guid`. |
+| `POST` | `/api/v1/match-proposals/{matchProposalId}/accept` | Accept proposal | Yes | Accepts a pending proposal, reserves capacity, and creates the execution trip. |
+| `POST` | `/api/v1/match-proposals/{matchProposalId}/reject` | Reject proposal | Yes | Rejects a pending match proposal. |
+| `POST` | `/api/v1/match-proposals/{matchProposalId}/cancel` | Cancel proposal | Yes | Cancels a pending match proposal. |
+| `GET` | `/api/v1/match-proposals/{matchProposalId}/messages` | List messages | Yes | Lists negotiation messages exchanged within a match proposal. |
+| `POST` | `/api/v1/match-proposals/{matchProposalId}/messages` | Send message | Yes | Sends a text or counteroffer message in a match proposal thread. |
+| `POST` | `/api/v1/match-proposals/{matchProposalId}/messages/read` | Mark messages read | Yes | Marks proposal messages as read by the participant. |
 
 ## Service Execution & Monitoring
 
 | Method | Route | Summary | Auth | Description |
 |:--|:--|:--|:--|:--|
-| `GET` | `/api/v1/shipments` | Get shipments | Yes | Gets all shipments, optionally filtered by a participant user id. |
-| `GET` | `/api/v1/shipments/{shipmentId}` | Get shipment by id | Yes | Gets a shipment with its timeline, incidents and live tracking indicators. |
-| `POST` | `/api/v1/shipments` | Open shipment | Yes | Opens the shipment of a confirmed match; returns the existing one when it was already opened. |
-| `PUT` | `/api/v1/shipments/{shipmentId}` | Update shipment | Yes | Applies the status, location and incident changes of a shipment through its domain rules. |
-| `POST` | `/api/v1/shipments/{shipmentId}/pickup` | Confirm pickup | Yes | Confirms that the carrier picked up the cargo. |
-| `POST` | `/api/v1/shipments/{shipmentId}/locations` | Share location | Yes | Updates the live location of a moving shipment and detects route deviations. |
-| `POST` | `/api/v1/shipments/{shipmentId}/delivery` | Confirm delivery | Yes | Confirms the delivery; requires acknowledgement when the vehicle is far from the address. |
-| `POST` | `/api/v1/shipments/{shipmentId}/reception` | Confirm reception | Yes | Confirms the reception by the merchant and closes the shipment. |
-| `POST` | `/api/v1/shipments/{shipmentId}/cancellation` | Cancel shipment | Yes | Cancels a shipment that was not picked up yet. |
-| `POST` | `/api/v1/shipments/{shipmentId}/incidents` | Report incident | Yes | Reports an incident of the shipment up to 48 hours after delivery. |
-| `POST` | `/api/v1/shipments/{shipmentId}/incidents/{incidentId}/resolution` | Resolve incident | Yes | Marks an open incident of the shipment as resolved. |
+| `GET` | `/api/v1/trips` | List trips | Yes | Lists trips where the authenticated user participates as carrier or merchant. |
+| `GET` | `/api/v1/trips/{tripId}` | Get trip | Yes | Gets trip details by public `Guid`. |
+| `GET` | `/api/v1/trips/{tripId}/status-history` | Get status history | Yes | Gets the chronological status transitions of a trip. |
+| `PUT` | `/api/v1/trips/{tripId}/driver` | Assign driver | Yes | Assigns a carrier driver and optional IoT device to the trip. |
+| `POST` | `/api/v1/trips/{tripId}/pick-up` | Confirm pick-up | Yes | Marks cargo as picked up and starts in-transit tracking. |
+| `POST` | `/api/v1/trips/{tripId}/deliver` | Mark delivered | Yes | Marks the trip cargo as delivered at the destination. |
+| `POST` | `/api/v1/trips/{tripId}/confirm` | Confirm delivery | Yes | Merchant confirms reception of the cargo and completes the trip. |
+| `POST` | `/api/v1/trips/{tripId}/cancel` | Cancel trip | Yes | Cancels a trip before completion and triggers applicable compensation rules. |
+| `GET` | `/api/v1/trips/{tripId}/tracking-points` | List tracking points | Yes | Lists GPS tracking coordinates recorded for the trip. |
+| `POST` | `/api/v1/trips/{tripId}/tracking-points` | Record tracking point | Yes | Records a live GPS coordinate and evaluates route corridor deviation. |
+| `GET` | `/api/v1/trips/{tripId}/deviation-alerts` | List deviation alerts | Yes | Lists route deviation alerts triggered during the trip. |
+| `POST` | `/api/v1/trips/{tripId}/deviation-alerts/{alertId}/acknowledge` | Acknowledge alert | Yes | Acknowledges a route deviation alert. |
+| `GET` | `/api/v1/trips/{tripId}/incidents` | List incidents | Yes | Lists incidents reported on the trip. |
+| `POST` | `/api/v1/trips/{tripId}/incidents` | Report incident | Yes | Reports an operational incident during or after the trip. |
+| `POST` | `/api/v1/trips/{tripId}/incidents/{incidentId}/evidences` | Attach evidence | Yes | Attaches evidence metadata to a reported incident. |
+| `POST` | `/api/v1/trips/{tripId}/incidents/{incidentId}/resolve` | Resolve incident | Yes | Resolves an open trip incident. |
+| `GET` | `/api/v1/iot-devices` | List IoT devices | Yes | Lists GPS/IoT tracking devices available to the carrier. |
 
 ## Payment & Billing
 
 | Method | Route | Summary | Auth | Description |
 |:--|:--|:--|:--|:--|
-| `GET` | `/api/v1/payment-transactions` | Get payment transactions | Yes | Gets all payment transactions, optionally filtered by user id. |
-| `GET` | `/api/v1/payment-transactions/{paymentTransactionId}` | Get payment transaction by id | Yes | Gets a payment transaction by its unique identifier. |
-| `POST` | `/api/v1/payment-transactions` | Upgrade plan | Yes | Charges the Pro plan to the card through the payment gateway and records the transaction as paid or failed. |
-| `GET` | `/api/v1/receipts` | Get receipts | Yes | Gets all electronic receipts, optionally filtered by user id. |
-| `GET` | `/api/v1/receipts/{receiptId}` | Get receipt by id | Yes | Gets an electronic receipt by its unique identifier. |
-| `POST` | `/api/v1/receipts` | Issue receipt | Yes | Issues a boleta or factura for a paid transaction with the next correlative number. |
-| `GET` | `/api/v1/subscription-plans` | Get subscription plans | No | Gets the catalog of subscription plans with price and monthly publication limit. |
-| `GET` | `/api/v1/users/{userId}/subscription` | Get user subscription | Yes | Gets the current plan of a user; Free when there is no paid period covering today. |
+| `GET` | `/api/v1/plans` | List subscription plans | Yes | Lists available carrier subscription plans and vehicle limits. |
+| `GET` | `/api/v1/subscriptions` | Get subscription | Yes | Gets the current subscription and payment history of the carrier. |
+| `POST` | `/api/v1/subscriptions` | Subscribe to plan | Yes | Subscribes the carrier to a plan with a simulated payment. |
+| `POST` | `/api/v1/subscriptions/{subscriptionId}/renew` | Renew subscription | Yes | Renews an existing carrier subscription. |
+| `POST` | `/api/v1/subscriptions/{subscriptionId}/cancel` | Cancel subscription | Yes | Cancels auto-renewal on an active subscription. |
+| `GET` | `/api/v1/freight-settlements` | List settlements | Yes | Lists freight settlements for completed trips. |
+| `POST` | `/api/v1/freight-settlements/{tripId}/mark-paid` | Mark settlement paid | Yes | Merchant marks a trip's freight settlement as paid. |
+| `POST` | `/api/v1/freight-settlements/{tripId}/confirm` | Confirm settlement | Yes | Carrier confirms receipt of the freight settlement payment. |
+| `GET` | `/api/v1/cancellation-compensations` | List compensations | Yes | Lists cancellation compensations for cancelled trips. |
+| `POST` | `/api/v1/cancellation-compensations/{tripId}/confirm-paid` | Confirm compensation | Yes | Confirms payment of a cancellation compensation. |
+| `POST` | `/api/v1/cancellation-compensations/{tripId}/waive` | Waive compensation | Yes | Waives a cancellation compensation. |
+| `POST` | `/api/v1/cancellation-compensations/{tripId}/dispute` | Dispute compensation | Yes | Opens a dispute on a cancellation compensation. |
 
 ## Loyalty & Reputation
 
 | Method | Route | Summary | Auth | Description |
 |:--|:--|:--|:--|:--|
-| `GET` | `/api/v1/ratings` | Get ratings | Yes | Gets all ratings, optionally filtered by rated user, rater or shipment. |
-| `GET` | `/api/v1/ratings/{ratingId}` | Get rating by id | Yes | Gets a rating by its unique identifier. |
-| `POST` | `/api/v1/ratings` | Rate counterpart | Yes | Rates the counterpart of a delivered shipment once per rater. |
-| `GET` | `/api/v1/users/{userId}/reputation` | Get user reputation | Yes | Gets the average score, total and positive ratings received by a user. |
+| `POST` | `/api/v1/ratings` | Submit rating | Yes | Submits a rating and comment for the counterpart of a completed trip. |
+| `GET` | `/api/v1/ratings/received` | List received ratings | Yes | Lists ratings received by the authenticated user. |
+| `GET` | `/api/v1/ratings/given` | List given ratings | Yes | Lists ratings submitted by the authenticated user. |
+| `GET` | `/api/v1/ratings/summary/{userId}` | Get reputation summary | Yes | Returns the aggregate rating score and breakdown for a user `Guid`. |
+| `GET` | `/api/v1/loyalty/points` | Get loyalty points | Yes | Gets the loyalty points balance and ledger entries of the authenticated user. |
+| `POST` | `/api/v1/loyalty/redemptions` | Redeem loyalty points | Yes | Redeems loyalty points for platform benefits. |
 
-## Status Codes
+## Shared
 
-| Code | Meaning |
-|:--|:--|
-| 200 | Successful read or state transition |
-| 201 | Resource created (`Location` header points to the new resource) |
-| 204 | Resource deleted |
-| 400 | Validation error (`EErrorType.Validation`) |
-| 401 | Missing or invalid bearer token, or invalid credentials |
-| 403 | Forbidden by a business rule (publication limit, only the merchant confirms, not a party) |
-| 404 | Resource not found |
-| 409 | Conflict with the current state (duplicated email, out of turn, invalid transition) |
-| 500 | Unexpected error handled by `GlobalExceptionHandler` |
+| Method | Route | Summary | Auth | Description |
+|:--|:--|:--|:--|:--|
+| `GET` | `/api/v1/health` | Database health check | No | Verifies connectivity with the MySQL database. |
