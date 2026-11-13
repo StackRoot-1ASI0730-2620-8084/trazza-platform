@@ -5,11 +5,11 @@ namespace Trazza.Platform.Matchmaking.Interfaces.Rest.Transform;
 
 public static class MessageResourceFromEntityAssembler
 {
-    public static MessageResource ToResourceFromEntity(Message message)
+    public static MessageResource ToResourceFromEntity(Message message, Guid matchProposalPublicId)
     {
         return new MessageResource(
             message.Id,
-            message.MatchProposalId,
+            matchProposalPublicId,
             message.SenderUserId,
             message.Content,
             message.SentAt,

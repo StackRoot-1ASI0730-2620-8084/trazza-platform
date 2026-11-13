@@ -25,9 +25,9 @@ public record TripView(
 /// <summary>The route and shipment of a trip, as Matchmaking sees them. Ids are the numeric Matchmaking ids.</summary>
 public record TripContextSnapshot(
     ulong MatchProposalId,
-    ulong MatchProposalPublicId,
-    ulong ReturnRoutePublicId,
-    ulong ShipmentRequestPublicId,
+    Guid MatchProposalPublicId,
+    Guid ReturnRoutePublicId,
+    Guid ShipmentRequestPublicId,
     ulong CarrierProfileId,
     ulong MerchantProfileId,
     ulong VehicleId,

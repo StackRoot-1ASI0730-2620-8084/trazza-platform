@@ -33,9 +33,11 @@ public partial class ShipmentRequest : AggregateRoot
         Delivery = delivery;
         PickupWindow = pickupWindow;
         Status = EShipmentRequestStatus.Open;
+        PublicId = Guid.CreateVersion7();
     }
 
     public ShipmentRequestId Id { get; private set; }
+    public Guid PublicId { get; private set; }
     public MerchantProfileId MerchantProfileId { get; private set; }
     public string Description { get; private set; }
     public Cargo Cargo { get; private set; }
