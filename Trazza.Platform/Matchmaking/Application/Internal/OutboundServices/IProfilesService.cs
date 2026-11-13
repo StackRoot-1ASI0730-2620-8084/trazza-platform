@@ -18,4 +18,15 @@ public interface IProfilesService
         CancellationToken cancellationToken);
 
     Task<bool> OwnsDriver(CarrierProfileId carrierProfileId, DriverId driverId, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Internal id of the vehicle with the given public id, or null when it does not exist.
+    /// </summary>
+    Task<VehicleId?> FetchVehicleIdByPublicId(Guid publicId, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Public ids of the given vehicles, keyed by their internal id. Missing vehicles are left out.
+    /// </summary>
+    Task<IReadOnlyDictionary<VehicleId, Guid>> FetchVehiclePublicIds(IReadOnlyCollection<VehicleId> vehicleIds,
+        CancellationToken cancellationToken);
 }

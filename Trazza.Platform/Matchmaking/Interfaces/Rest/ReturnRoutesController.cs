@@ -1,8 +1,10 @@
 using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 using Trazza.Platform.Matchmaking.Application.CommandServices;
+using Trazza.Platform.Matchmaking.Application.Internal.OutboundServices;
 using Trazza.Platform.Matchmaking.Application.QueryServices;
 using Trazza.Platform.Matchmaking.Domain.Model.Commands;
+using Trazza.Platform.Matchmaking.Domain.Model.Aggregates;
 using Trazza.Platform.Matchmaking.Domain.Model.Errors;
 using Trazza.Platform.Matchmaking.Domain.Model.Queries;
 using Trazza.Platform.Matchmaking.Domain.Model.ValueObjects;
@@ -20,6 +22,7 @@ public class ReturnRoutesController(
     IReturnRouteCommandService returnRouteCommandService,
     IReturnRouteQueryService returnRouteQueryService,
     IMatchProposalQueryService matchProposalQueryService,
+    IProfilesService profilesService,
     ProblemDetailsFactory problemDetailsFactory)
     : ControllerBase
 {
@@ -34,15 +37,19 @@ public class ReturnRoutesController(
     {
         if (this.GetCurrentUserId() is not { } userId) return Unauthorized();
 
-        var command = PublishReturnRouteCommandFromResourceAssembler.ToCommandFromResource(userId, resource);
+        // The API exposes the public id of the vehicle; an unknown id fails as a vehicle the carrier does not own.
+        var vehicleId = await profilesService.FetchVehicleIdByPublicId(resource.VehicleId, cancellationToken) ??
+                        new VehicleId(0);
+        var command = PublishReturnRouteCommandFromResourceAssembler.ToCommandFromResource(userId, vehicleId, resource);
         var result = await returnRouteCommandService.Handle(command, cancellationToken);
+        var vehiclePublicIds = await FetchVehiclePublicIds(result.IsSuccess ? [result.Value] : [], cancellationToken);
 
         return MatchmakingActionResultAssembler.ToActionResultFromResult(
             this,
             result,
             problemDetailsFactory,
             published => CreatedAtAction(nameof(GetReturnRouteById), new { returnRouteId = published.Id.Value },
-                ReturnRouteResourceFromEntityAssembler.ToResourceFromEntity(published)));
+                ReturnRouteResourceFromEntityAssembler.ToResourceFromEntity(published, vehiclePublicIds)));
     }
 
     [HttpGet("{returnRouteId}")]
@@ -53,13 +60,14 @@ public class ReturnRoutesController(
     {
         var route = await returnRouteQueryService.Handle(new GetReturnRouteByIdQuery(new ReturnRouteId(returnRouteId)),
             cancellationToken);
+        var vehiclePublicIds = await FetchVehiclePublicIds(route is null ? [] : [route], cancellationToken);
 
         return MatchmakingActionResultAssembler.ToActionResultFromEntity(
             this,
             route,
             MatchmakingErrors.ReturnRouteNotFound,
             problemDetailsFactory,
-            found => Ok(ReturnRouteResourceFromEntityAssembler.ToResourceFromEntity(found)));
+            found => Ok(ReturnRouteResourceFromEntityAssembler.ToResourceFromEntity(found, vehiclePublicIds)));
     }
 
     [HttpGet("mine")]
@@ -72,7 +80,7 @@ public class ReturnRoutesController(
 
         var routes = await returnRouteQueryService.Handle(new GetReturnRoutesByCarrierQuery(userId),
             cancellationToken);
-        return Ok(routes.Select(ReturnRouteResourceFromEntityAssembler.ToResourceFromEntity));
+        return Ok(await ToResources(routes, cancellationToken));
     }
 
     [HttpGet("search")]
@@ -99,7 +107,7 @@ public class ReturnRoutesController(
         var query = new SearchReturnRoutesQuery(pickup, delivery, window,
             maxDistanceKm ?? SearchReturnRoutesQuery.DefaultMaxDistanceKm);
         var routes = await returnRouteQueryService.Handle(query, cancellationToken);
-        return Ok(routes.Select(ReturnRouteResourceFromEntityAssembler.ToResourceFromEntity));
+        return Ok(await ToResources(routes, cancellationToken));
     }
 
     [HttpGet("{returnRouteId}/proposals")]
@@ -125,11 +133,24 @@ public class ReturnRoutesController(
 
         var result = await returnRouteCommandService.Handle(
             new CancelReturnRouteCommand(userId, new ReturnRouteId(returnRouteId)), cancellationToken);
+        var vehiclePublicIds = await FetchVehiclePublicIds(result.IsSuccess ? [result.Value] : [], cancellationToken);
 
         return MatchmakingActionResultAssembler.ToActionResultFromResult(
             this,
             result,
             problemDetailsFactory,
-            cancelled => Ok(ReturnRouteResourceFromEntityAssembler.ToResourceFromEntity(cancelled)));
+            cancelled => Ok(ReturnRouteResourceFromEntityAssembler.ToResourceFromEntity(cancelled, vehiclePublicIds)));
+    }
+
+    private Task<IReadOnlyDictionary<VehicleId, Guid>> FetchVehiclePublicIds(IEnumerable<ReturnRoute> routes,
+        CancellationToken cancellationToken) =>
+        profilesService.FetchVehiclePublicIds(routes.Select(route => route.VehicleId).ToList(), cancellationToken);
+
+    private async Task<IEnumerable<ReturnRouteResource>> ToResources(IEnumerable<ReturnRoute> routes,
+        CancellationToken cancellationToken)
+    {
+        var list = routes.ToList();
+        var vehiclePublicIds = await FetchVehiclePublicIds(list, cancellationToken);
+        return list.Select(route => ReturnRouteResourceFromEntityAssembler.ToResourceFromEntity(route, vehiclePublicIds));
     }
 }
