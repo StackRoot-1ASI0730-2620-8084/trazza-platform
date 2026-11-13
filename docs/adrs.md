@@ -1,266 +1,187 @@
 # Architecture Decision Records (ADRs)
 
-This document records the key architectural decisions made for the **Trazza Platform** RESTful Web Services, detailing the context, options considered, decisions and consequences. The backend serves the Trazza web application (`trazza-webapp`) and follows the conventions of the reference project `learning-center-platform`.
+This document records the key architectural decisions made for the **Trazza Platform** RESTful Web Services, detailing the context, options considered, decisions, and consequences.
 
 ---
 
 ## ADR Index
 
-1. [ADR-001: Domain-Driven Design with the Trazza Bounded Contexts](#adr-001-domain-driven-design-with-the-trazza-bounded-contexts)
+1. [ADR-001: Domain-Driven Design with Trazza Bounded Contexts](#adr-001-domain-driven-design-with-trazza-bounded-contexts)
 2. [ADR-002: CQRS with Command and Query Services and Cortex Mediator](#adr-002-cqrs-with-command-and-query-services-and-cortex-mediator)
 3. [ADR-003: Result Pattern and Typed Error Model Instead of Business Exceptions](#adr-003-result-pattern-and-typed-error-model-instead-of-business-exceptions)
-4. [ADR-004: Strongly-Typed Identifiers with Readonly Record Structs](#adr-004-strongly-typed-identifiers-with-readonly-record-structs)
+4. [ADR-004: Public Guid Identifiers and Strongly-Typed Internal IDs](#adr-004-public-guid-identifiers-and-strongly-typed-internal-ids)
 5. [ADR-005: Non-Tracking Reads in Query Services](#adr-005-non-tracking-reads-in-query-services)
-6. [ADR-006: Domain Events Accumulated in Aggregates and Dispatched After Commit](#adr-006-domain-events-accumulated-in-aggregates-and-dispatched-after-commit)
+6. [ADR-006: Domain Events Dispatched via EF Core Interceptor](#adr-006-domain-events-dispatched-via-ef-core-interceptor)
 7. [ADR-007: Shared Kernel with Money, Address and GeoLocation](#adr-007-shared-kernel-with-money-address-and-geolocation)
 8. [ADR-008: Route Matching as a Domain Service](#adr-008-route-matching-as-a-domain-service)
 9. [ADR-009: Anti-Corruption Layer Facades Between Bounded Contexts](#adr-009-anti-corruption-layer-facades-between-bounded-contexts)
-10. [ADR-010: Frontend-Compatible PUT Endpoints Translated into Domain Transitions](#adr-010-frontend-compatible-put-endpoints-translated-into-domain-transitions)
-11. [ADR-011: IAM with BCrypt, JWT and a Request Authorization Middleware](#adr-011-iam-with-bcrypt-jwt-and-a-request-authorization-middleware)
-12. [ADR-012: IExceptionHandler and RFC 9457 Problem Details with Localized Messages](#adr-012-iexceptionhandler-and-rfc-9457-problem-details-with-localized-messages)
-13. [ADR-013: EF Core with MySQL, Snake Case Naming and Audit Interceptor](#adr-013-ef-core-with-mysql-snake-case-naming-and-audit-interceptor)
-14. [ADR-014: OpenAPI Documentation with Scalar](#adr-014-openapi-documentation-with-scalar)
-15. [ADR-015: External Payment Gateway Behind an Outbound Service](#adr-015-external-payment-gateway-behind-an-outbound-service)
+10. [ADR-010: IAM with BCrypt, JWT, Refresh Tokens and AES-GCM Personal Data Protection](#adr-010-iam-with-bcrypt-jwt-refresh-tokens-and-aes-gcm-personal-data-protection)
+11. [ADR-011: IExceptionHandler and RFC 9457 Problem Details with Localized Messages](#adr-011-iexceptionhandler-and-rfc-9457-problem-details-with-localized-messages)
+12. [ADR-012: EF Core with Shared MySQL Database Schema and Audit Interceptor](#adr-012-ef-core-with-shared-mysql-database-schema-and-audit-interceptor)
+13. [ADR-013: OpenAPI Documentation with Scalar](#adr-013-openapi-documentation-with-scalar)
 
 ---
 
-## ADR-001: Domain-Driven Design with the Trazza Bounded Contexts
+## ADR-001: Domain-Driven Design with Trazza Bounded Contexts
 
 - **Status:** Accepted
-- **Date:** 2026-11-03
+- **Date:** 2026-11-12
 
 ### Context
-Trazza connects carriers that travel with empty return trips and merchants that need to ship goods inside Metropolitan Lima. The domain covers identity, profiles and fleets, route matching and rate negotiation, trip execution and monitoring, subscription billing and reputation. Each area has its own language and rules.
+Trazza connects carriers that travel with empty return trips and merchants that need to ship goods inside Metropolitan Lima. The domain covers identity, profiles and fleets, route matching and proposal negotiation, trip execution and GPS monitoring, subscription and freight settlement billing, and reputation with loyalty points.
 
 ### Decision
-Organize `Trazza.Platform` into the same bounded contexts used by the web application, each split into `Domain`, `Application`, `Infrastructure` and `Interfaces`:
+Organize `Trazza.Platform` into five domain bounded contexts plus `Shared`, each split into `Domain`, `Application`, `Infrastructure`, and `Interfaces`:
 
-| Bounded Context | Aggregates | Main Value Objects |
+| Bounded Context | Aggregates | Main Responsibilities |
 |:--|:--|:--|
-| `Iam` | `User` | `EmailAddress`, `PhoneNumber`, `UserRole` |
-| `Profiles` | `CarrierProfile` (entity `Vehicle`), `MerchantProfile` | `Dni`, `Ruc`, `LicensePlate`, `LoadCapacity`, `VehicleBodyType` |
-| `Matchmaking` | `ReturnRoute`, `FreightRequest`, `MatchProposal` | `TimeWindow`, `Cargo`, `CargoType`, `Detour`, `ERouteStatus`, `ERequestStatus`, `EProposalStatus` |
-| `Execution` | `Shipment` (entities `Incident`, `ShipmentEvent`) | `EShipmentStatus`, `IncidentType`, `EPartyRole` |
-| `Billing` | `PaymentTransaction`, `Receipt` | `SubscriptionPlan`, `PaymentMethod`, `ReceiptType`, `EPaymentStatus` |
-| `Reputation` | `Rating` | `Score`, `RatingTarget`, `ReputationSummary` |
-| `Shared` | `AggregateRoot` | `Money`, `Address`, `GeoLocation`, `LimaDistricts`, `LimaCalendar` |
+| `Iam` | `User`, `PersonIdentity`, `IdentityVerification`, `RefreshToken`, `CarrierProfile`, `MerchantProfile`, `Vehicle`, `Driver`, `SavedAddress` | Authentication, encrypted personal data, RENIEC verification, profiles, fleet, and saved addresses |
+| `Matchmaking` | `ReturnRoute`, `ShipmentRequest`, `MatchProposal`, `Message` | Return routes, shipment requests, compatibility suggestions, proposals, and negotiation messages |
+| `Execution` | `Trip`, `TrackingPoint`, `DeviationAlert`, `Incident`, `IotDevice` | Trip execution lifecycle, live GPS tracking, route corridor deviation alerts, and incidents |
+| `Billing` | `Plan`, `Subscription`, `SubscriptionPayment`, `FreightSettlement`, `CancellationCompensation` | Carrier subscription plans, active subscriptions, trip freight settlements, and cancellation compensations |
+| `Reputation` | `Rating`, `LoyaltyPointEntry` | Post-trip ratings, reputation summaries, and loyalty point accrual and redemptions |
+| `Shared` | `AggregateRoot` | `Money`, `Address`, `GeoLocation`, `LimaDistricts`, `LimaCalendar`, interceptors, and pipeline behaviors |
 
 ### Consequences
-- **Positive:** the backend speaks the same ubiquitous language as the frontend; each context evolves independently.
-- **Negative:** more types and mapping code between resources, commands and aggregates.
+- **Positive:** Clear ubiquitous language and independent evolution of each module.
+- **Negative:** Requires explicit mapping between REST resources, commands, and domain models.
 
 ---
 
 ## ADR-002: CQRS with Command and Query Services and Cortex Mediator
 
 - **Status:** Accepted
-- **Date:** 2026-11-03
-
-### Context
-Write operations enforce invariants and change state, while reads must be fast and side-effect free.
+- **Date:** 2026-11-12
 
 ### Decision
-- Every context exposes `I*CommandService` (state changes, returns `Result<T>`) and `I*QueryService` (reads, returns entities or `null`).
+- Every context exposes `I*CommandService` (write operations returning `Result<T>`) and `I*QueryService` (read operations).
 - Commands and queries are immutable records in `Domain/Model/Commands` and `Domain/Model/Queries`.
-- `Cortex.Mediator` is registered with the pipeline behaviors `LoggingCommandBehavior`, `ExceptionHandlingCommandBehavior` and `TransactionCommandBehavior`, and it publishes domain events to `IEventHandler<TEvent>` implementations.
-
-### Consequences
-- **Positive:** clear separation of responsibilities and cross-cutting behaviors in one place.
-- **Negative:** one command or query record per use case.
+- `Cortex.Mediator` is registered with `LoggingCommandBehavior`, `ExceptionHandlingCommandBehavior`, and `TransactionCommandBehavior`.
 
 ---
 
 ## ADR-003: Result Pattern and Typed Error Model Instead of Business Exceptions
 
 - **Status:** Accepted
-- **Date:** 2026-11-03
-
-### Context
-Throwing exceptions for expected business outcomes (a duplicated email, an out-of-turn counteroffer) mixes control flow with failures and hides the HTTP status to return.
+- **Date:** 2026-11-12
 
 ### Decision
-- `Error(Code, Message, EErrorType)` with `Validation`, `NotFound`, `Conflict`, `Unauthorized`, `Forbidden`, `Failure` and `Unexpected`.
-- Each context declares its catalog (`IamErrors`, `ProfilesErrors`, `MatchmakingErrors`, `ExecutionErrors`, `BillingErrors`, `ReputationErrors`).
-- Aggregate behaviors return `Error.None` or a domain error (`MatchProposal.Counter`, `Shipment.ConfirmDelivery`).
-- Command services return `Result<T>`; controllers resolve it with `.Match()` inside the context `*ActionResultAssembler`, which delegates failures to `ProblemDetailsFactory.CreateProblemDetails(controller, error)`.
-
-### Consequences
-- **Positive:** predictable responses, status codes derived from `EErrorType`, no try/catch in controllers.
-- **Negative:** callers must check the result of each domain operation.
+- `Error(Code, Message, EErrorType)` classifies domain errors into `Validation`, `NotFound`, `Conflict`, `Unauthorized`, `Forbidden`, `Failure`, and `Unexpected`.
+- Each context declares its error catalog (`IamErrors`, `MatchmakingErrors`, `ExecutionErrors`, `BillingErrors`, `ReputationErrors`).
+- Command services return `Result<T>`, and controllers map failures to RFC 9457 `ProblemDetails` via `ProblemDetailsFactory`.
 
 ---
 
-## ADR-004: Strongly-Typed Identifiers with Readonly Record Structs
+## ADR-004: Public Guid Identifiers and Strongly-Typed Internal IDs
 
 - **Status:** Accepted
-- **Date:** 2026-11-03
-
-### Context
-Plain `int` identifiers allow mixing a `ReturnRouteId` with a `FreightRequestId` without any compiler error.
+- **Date:** 2026-11-12
 
 ### Decision
-Every identifier is a `readonly record struct` implementing `IEntityId<int>` with implicit conversions (`UserId`, `CarrierProfileId`, `VehicleId`, `ReturnRouteId`, `FreightRequestId`, `MatchProposalId`, `ShipmentId`, `IncidentId`, `PaymentTransactionId`, `ReceiptId`, `RatingId`). External references are typed inside each context (`CarrierId`, `MerchantId`, `RaterId`, `RatedUserId`). EF Core persists them with `StronglyTypedIdConverter<TId, int>`.
-
-### Consequences
-- **Positive:** no primitive obsession and zero allocation.
-- **Negative:** each identifier needs a converter in the model configuration.
+- Aggregates maintain internal database keys (`long`/`int` or strongly-typed record structs implementing `IEntityId<T>`) while exposing a `Guid` `PublicId` (`public_id`) over REST endpoints.
+- Cross-context and public API routes resolve resources by `Guid` (`{returnRouteId:guid}`, `{shipmentRequestId:guid}`, `{matchProposalId:guid}`, `{tripId:guid}`, `{vehicleId:guid}`, `{userId:guid}`).
 
 ---
 
 ## ADR-005: Non-Tracking Reads in Query Services
 
 - **Status:** Accepted
-- **Date:** 2026-11-03
+- **Date:** 2026-11-12
 
 ### Decision
-Query services only call repository methods that use `.AsNoTracking()` (and `.AsSplitQuery()` when including collections such as vehicles, shipment events and incidents). Command services load tracked aggregates.
-
-### Consequences
-- **Positive:** lower memory use and faster reads.
-- **Negative:** entities returned by queries cannot be modified and saved directly.
+Query services and read repositories use `.AsNoTracking()` for read projections, while command services load tracked aggregates through EF Core repositories and commit via `IUnitOfWork.CompleteAsync()`.
 
 ---
 
-## ADR-006: Domain Events Accumulated in Aggregates and Dispatched After Commit
+## ADR-006: Domain Events Dispatched via EF Core Interceptor
 
 - **Status:** Accepted
-- **Date:** 2026-11-03
-
-### Context
-Some use cases cross contexts: a registration may create a profile, updating a user contact must update the profile, confirming a match must open a shipment, closing a route must close its open proposals.
+- **Date:** 2026-11-12
 
 ### Decision
-- Aggregates inherit `AggregateRoot` and record events with `AddDomainEvent`.
-- `DispatchDomainEventsInterceptor` collects aggregates with events in `SavingChanges` and publishes the events through Cortex Mediator in `SavedChanges`, that is, **after the commit**, so the events see the generated identifiers and only successful transactions are propagated. Pending events are discarded if `SaveChanges` fails.
-- Events and handlers:
-
-| Event | Raised by | Handler | Effect |
-|:--|:--|:--|:--|
-| `UserRegisteredEvent` | `User` | `Profiles.UserRegisteredEventHandler` | Creates the carrier or merchant profile when the sign-up includes the document |
-| `UserContactUpdatedEvent` | `User.UpdateContact` | `Profiles.UserContactUpdatedEventHandler` | Synchronizes name and phone in the profile |
-| `ReturnRouteClosedEvent` | `ReturnRoute.Close` | `Matchmaking.ReturnRouteClosedEventHandler` | Closes open proposals of the route |
-| `FreightRequestCancelledEvent` | `FreightRequest.Cancel` | `Matchmaking.FreightRequestCancelledEventHandler` | Closes open proposals of the request |
-| `MatchProposalConfirmedEvent` | `MatchProposal.Confirm` | `Execution.MatchProposalConfirmedEventHandler` | Opens the `Shipment` |
-| `ShipmentDeviatedEvent` | `Shipment.UpdateLocation` | `Execution.ShipmentDeviatedEventHandler` | Logs the route deviation alert |
-
-### Consequences
-- **Positive:** contexts stay decoupled and reactions happen only after a successful commit.
-- **Negative:** reactions run in a second save; they are eventually consistent with the originating transaction.
+Aggregates inherit from `AggregateRoot` and record domain events via `AddDomainEvent`. `DispatchDomainEventsInterceptor` dispatches queued events through `Cortex.Mediator` after changes are saved.
 
 ---
 
 ## ADR-007: Shared Kernel with Money, Address and GeoLocation
 
 - **Status:** Accepted
-- **Date:** 2026-11-03
+- **Date:** 2026-11-12
 
 ### Decision
-The `Shared` context contains the value objects used by several contexts, mirroring the frontend shared kernel:
-- `Money(Amount, Currency)` in PEN, with `Add`, `Multiply`, `IsGreaterThan` and `Formatted` (`S/ 39.90`).
-- `Address(Street, District)` validated against `LimaDistricts`, exposing its approximate `Location`.
-- `GeoLocation(Latitude, Longitude)` with haversine `DistanceTo`, `MoveTowards` and `DistanceToSegment`.
-- `LimaCalendar` with the Lima time offset (UTC-5) to compute today and the start of the month.
-
-Value objects expose `IsValid` instead of throwing; command services translate invalid values into `Result` failures.
+The `Shared` context provides common domain value objects:
+- `Money(Amount, Currency)` in PEN (`S/`).
+- `Address(Street, District)` validated against `LimaDistricts`.
+- `GeoLocation(Latitude, Longitude)` with Haversine distance and segment calculations.
+- `LimaCalendar` with the Lima timezone offset (UTC-5).
 
 ---
 
 ## ADR-008: Route Matching as a Domain Service
 
 - **Status:** Accepted
-- **Date:** 2026-11-03
-
-### Context
-Compatibility between a return route and a freight request depends on both aggregates and does not belong to either of them.
+- **Date:** 2026-11-12
 
 ### Decision
-`IRouteMatchingService` / `RouteMatchingService` in `Matchmaking/Domain/Services` estimates trips (`road factor 1.3`, `30 km/h`), calculates the detour (`origin → pickup → delivery → destination` minus the direct trip) and evaluates compatibility: route active, request open, same date, overlapping time windows, accepted cargo type, enough capacity and detour within the maximum. It is used to create proposals and to serve `load-suggestions` and `carrier-suggestions`.
+`IRouteMatchingService` / `RouteMatchingService` in `Matchmaking/Domain/Services` evaluates spatial corridor compatibility, available weight and volume capacity, cargo type compatibility, and time windows between `ReturnRoute` and `ShipmentRequest` aggregates.
 
 ---
 
 ## ADR-009: Anti-Corruption Layer Facades Between Bounded Contexts
 
 - **Status:** Accepted
-- **Date:** 2026-11-03
+- **Date:** 2026-11-12
 
 ### Decision
-Contexts query each other only through facades declared in `Interfaces/Acl` and implemented in `Application/Acl`, which return primitives or tuples:
-
-| Facade | Consumers | Purpose |
-|:--|:--|:--|
-| `IIamContextFacade` | Profiles, Billing | User id by email, role and existence |
-| `IProfilesContextFacade` | Matchmaking, Execution | Vehicle capacity and label, carrier and merchant contacts |
-| `IBillingContextFacade` | Matchmaking | Monthly publication limit of the current plan |
-| `IExecutionContextFacade` | Reputation | Parties and delivery state of a shipment |
+Bounded contexts communicate synchronously only through ACL facades in `Interfaces/Acl`:
+- `IIamContextFacade`: User identity, carrier/merchant profiles, and fleet lookups.
+- `IMatchmakingContextFacade`: Proposal and trip context snapshots for Execution.
+- `IExecutionContextFacade`: Trip status, participants, and completion snapshots for Billing and Reputation.
+- `IBillingContextFacade`: Carrier subscription status and freight settlement creation.
+- `IReputationContextFacade`: Reputation summary and loyalty points integration.
 
 ---
 
-## ADR-010: Frontend-Compatible PUT Endpoints Translated into Domain Transitions
+## ADR-010: IAM with BCrypt, JWT, Refresh Tokens and AES-GCM Personal Data Protection
 
 - **Status:** Accepted
-- **Date:** 2026-11-03
-
-### Context
-The web application persists aggregates by sending the full resource with `PUT` after applying the behavior locally (for example, a proposal with `status: "accepted"`).
+- **Date:** 2026-11-12
 
 ### Decision
-- `PUT` endpoints never overwrite state blindly. They translate the requested status into the corresponding aggregate behavior (`Accept`, `Counter`, `Reject`, `Confirm`, `Close`, `ConfirmPickup`, `UpdateLocation`, `ConfirmDelivery`, `ConfirmReception`, `Cancel`) so the backend enforces the same invariants. Requests that do not change state are idempotent.
-- Explicit action endpoints are also exposed (`/acceptance`, `/counteroffers`, `/confirmation`, `/pickup`, `/delivery`, `/incidents`).
-- `POST /shipments` is idempotent per proposal because the shipment is already opened by `MatchProposalConfirmedEvent`.
+- Passwords are hashed with BCrypt (`BCryptHashingService`).
+- Access tokens are signed with HMAC SHA-256 (`JwtTokenService`), paired with rotating `RefreshToken` records.
+- Sensitive identity numbers (DNI/CE) are encrypted at rest with AES-GCM (`AesGcmPersonalDataProtector`) and indexed via HMAC-SHA256 blind hashes.
+- `RequestAuthorizationMiddleware` populates `AuthenticatedUser` in `HttpContext.Items`.
 
 ---
 
-## ADR-011: IAM with BCrypt, JWT and a Request Authorization Middleware
+## ADR-011: IExceptionHandler and RFC 9457 Problem Details with Localized Messages
 
 - **Status:** Accepted
-- **Date:** 2026-11-03
+- **Date:** 2026-11-12
 
 ### Decision
-- Passwords are hashed with BCrypt (`IHashingService`).
-- `POST /authentication/sign-in` and `POST /authentication/sign-up` return the user with a JWT signed with HMAC SHA-256 (`ITokenService`, 7 days, claims `sid`, `email`, `role`).
-- `RequestAuthorizationMiddleware` validates the bearer token and places the user in `HttpContext.Items["User"]`; the custom `[Authorize]` filter rejects requests without user, and `[AllowAnonymous]` opens public endpoints.
+- `GlobalExceptionHandler` implements `IExceptionHandler` and writes RFC 9457 `ProblemDetails` for unhandled exceptions.
+- `ProblemDetailsFactory` localizes error titles and details using `CommonMessages` and `ErrorMessages` (`.resx` in English and Spanish) based on `Accept-Language`.
 
 ---
 
-## ADR-012: IExceptionHandler and RFC 9457 Problem Details with Localized Messages
+## ADR-012: EF Core with Shared MySQL Database Schema and Audit Interceptor
 
 - **Status:** Accepted
-- **Date:** 2026-11-03
+- **Date:** 2026-11-12
 
 ### Decision
-- `GlobalExceptionHandler` implements `IExceptionHandler` and writes `ProblemDetails` for unexpected exceptions.
-- `ProblemDetailsFactory` maps `EErrorType` to the HTTP status, localizes the title with `CommonMessages` and the detail with `ErrorMessages` using the error code as key, and adds the `code` extension.
-- Messages live in `.resx` files in English and Spanish; the culture is selected by `Accept-Language`.
+- `AppDbContext` applies each bounded context's entity mappings (`ApplyIamConfiguration`, `ApplyMatchmakingConfiguration`, `ApplyExecutionConfiguration`, `ApplyBillingConfiguration`, `ApplyReputationConfiguration`) against the MySQL 8 `trazza_database` schema.
+- Database credentials and secrets are read strictly from environment variables (`DATABASE_URL`, `DATABASE_USER`, `DATABASE_PASSWORD`, `DATABASE_SCHEMA`).
+- `AuditableEntityInterceptor` populates `CreatedAt` and `UpdatedAt` timestamps in UTC.
 
 ---
 
-## ADR-013: EF Core with MySQL, Snake Case Naming and Audit Interceptor
+## ADR-013: OpenAPI Documentation with Scalar
 
 - **Status:** Accepted
-- **Date:** 2026-11-03
+- **Date:** 2026-11-12
 
 ### Decision
-- `AppDbContext` applies each context configuration (`ApplyIamConfiguration`, `ApplyProfilesConfiguration`, `ApplyMatchmakingConfiguration`, `ApplyExecutionConfiguration`, `ApplyBillingConfiguration`, `ApplyReputationConfiguration`) and `UseSnakeCaseNamingConvention()` with pluralized table names.
-- Value objects are owned types (`Address`, `Money`, `TimeWindow`, `Cargo`, `Detour`, `GeoLocation`, `PaymentMethod`, `RatingTarget`) or value conversions (`EmailAddress`, `Dni`, `LicensePlate`, `CargoType` lists).
-- `AuditableEntityInterceptor` fills `CreatedAt` and `UpdatedAt` for every `IAuditableEntity`.
-- Migrations are applied on startup with `Database.Migrate()`.
-
----
-
-## ADR-014: OpenAPI Documentation with Scalar
-
-- **Status:** Accepted
-- **Date:** 2026-11-03
-
-### Decision
-`Microsoft.AspNetCore.OpenApi` generates the document with `BearerSecuritySchemeTransformer` and `IamBearerSecurityOperationTransformer` (security requirement only on protected operations). `Scalar.AspNetCore` serves the interactive reference at `/scalar/v1`. Every action declares `EndpointSummary`, `EndpointDescription` and `ProducesResponseType`.
-
----
-
-## ADR-015: External Payment Gateway Behind an Outbound Service
-
-- **Status:** Accepted
-- **Date:** 2026-11-03
-
-### Decision
-`IPaymentGateway` (`Billing/Application/Internal/OutboundServices`) abstracts the card processor. `SimulatedPaymentGateway` approves every card except the test card ending in `0002`, matching the frontend gateway. Replacing it with a real provider only requires a new infrastructure adapter.
+`Microsoft.AspNetCore.OpenApi` generates `/openapi/v1.json` with `BearerSecuritySchemeTransformer`, and `Scalar.AspNetCore` serves the interactive API reference at `/scalar/v1`.

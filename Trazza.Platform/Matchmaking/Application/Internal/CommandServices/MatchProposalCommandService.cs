@@ -1,0 +1,209 @@
+using Trazza.Platform.Execution.Interfaces.Acl;
+using Trazza.Platform.Matchmaking.Application.CommandServices;
+using Trazza.Platform.Matchmaking.Application.Internal.OutboundServices;
+using Trazza.Platform.Matchmaking.Domain.Model.Aggregates;
+using Trazza.Platform.Matchmaking.Domain.Model.Commands;
+using Trazza.Platform.Matchmaking.Domain.Model.Errors;
+using Trazza.Platform.Matchmaking.Domain.Repositories;
+using Trazza.Platform.Shared.Application.Model;
+using Trazza.Platform.Shared.Domain.Repositories;
+
+namespace Trazza.Platform.Matchmaking.Application.Internal.CommandServices;
+
+public class MatchProposalCommandService(
+    IMatchProposalRepository matchProposalRepository,
+    IReturnRouteRepository returnRouteRepository,
+    IShipmentRequestRepository shipmentRequestRepository,
+    IProfilesService profilesService,
+    IExecutionContextFacade executionContextFacade,
+    IUnitOfWork unitOfWork)
+    : IMatchProposalCommandService
+{
+    public async Task<Result<MatchProposal>> Handle(SubmitMatchProposalCommand command,
+        CancellationToken cancellationToken)
+    {
+        if (!command.OfferedRate.IsValid || command.OfferedRate.Amount <= 0)
+            return Result<MatchProposal>.Failure(MatchmakingErrors.InvalidRate);
+
+        var carrierProfileId = await profilesService.FetchCarrierProfileIdByUserId(command.UserId, cancellationToken);
+        if (carrierProfileId is null)
+            return Result<MatchProposal>.Failure(MatchmakingErrors.CarrierProfileNotFound);
+
+        var route = await returnRouteRepository.FindByIdAsNoTrackingAsync(command.ReturnRouteId, cancellationToken);
+        if (route is null)
+            return Result<MatchProposal>.Failure(MatchmakingErrors.ReturnRouteNotFound);
+        if (route.CarrierProfileId != carrierProfileId.Value)
+            return Result<MatchProposal>.Failure(MatchmakingErrors.NotRouteOwner);
+        if (!route.IsPublished)
+            return Result<MatchProposal>.Failure(MatchmakingErrors.ReturnRouteNotPublished);
+
+        var shipment =
+            await shipmentRequestRepository.FindByIdAsNoTrackingAsync(command.ShipmentRequestId, cancellationToken);
+        if (shipment is null)
+            return Result<MatchProposal>.Failure(MatchmakingErrors.ShipmentRequestNotFound);
+        if (!shipment.IsOpen)
+            return Result<MatchProposal>.Failure(MatchmakingErrors.ShipmentRequestNotOpen);
+
+        if (await matchProposalRepository.ExistsAsync(command.ShipmentRequestId, command.ReturnRouteId,
+                cancellationToken))
+            return Result<MatchProposal>.Failure(MatchmakingErrors.ProposalAlreadyExists);
+
+        var proposal = new MatchProposal(command.ShipmentRequestId, command.ReturnRouteId, command.OfferedRate);
+
+        await matchProposalRepository.AddAsync(proposal, cancellationToken);
+        await unitOfWork.CompleteAsync(cancellationToken);
+
+        proposal.RaiseSubmitted();
+        await unitOfWork.CompleteAsync(cancellationToken);
+        return Result<MatchProposal>.Success(proposal);
+    }
+
+    public Task<Result<MatchProposal>> Handle(AcceptMatchProposalCommand command,
+        CancellationToken cancellationToken) =>
+        unitOfWork.ExecuteInTransactionAsync(() => AcceptAsync(command, cancellationToken),
+            result => result.IsSuccess, cancellationToken);
+
+    private async Task<Result<MatchProposal>> AcceptAsync(AcceptMatchProposalCommand command,
+        CancellationToken cancellationToken)
+    {
+        var merchantProfileId =
+            await profilesService.FetchMerchantProfileIdByUserId(command.UserId, cancellationToken);
+        if (merchantProfileId is null)
+            return Result<MatchProposal>.Failure(MatchmakingErrors.MerchantProfileNotFound);
+
+        var proposal = await matchProposalRepository.FindByIdAsync(command.MatchProposalId, cancellationToken);
+        if (proposal is null)
+            return Result<MatchProposal>.Failure(MatchmakingErrors.MatchProposalNotFound);
+
+        var shipment = await shipmentRequestRepository.FindByIdAsync(proposal.ShipmentRequestId, cancellationToken);
+        if (shipment is null)
+            return Result<MatchProposal>.Failure(MatchmakingErrors.ShipmentRequestNotFound);
+        if (shipment.MerchantProfileId != merchantProfileId.Value)
+            return Result<MatchProposal>.Failure(MatchmakingErrors.NotShipmentOwner);
+        if (!proposal.IsPending)
+            return Result<MatchProposal>.Failure(MatchmakingErrors.ProposalNotPending);
+        if (!shipment.IsOpen)
+            return Result<MatchProposal>.Failure(MatchmakingErrors.ShipmentRequestNotOpen);
+
+        // The route row is locked so two merchants cannot take the last free place at the same time.
+        var route = await returnRouteRepository.FindByIdForUpdateAsync(proposal.ReturnRouteId, cancellationToken);
+        if (route is null)
+            return Result<MatchProposal>.Failure(MatchmakingErrors.ReturnRouteNotFound);
+
+        var vehicleMaxLoadKg =
+            await profilesService.FetchVehicleMaxLoadKg(route.CarrierProfileId, route.VehicleId, cancellationToken);
+        if (vehicleMaxLoadKg is null)
+            return Result<MatchProposal>.Failure(MatchmakingErrors.VehicleNotOwned);
+
+        var (acceptedShipments, acceptedWeightKg) =
+            await matchProposalRepository.GetAcceptedLoadAsync(route.Id, cancellationToken);
+
+        var error = route.EnsureCanTakeShipment(acceptedShipments, acceptedWeightKg, shipment.Cargo,
+            vehicleMaxLoadKg.Value);
+        if (!error.IsNone)
+            return Result<MatchProposal>.Failure(error);
+
+        var now = DateTimeOffset.UtcNow;
+
+        error = proposal.Accept(now);
+        if (!error.IsNone)
+            return Result<MatchProposal>.Failure(error);
+
+        error = shipment.MarkMatched();
+        if (!error.IsNone)
+            return Result<MatchProposal>.Failure(error);
+
+        var otherPending = await matchProposalRepository.ListPendingByShipmentRequestIdAsync(shipment.Id,
+            cancellationToken);
+        foreach (var other in otherPending.Where(other => other.Id != proposal.Id))
+        {
+            error = other.Expire();
+            if (!error.IsNone)
+                return Result<MatchProposal>.Failure(error);
+        }
+
+        error = route.RegisterAcceptedShipment(acceptedShipments + 1);
+        if (!error.IsNone)
+            return Result<MatchProposal>.Failure(error);
+
+        await unitOfWork.CompleteAsync(cancellationToken);
+        await executionContextFacade.CreateTripAsync(proposal.Id, route.DriverId?.Value, proposal.OfferedRate.Amount,
+            proposal.OfferedRate.Currency, command.UserId.Value, cancellationToken);
+        return Result<MatchProposal>.Success(proposal);
+    }
+
+    public async Task<Result<MatchProposal>> Handle(RejectMatchProposalCommand command,
+        CancellationToken cancellationToken)
+    {
+        var merchantProfileId =
+            await profilesService.FetchMerchantProfileIdByUserId(command.UserId, cancellationToken);
+        if (merchantProfileId is null)
+            return Result<MatchProposal>.Failure(MatchmakingErrors.MerchantProfileNotFound);
+
+        var proposal = await matchProposalRepository.FindByIdAsync(command.MatchProposalId, cancellationToken);
+        if (proposal is null)
+            return Result<MatchProposal>.Failure(MatchmakingErrors.MatchProposalNotFound);
+
+        var shipment =
+            await shipmentRequestRepository.FindByIdAsNoTrackingAsync(proposal.ShipmentRequestId, cancellationToken);
+        if (shipment is null)
+            return Result<MatchProposal>.Failure(MatchmakingErrors.ShipmentRequestNotFound);
+        if (shipment.MerchantProfileId != merchantProfileId.Value)
+            return Result<MatchProposal>.Failure(MatchmakingErrors.NotShipmentOwner);
+
+        var error = proposal.Reject(DateTimeOffset.UtcNow);
+        if (!error.IsNone)
+            return Result<MatchProposal>.Failure(error);
+
+        await unitOfWork.CompleteAsync(cancellationToken);
+        return Result<MatchProposal>.Success(proposal);
+    }
+
+    public async Task<Result<MatchProposal>> Handle(CancelMatchProposalCommand command,
+        CancellationToken cancellationToken)
+    {
+        var carrierProfileId = await profilesService.FetchCarrierProfileIdByUserId(command.UserId, cancellationToken);
+        if (carrierProfileId is null)
+            return Result<MatchProposal>.Failure(MatchmakingErrors.CarrierProfileNotFound);
+
+        var proposal = await matchProposalRepository.FindByIdAsync(command.MatchProposalId, cancellationToken);
+        if (proposal is null)
+            return Result<MatchProposal>.Failure(MatchmakingErrors.MatchProposalNotFound);
+
+        var route = await returnRouteRepository.FindByIdAsync(proposal.ReturnRouteId, cancellationToken);
+        if (route is null)
+            return Result<MatchProposal>.Failure(MatchmakingErrors.ReturnRouteNotFound);
+        if (route.CarrierProfileId != carrierProfileId.Value)
+            return Result<MatchProposal>.Failure(MatchmakingErrors.NotRouteOwner);
+
+        var wasAccepted = proposal.IsAccepted;
+
+        // Once accepted, the proposal has a trip: it is cancelled from the trip, which releases the proposal.
+        if (wasAccepted && (await executionContextFacade.FindTripPublicIdsByProposalIdsAsync([proposal.Id],
+                cancellationToken)).Count > 0)
+            return Result<MatchProposal>.Failure(MatchmakingErrors.ProposalHasTrip);
+
+        var error = proposal.Cancel(DateTimeOffset.UtcNow);
+        if (!error.IsNone)
+            return Result<MatchProposal>.Failure(error);
+
+        if (wasAccepted)
+        {
+            var shipment =
+                await shipmentRequestRepository.FindByIdAsync(proposal.ShipmentRequestId, cancellationToken);
+            if (shipment is null)
+                return Result<MatchProposal>.Failure(MatchmakingErrors.ShipmentRequestNotFound);
+
+            error = shipment.Reopen();
+            if (!error.IsNone)
+                return Result<MatchProposal>.Failure(error);
+
+            error = route.Reopen();
+            if (!error.IsNone)
+                return Result<MatchProposal>.Failure(error);
+        }
+
+        await unitOfWork.CompleteAsync(cancellationToken);
+        return Result<MatchProposal>.Success(proposal);
+    }
+}

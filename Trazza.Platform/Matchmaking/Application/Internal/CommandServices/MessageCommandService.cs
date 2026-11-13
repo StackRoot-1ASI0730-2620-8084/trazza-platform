@@ -1,0 +1,90 @@
+using Trazza.Platform.Execution.Interfaces.Acl;
+using Trazza.Platform.Matchmaking.Application.CommandServices;
+using Trazza.Platform.Matchmaking.Application.Internal.OutboundServices;
+using Trazza.Platform.Matchmaking.Domain.Model.Aggregates;
+using Trazza.Platform.Matchmaking.Domain.Model.Commands;
+using Trazza.Platform.Matchmaking.Domain.Model.Errors;
+using Trazza.Platform.Matchmaking.Domain.Model.ValueObjects;
+using Trazza.Platform.Matchmaking.Domain.Repositories;
+using Trazza.Platform.Shared.Application.Model;
+using Trazza.Platform.Shared.Domain.Model.Errors;
+using Trazza.Platform.Shared.Domain.Repositories;
+
+namespace Trazza.Platform.Matchmaking.Application.Internal.CommandServices;
+
+public class MessageCommandService(
+    IMessageRepository messageRepository,
+    IMatchProposalRepository matchProposalRepository,
+    IReturnRouteRepository returnRouteRepository,
+    IShipmentRequestRepository shipmentRequestRepository,
+    IProfilesService profilesService,
+    IExecutionContextFacade executionContextFacade,
+    IUnitOfWork unitOfWork)
+    : IMessageCommandService
+{
+    public async Task<Result<Message>> Handle(SendMessageCommand command, CancellationToken cancellationToken)
+    {
+        var content = (command.Content ?? string.Empty).Trim();
+
+        if (content.Length == 0)
+            return Result<Message>.Failure(MatchmakingErrors.EmptyMessage);
+        if (content.Length > Message.MaxContentLength)
+            return Result<Message>.Failure(MatchmakingErrors.MessageTooLong);
+
+        var error = await EnsureParticipantAsync(command.UserId, command.MatchProposalId, cancellationToken);
+        if (!error.IsNone)
+            return Result<Message>.Failure(error);
+
+        // The chat is open while the proposal is pending, and after it is accepted until its trip is closed.
+        var proposal =
+            await matchProposalRepository.FindByIdAsNoTrackingAsync(command.MatchProposalId, cancellationToken);
+        var chatOpen = proposal is not null && (proposal.IsPending || (proposal.IsAccepted &&
+            !await executionContextFacade.IsTripClosedAsync(proposal.Id, cancellationToken)));
+        if (!chatOpen)
+            return Result<Message>.Failure(MatchmakingErrors.ChatClosed);
+
+        var message = new Message(command.MatchProposalId, command.UserId, content, DateTimeOffset.UtcNow);
+
+        await messageRepository.AddAsync(message, cancellationToken);
+        await unitOfWork.CompleteAsync(cancellationToken);
+
+        message.RaiseSent();
+        await unitOfWork.CompleteAsync(cancellationToken);
+        return Result<Message>.Success(message);
+    }
+
+    public async Task<Result<int>> Handle(MarkMessagesAsReadCommand command, CancellationToken cancellationToken)
+    {
+        var error = await EnsureParticipantAsync(command.UserId, command.MatchProposalId, cancellationToken);
+        if (!error.IsNone)
+            return Result<int>.Failure(error);
+
+        var unread = (await messageRepository.ListUnreadSentByOthersAsync(command.MatchProposalId, command.UserId,
+            cancellationToken)).ToList();
+
+        var now = DateTimeOffset.UtcNow;
+        unread.ForEach(message => message.MarkAsRead(now));
+
+        await unitOfWork.CompleteAsync(cancellationToken);
+        return Result<int>.Success(unread.Count);
+    }
+
+    private async Task<Error> EnsureParticipantAsync(UserId userId, MatchProposalId matchProposalId,
+        CancellationToken cancellationToken)
+    {
+        var proposal = await matchProposalRepository.FindByIdAsNoTrackingAsync(matchProposalId, cancellationToken);
+        if (proposal is null) return MatchmakingErrors.MatchProposalNotFound;
+
+        var route = await returnRouteRepository.FindByIdAsNoTrackingAsync(proposal.ReturnRouteId, cancellationToken);
+        var shipment =
+            await shipmentRequestRepository.FindByIdAsNoTrackingAsync(proposal.ShipmentRequestId, cancellationToken);
+        if (route is null || shipment is null) return MatchmakingErrors.MatchProposalNotFound;
+
+        var carrierProfileId = await profilesService.FetchCarrierProfileIdByUserId(userId, cancellationToken);
+        var merchantProfileId = await profilesService.FetchMerchantProfileIdByUserId(userId, cancellationToken);
+
+        var isParticipant = carrierProfileId == route.CarrierProfileId ||
+                            merchantProfileId == shipment.MerchantProfileId;
+        return isParticipant ? Error.None : MatchmakingErrors.NotProposalParticipant;
+    }
+}

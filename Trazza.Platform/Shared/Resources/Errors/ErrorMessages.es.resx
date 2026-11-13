@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Matchmaking.ChatClosed" xml:space="preserve">
+    <value>El chat de esta propuesta está cerrado.</value>
+  </data>
+  <data name="Matchmaking.ProposalHasTrip" xml:space="preserve">
+    <value>La propuesta ya tiene un viaje. Cancela el viaje.</value>
+  </data>
+  <data name="Matchmaking.CapacityExceeded" xml:space="preserve">
+    <value>La carga supera la capacidad del vehículo.</value>
+  </data>
+  <data name="Matchmaking.CarrierProfileNotFound" xml:space="preserve">
+    <value>El usuario no tiene un perfil de transportista.</value>
+  </data>
+  <data name="Matchmaking.DepartureInPast" xml:space="preserve">
+    <value>La salida debe ser en el futuro.</value>
+  </data>
+  <data name="Matchmaking.DriverNotOwned" xml:space="preserve">
+    <value>El conductor no pertenece al transportista.</value>
+  </data>
+  <data name="Matchmaking.EmptyMessage" xml:space="preserve">
+    <value>El mensaje no puede estar vacío.</value>
+  </data>
+  <data name="Matchmaking.InvalidAddress" xml:space="preserve">
+    <value>La dirección o sus coordenadas no son válidas.</value>
+  </data>
+  <data name="Matchmaking.InvalidCargo" xml:space="preserve">
+    <value>El peso y el volumen deben ser mayores que cero.</value>
+  </data>
+  <data name="Matchmaking.InvalidDescription" xml:space="preserve">
+    <value>La descripción es obligatoria y tiene como máximo 500 caracteres.</value>
+  </data>
+  <data name="Matchmaking.InvalidMaxShipments" xml:space="preserve">
+    <value>El máximo de envíos debe ser 1 o 2.</value>
+  </data>
+  <data name="Matchmaking.InvalidRate" xml:space="preserve">
+    <value>La tarifa ofrecida debe ser mayor que cero y estar en una moneda válida.</value>
+  </data>
+  <data name="Matchmaking.InvalidTimeWindow" xml:space="preserve">
+    <value>El fin de la ventana de tiempo debe ser posterior a su inicio.</value>
+  </data>
+  <data name="Matchmaking.MatchProposalNotFound" xml:space="preserve">
+    <value>No se encontró la propuesta indicada.</value>
+  </data>
+  <data name="Matchmaking.MerchantProfileNotFound" xml:space="preserve">
+    <value>El usuario no tiene un perfil de comerciante.</value>
+  </data>
+  <data name="Matchmaking.MessageTooLong" xml:space="preserve">
+    <value>El mensaje supera los 2000 caracteres.</value>
+  </data>
+  <data name="Matchmaking.NotProposalParticipant" xml:space="preserve">
+    <value>Solo el transportista y el comerciante de la propuesta pueden usar este chat.</value>
+  </data>
+  <data name="Matchmaking.NotRouteOwner" xml:space="preserve">
+    <value>La ruta de retorno no pertenece al transportista.</value>
+  </data>
+  <data name="Matchmaking.NotShipmentOwner" xml:space="preserve">
+    <value>La solicitud de envío no pertenece al comerciante.</value>
+  </data>
+  <data name="Matchmaking.ProposalAlreadyExists" xml:space="preserve">
+    <value>Ya existe una propuesta para esta solicitud y esta ruta.</value>
+  </data>
+  <data name="Matchmaking.ProposalNotPending" xml:space="preserve">
+    <value>La propuesta ya no está pendiente.</value>
+  </data>
+  <data name="Matchmaking.ReturnRouteFull" xml:space="preserve">
+    <value>La ruta de retorno ya no tiene lugares disponibles.</value>
+  </data>
+  <data name="Matchmaking.ReturnRouteNotCancellable" xml:space="preserve">
+    <value>La ruta de retorno no se puede cancelar en su estado actual.</value>
+  </data>
+  <data name="Matchmaking.ReturnRouteNotFound" xml:space="preserve">
+    <value>No se encontró la ruta de retorno indicada.</value>
+  </data>
+  <data name="Matchmaking.ReturnRouteNotPublished" xml:space="preserve">
+    <value>La ruta de retorno no está publicada.</value>
+  </data>
+  <data name="Matchmaking.ShipmentRequestNotCancellable" xml:space="preserve">
+    <value>La solicitud de envío no se puede cancelar en su estado actual.</value>
+  </data>
+  <data name="Matchmaking.ShipmentRequestNotFound" xml:space="preserve">
+    <value>No se encontró la solicitud de envío indicada.</value>
+  </data>
+  <data name="Matchmaking.ShipmentRequestNotOpen" xml:space="preserve">
+    <value>La solicitud de envío no está abierta.</value>
+  </data>
+  <data name="Matchmaking.VehicleNotOwned" xml:space="preserve">
+    <value>El vehículo no pertenece al transportista.</value>
+  </data>
+  <data name="Shared.BadRequest" xml:space="preserve">
+    <value>La solicitud no es válida.</value>
+  </data>
+  <data name="Shared.ConcurrencyConflict" xml:space="preserve">
+    <value>Otra solicitud modificó estos datos. Vuelve a cargar e inténtalo de nuevo.</value>
+  </data>
+  <data name="Shared.DatabaseConflict" xml:space="preserve">
+    <value>El cambio entra en conflicto con los datos ya guardados.</value>
+  </data>
+  <data name="Shared.RequestCancelled" xml:space="preserve">
+    <value>La solicitud fue cancelada.</value>
+  </data>
+  <data name="Shared.Unexpected" xml:space="preserve">
+    <value>Ocurrió un error inesperado.</value>
+  </data>
+</root>

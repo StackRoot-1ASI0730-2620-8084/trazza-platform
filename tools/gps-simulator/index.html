@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Trazza GPS Simulator</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    :root { --bg: #f6f7f9; --card: #fff; --text: #1d2430; --muted: #5b6573; --accent: #1f7a5a; --danger: #b42318; --border: #d8dde4; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, sans-serif; background: var(--bg); color: var(--text); }
+    header { padding: 16px; background: var(--accent); color: #fff; }
+    header h1 { margin: 0; font-size: 20px; }
+    header p { margin: 4px 0 0; opacity: .9; font-size: 14px; }
+    main { display: grid; gap: 16px; padding: 16px; grid-template-columns: minmax(280px, 380px) 1fr; }
+    @media (max-width: 800px) { main { grid-template-columns: 1fr; } }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+    label { display: block; font-size: 13px; color: var(--muted); margin: 10px 0 4px; }
+    input, select { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; }
+    button { margin-top: 12px; padding: 9px 14px; border: 0; border-radius: 6px; background: var(--accent); color: #fff; font-size: 14px; cursor: pointer; }
+    button.secondary { background: #44505f; }
+    button.danger { background: var(--danger); }
+    button:disabled { opacity: .5; cursor: default; }
+    .row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .check { display: flex; align-items: center; gap: 8px; margin-top: 12px; font-size: 14px; }
+    .check input { width: auto; }
+    #map { height: 420px; border-radius: 10px; }
+    #log { height: 180px; overflow: auto; font: 12px ui-monospace, monospace; background: #0f1720; color: #d7e0ea; padding: 8px; border-radius: 6px; margin-top: 12px; }
+    .alert { color: #ffb4a8; }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Trazza GPS Simulator</h1>
+  <p>Envía puntos GPS a un viaje como si fuera el celular del transportista (POST /api/v1/trips/{id}/tracking-points).</p>
+</header>
+<main>
+  <section class="card">
+    <label for="api">URL del API</label>
+    <input id="api" value="http://localhost:5222">
+    <label for="email">Correo del transportista</label>
+    <input id="email" type="email" autocomplete="username">
+    <label for="password">Contraseña</label>
+    <input id="password" type="password" autocomplete="current-password">
+    <button id="signIn">Iniciar sesión</button>
+
+    <label for="trip">Viaje (recogido o en tránsito)</label>
+    <select id="trip" disabled></select>
+    <label for="interval">Segundos entre puntos</label>
+    <input id="interval" type="number" min="1" max="60" value="3">
+    <label for="steps">Puntos por tramo</label>
+    <input id="steps" type="number" min="2" max="200" value="20">
+    <div class="check"><input id="deviate" type="checkbox"><label for="deviate" style="margin:0">Desviar unos 3 km (provoca una alerta)</label></div>
+    <div class="row">
+      <button id="start" disabled>Iniciar</button>
+      <button id="stop" class="danger" disabled>Detener</button>
+      <button id="reload" class="secondary" disabled>Recargar viajes</button>
+    </div>
+    <div id="log"></div>
+  </section>
+  <section class="card"><div id="map"></div></section>
+</main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  // The token lives only in memory: closing the tab signs out.
+  let token = null;
+  let trips = [];
+  let timer = null;
+  let path = [];
+  let index = 0;
+  const $ = (id) => document.getElementById(id);
+  const map = L.map('map').setView([-12.0464, -77.0428], 11);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(map);
+  const layer = L.layerGroup().addTo(map);
+
+  function log(text, isAlert = false) {
+    const line = document.createElement('div');
+    line.textContent = `${new Date().toLocaleTimeString()}  ${text}`;
+    if (isAlert) line.className = 'alert';
+    $('log').prepend(line);
+  }
+
+  async function api(method, url, body) {
+    const response = await fetch($('api').value.replace(/\/$/, '') + url, {
+      method,
+      headers: { 'Content-Type': 'application/json', 'Accept-Language': 'es', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    const data = response.status === 204 ? null : await response.json().catch(() => null);
+    if (!response.ok) throw new Error(data?.detail || `HTTP ${response.status}`);
+    return data;
+  }
+
+  function interpolate(points, steps) {
+    const result = [];
+    for (let i = 0; i < points.length - 1; i++) {
+      const [a, b] = [points[i], points[i + 1]];
+      for (let s = 0; s < steps; s++) {
+        const t = s / steps;
+        result.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]);
+      }
+    }
+    result.push(points[points.length - 1]);
+    return result;
+  }
+
+  function drawTrip(trip) {
+    layer.clearLayers();
+    const stops = [trip.origin, trip.pickup, trip.delivery, trip.destination].map(p => [p.latitude, p.longitude]);
+    L.polyline(stops, { color: '#1f7a5a', dashArray: '6 6' }).addTo(layer);
+    [['Origen', trip.origin], ['Recojo', trip.pickup], ['Entrega', trip.delivery], ['Destino', trip.destination]]
+      .forEach(([name, p]) => L.marker([p.latitude, p.longitude]).bindTooltip(name).addTo(layer));
+    map.fitBounds(L.latLngBounds(stops).pad(0.2));
+    return stops;
+  }
+
+  async function loadTrips() {
+    trips = (await api('GET', '/api/v1/trips')).filter(t => t.myRole === 'CARRIER' && ['PICKED_UP', 'IN_TRANSIT'].includes(t.status));
+    $('trip').innerHTML = trips.map(t => `<option value="${t.id}">${t.vehicle.plate} | ${t.pickup.address} -> ${t.delivery.address} (${t.status})</option>`).join('');
+    $('trip').disabled = trips.length === 0;
+    $('start').disabled = trips.length === 0;
+    if (trips.length === 0) log('No hay viajes recogidos o en tránsito. Marca el recojo primero (POST /trips/{id}/pick-up).');
+    else drawTrip(trips[0]);
+  }
+
+  $('signIn').onclick = async () => {
+    try {
+      const session = await api('POST', '/api/v1/authentication/sign-in', { email: $('email').value, password: $('password').value });
+      token = session.accessToken;
+      $('password').value = '';
+      $('reload').disabled = false;
+      log(`Sesión iniciada como ${session.user.email}`);
+      await loadTrips();
+    } catch (error) { log(`Error: ${error.message}`, true); }
+  };
+
+  $('reload').onclick = () => loadTrips().catch(error => log(`Error: ${error.message}`, true));
+  $('trip').onchange = () => drawTrip(trips.find(t => t.id === $('trip').value));
+
+  $('start').onclick = () => {
+    const trip = trips.find(t => t.id === $('trip').value);
+    path = interpolate(drawTrip(trip), Number($('steps').value) || 20);
+    index = 0;
+    $('start').disabled = true;
+    $('stop').disabled = false;
+    timer = setInterval(() => sendNext(trip.id), (Number($('interval').value) || 3) * 1000);
+    log(`Simulación iniciada: ${path.length} puntos.`);
+  };
+
+  $('stop').onclick = () => stop('Simulación detenida.');
+
+  function stop(message) {
+    clearInterval(timer);
+    timer = null;
+    $('start').disabled = trips.length === 0;
+    $('stop').disabled = true;
+    log(message);
+  }
+
+  async function sendNext(tripId) {
+    if (index >= path.length) return stop('Llegó al destino. Marca la entrega desde la app.');
+    let [lat, lng] = path[index++];
+    if ($('deviate').checked) lat += 0.027;
+    try {
+      const result = await api('POST', `/api/v1/trips/${tripId}/tracking-points`, {
+        latitude: lat, longitude: lng, speedKmh: 35 + Math.round(Math.random() * 20), source: 'PHONE'
+      });
+      L.circleMarker([lat, lng], { radius: 4, color: result.alert ? '#b42318' : '#1d4ed8' }).addTo(layer);
+      log(`Punto ${index}/${path.length} enviado (${lat.toFixed(5)}, ${lng.toFixed(5)}) estado ${result.tripStatus}`);
+      if (result.alert) log(`Alerta de desvío: ${result.alert.deviationKm} km`, true);
+    } catch (error) { stop(`Error: ${error.message}`); }
+  }
+</script>
+</body>
+</html>

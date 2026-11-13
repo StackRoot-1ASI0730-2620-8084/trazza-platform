@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ApiTitle" xml:space="preserve">
+    <value>Trazza Platform API</value>
+  </data>
+  <data name="ApiDescription" xml:space="preserve">
+    <value>RESTful API that connects carriers with empty return trips and merchants who need to ship goods in Metropolitan Lima.</value>
+  </data>
+  <data name="OperationCompleted" xml:space="preserve">
+    <value>The operation was completed successfully.</value>
+  </data>
+  <data name="ResourceCreated" xml:space="preserve">
+    <value>The resource was created successfully.</value>
+  </data>
+  <data name="ResourceNotFound" xml:space="preserve">
+    <value>The requested resource was not found.</value>
+  </data>
+  <data name="Unauthenticated" xml:space="preserve">
+    <value>You must sign in to access this resource.</value>
+  </data>
+  <data name="AccessDenied" xml:space="preserve">
+    <value>You do not have permission to perform this action.</value>
+  </data>
+</root>

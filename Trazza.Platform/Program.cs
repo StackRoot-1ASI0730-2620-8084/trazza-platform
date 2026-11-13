@@ -1,58 +1,6 @@
-using Trazza.Platform.Billing.Application.Acl;
-using Trazza.Platform.Billing.Application.CommandServices;
-using Trazza.Platform.Billing.Application.Internal.CommandServices;
-using Trazza.Platform.Billing.Application.Internal.OutboundServices;
-using Trazza.Platform.Billing.Application.Internal.QueryServices;
-using Trazza.Platform.Billing.Application.QueryServices;
-using Trazza.Platform.Billing.Domain.Repositories;
-using Trazza.Platform.Billing.Infrastructure.Payments.Simulated.Services;
-using Trazza.Platform.Billing.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
-using Trazza.Platform.Billing.Interfaces.Acl;
-using Trazza.Platform.Execution.Application.Acl;
-using Trazza.Platform.Execution.Application.CommandServices;
-using Trazza.Platform.Execution.Application.Internal.CommandServices;
-using Trazza.Platform.Execution.Application.Internal.QueryServices;
-using Trazza.Platform.Execution.Application.QueryServices;
-using Trazza.Platform.Execution.Domain.Repositories;
-using Trazza.Platform.Execution.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
-using Trazza.Platform.Execution.Interfaces.Acl;
-using Trazza.Platform.Iam.Application.Acl;
-using Trazza.Platform.Iam.Application.CommandServices;
-using Trazza.Platform.Iam.Application.Internal.CommandServices;
-using Trazza.Platform.Iam.Application.Internal.OutboundServices;
-using Trazza.Platform.Iam.Application.Internal.QueryServices;
-using Trazza.Platform.Iam.Application.QueryServices;
-using Trazza.Platform.Iam.Domain.Repositories;
-using Trazza.Platform.Iam.Infrastructure.Hashing.BCrypt.Services;
-using Trazza.Platform.Iam.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
-using Trazza.Platform.Iam.Infrastructure.Pipeline.Middleware.Extensions;
-using Trazza.Platform.Iam.Infrastructure.Tokens.Jwt.Configuration;
-using Trazza.Platform.Iam.Infrastructure.Tokens.Jwt.Services;
-using Trazza.Platform.Iam.Interfaces.Acl;
-using Trazza.Platform.Matchmaking.Application.CommandServices;
-using Trazza.Platform.Matchmaking.Application.Internal.CommandServices;
-using Trazza.Platform.Matchmaking.Application.Internal.OutboundServices;
-using Trazza.Platform.Matchmaking.Application.Internal.QueryServices;
-using Trazza.Platform.Matchmaking.Application.QueryServices;
-using Trazza.Platform.Matchmaking.Domain.Repositories;
-using Trazza.Platform.Matchmaking.Domain.Services;
-using Trazza.Platform.Matchmaking.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
-using Trazza.Platform.Profiles.Application.Acl;
-using Trazza.Platform.Profiles.Application.CommandServices;
-using Trazza.Platform.Profiles.Application.Internal.CommandServices;
-using Trazza.Platform.Profiles.Application.Internal.QueryServices;
-using Trazza.Platform.Profiles.Application.QueryServices;
-using Trazza.Platform.Profiles.Domain.Repositories;
-using Trazza.Platform.Profiles.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
-using Trazza.Platform.Profiles.Interfaces.Acl;
-using Trazza.Platform.Reputation.Application.CommandServices;
-using Trazza.Platform.Reputation.Application.Internal.CommandServices;
-using Trazza.Platform.Reputation.Application.Internal.QueryServices;
-using Trazza.Platform.Reputation.Application.QueryServices;
-using Trazza.Platform.Reputation.Domain.Repositories;
-using Trazza.Platform.Reputation.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 using Trazza.Platform.Shared.Domain.Repositories;
 using Trazza.Platform.Shared.Infrastructure.Interfaces.AspNetCore.Configuration;
+using Trazza.Platform.Shared.Infrastructure.Interfaces.AspNetCore.Json;
 using Trazza.Platform.Shared.Infrastructure.Interfaces.AspNetCore.OpenApi;
 using Trazza.Platform.Shared.Infrastructure.Mediator.Cortex.Configuration;
 using Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
@@ -68,21 +16,75 @@ using Microsoft.Extensions.Localization;
 using Scalar.AspNetCore;
 using ProblemDetailsFactory = Trazza.Platform.Shared.Interfaces.Rest.ProblemDetails.ProblemDetailsFactory;
 
+using Trazza.Platform.Iam.Application.Internal.CommandServices;
+using Trazza.Platform.Iam.Application.Internal.OutboundServices;
+using Trazza.Platform.Iam.Application.Internal.QueryServices;
+using Trazza.Platform.Iam.Domain.Repositories;
+using Trazza.Platform.Iam.Domain.Services;
+using Trazza.Platform.Iam.Infrastructure.Hashing;
+using Trazza.Platform.Iam.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using Trazza.Platform.Iam.Infrastructure.Pipeline;
+using Trazza.Platform.Iam.Infrastructure.Security;
+using Trazza.Platform.Iam.Infrastructure.Tokens;
+using Trazza.Platform.Iam.Interfaces.Acl;
+using Trazza.Platform.Matchmaking.Application.Acl;
+using Trazza.Platform.Matchmaking.Application.CommandServices;
+using Trazza.Platform.Matchmaking.Application.Internal.CommandServices;
+using Trazza.Platform.Matchmaking.Application.Internal.OutboundServices;
+using Trazza.Platform.Matchmaking.Application.Internal.QueryServices;
+using Trazza.Platform.Matchmaking.Application.QueryServices;
+using Trazza.Platform.Matchmaking.Domain.Repositories;
+using Trazza.Platform.Matchmaking.Domain.Services;
+using Trazza.Platform.Matchmaking.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using Trazza.Platform.Matchmaking.Infrastructure.Profiles;
+using Trazza.Platform.Matchmaking.Infrastructure.Services;
+using Trazza.Platform.Matchmaking.Interfaces.Acl;
+using Trazza.Platform.Execution.Application.Internal;
+using Trazza.Platform.Execution.Application.Internal.CommandServices;
+using Trazza.Platform.Execution.Application.Internal.QueryServices;
+using Trazza.Platform.Execution.Domain.Repositories;
+using Trazza.Platform.Execution.Domain.Services;
+using Trazza.Platform.Execution.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using Trazza.Platform.Execution.Interfaces.Acl;
+using Trazza.Platform.Billing.Application.Internal;
+using Trazza.Platform.Billing.Application.Internal.CommandServices;
+using Trazza.Platform.Billing.Application.Internal.QueryServices;
+using Trazza.Platform.Billing.Domain.Repositories;
+using Trazza.Platform.Billing.Domain.Services;
+using Trazza.Platform.Billing.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using Trazza.Platform.Billing.Interfaces.Acl;
+using Trazza.Platform.Reputation.Application.Internal;
+using Trazza.Platform.Reputation.Application.Internal.CommandServices;
+using Trazza.Platform.Reputation.Application.Internal.QueryServices;
+using Trazza.Platform.Reputation.Domain.Repositories;
+using Trazza.Platform.Reputation.Domain.Services;
+using Trazza.Platform.Reputation.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using Trazza.Platform.Reputation.Interfaces.Acl;
+
+// Local development: load variables from the .env file at the repository root (never committed).
+LoadDotEnvForDevelopment();
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddControllers(options => options.Conventions.Add(new KebabCaseRouteNamingConvention()))
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new UtcDateTimeJsonConverter()))
     .AddDataAnnotationsLocalization();
 
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAllPolicy",
-        policy => policy.AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader());
+    // An empty list or "*" accepts any origin, so static tools such as the GPS simulator can call the API.
+    options.AddPolicy("TrazzaWebAppPolicy", policy =>
+    {
+        if (allowedOrigins.Length == 0 || allowedOrigins.Contains("*")) policy.AllowAnyOrigin();
+        else policy.WithOrigins(allowedOrigins);
+        policy.AllowAnyMethod().AllowAnyHeader();
+    });
 });
 
 builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) =>
@@ -94,10 +96,15 @@ builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) =>
     var connectionString = Environment.ExpandEnvironmentVariables(connectionStringTemplate);
     if (string.IsNullOrWhiteSpace(connectionString))
         throw new InvalidOperationException("Database connection string is not set in the configuration.");
+    if (connectionString.Contains('%'))
+        throw new InvalidOperationException(
+            "Database connection string has unresolved environment variables. Set DATABASE_URL, DATABASE_USER, DATABASE_PASSWORD and DATABASE_SCHEMA.");
 
     options.UseMySQL(connectionString)
         .UseLoggerFactory(serviceProvider.GetRequiredService<ILoggerFactory>())
-        .AddInterceptors(serviceProvider.GetRequiredService<DispatchDomainEventsInterceptor>())
+        .AddInterceptors(
+            serviceProvider.GetRequiredService<AuditableEntityInterceptor>(),
+            serviceProvider.GetRequiredService<DispatchDomainEventsInterceptor>())
         .EnableDetailedErrors();
 
     if (builder.Environment.IsDevelopment())
@@ -114,58 +121,94 @@ builder.Services.AddSingleton<ProblemDetailsFactory>();
 builder.Services.AddOpenApi(options =>
 {
     options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
-    options.AddOperationTransformer<IamBearerSecurityOperationTransformer>();
 });
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<AuditableEntityInterceptor>();
 builder.Services.AddScoped<DispatchDomainEventsInterceptor>();
 
-builder.Services.Configure<TokenSettings>(builder.Configuration.GetSection("TokenSettings"));
+// IAM
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddOptions<TokenSettings>()
+    .Bind(builder.Configuration.GetSection("TokenSettings"))
+    .Validate(settings => System.Text.Encoding.UTF8.GetByteCount(settings.Secret) >= 32,
+        "TokenSettings:Secret must be configured with at least 32 characters.")
+    .ValidateOnStart();
+builder.Services.AddOptions<PersonalDataSettings>()
+    .Bind(builder.Configuration.GetSection("PersonalData"))
+    .Validate(settings => IsBase64Key(settings.EncryptionKey) && IsBase64Key(settings.HashKey),
+        "PersonalData:EncryptionKey and PersonalData:HashKey must be Base64 keys of 32 bytes.")
+    .ValidateOnStart();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IUserCommandService, UserCommandService>();
-builder.Services.AddScoped<IUserQueryService, UserQueryService>();
-builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IHashingService, HashingService>();
-builder.Services.AddScoped<IIamContextFacade, IamContextFacade>();
-
+builder.Services.AddScoped<IPersonIdentityRepository, PersonIdentityRepository>();
+builder.Services.AddScoped<IIdentityVerificationRepository, IdentityVerificationRepository>();
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<ICarrierProfileRepository, CarrierProfileRepository>();
 builder.Services.AddScoped<IMerchantProfileRepository, MerchantProfileRepository>();
-builder.Services.AddScoped<ICarrierProfileCommandService, CarrierProfileCommandService>();
-builder.Services.AddScoped<ICarrierProfileQueryService, CarrierProfileQueryService>();
-builder.Services.AddScoped<IMerchantProfileCommandService, MerchantProfileCommandService>();
-builder.Services.AddScoped<IMerchantProfileQueryService, MerchantProfileQueryService>();
-builder.Services.AddScoped<IProfilesContextFacade, ProfilesContextFacade>();
+builder.Services.AddScoped<IDriverRepository, DriverRepository>();
+builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
+builder.Services.AddScoped<ISavedAddressRepository, SavedAddressRepository>();
+builder.Services.AddSingleton<IHashingService, BCryptHashingService>();
+builder.Services.AddSingleton<ITokenService, JwtTokenService>();
+builder.Services.AddSingleton<IPersonalDataProtector, AesGcmPersonalDataProtector>();
+builder.Services.AddSingleton<IIdentityVerificationProvider, SimulatedReniecProvider>();
+builder.Services.AddScoped<IUserCommandService, UserCommandService>();
+builder.Services.AddScoped<IUserQueryService, UserQueryService>();
+builder.Services.AddScoped<IFleetCommandService, FleetCommandService>();
+builder.Services.AddScoped<IFleetQueryService, FleetQueryService>();
+builder.Services.AddScoped<IIamContextFacade, IamContextFacade>();
 
+// Matchmaking
 builder.Services.AddScoped<IReturnRouteRepository, ReturnRouteRepository>();
-builder.Services.AddScoped<IFreightRequestRepository, FreightRequestRepository>();
+builder.Services.AddScoped<IShipmentRequestRepository, ShipmentRequestRepository>();
 builder.Services.AddScoped<IMatchProposalRepository, MatchProposalRepository>();
+builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddScoped<IRouteMatchingService, RouteMatchingService>();
-builder.Services.AddScoped<PublicationPolicy>();
+builder.Services.AddScoped<IProfilesService, IamProfilesService>();
 builder.Services.AddScoped<IReturnRouteCommandService, ReturnRouteCommandService>();
 builder.Services.AddScoped<IReturnRouteQueryService, ReturnRouteQueryService>();
-builder.Services.AddScoped<IFreightRequestCommandService, FreightRequestCommandService>();
-builder.Services.AddScoped<IFreightRequestQueryService, FreightRequestQueryService>();
+builder.Services.AddScoped<IShipmentRequestCommandService, ShipmentRequestCommandService>();
+builder.Services.AddScoped<IShipmentRequestQueryService, ShipmentRequestQueryService>();
 builder.Services.AddScoped<IMatchProposalCommandService, MatchProposalCommandService>();
 builder.Services.AddScoped<IMatchProposalQueryService, MatchProposalQueryService>();
+builder.Services.AddScoped<IMessageCommandService, MessageCommandService>();
+builder.Services.AddScoped<IMessageQueryService, MessageQueryService>();
+builder.Services.AddScoped<IPublicIdQueryService, PublicIdQueryService>();
+builder.Services.AddScoped<IMatchmakingContextFacade, MatchmakingContextFacade>();
 
-builder.Services.AddScoped<IShipmentRepository, ShipmentRepository>();
-builder.Services.AddScoped<IShipmentCommandService, ShipmentCommandService>();
-builder.Services.AddScoped<IShipmentQueryService, ShipmentQueryService>();
+// Execution
+builder.Services.AddScoped<ITripRepository, TripRepository>();
+builder.Services.AddScoped<ITrackingPointRepository, TrackingPointRepository>();
+builder.Services.AddScoped<IDeviationAlertRepository, DeviationAlertRepository>();
+builder.Services.AddScoped<IIncidentRepository, IncidentRepository>();
+builder.Services.AddScoped<IIotDeviceRepository, IotDeviceRepository>();
+builder.Services.AddScoped<TripAccessService>();
+builder.Services.AddScoped<ITripCommandService, TripCommandService>();
+builder.Services.AddScoped<ITrackingCommandService, TrackingCommandService>();
+builder.Services.AddScoped<IIncidentCommandService, IncidentCommandService>();
+builder.Services.AddScoped<IExecutionQueryService, ExecutionQueryService>();
 builder.Services.AddScoped<IExecutionContextFacade, ExecutionContextFacade>();
 
-builder.Services.AddScoped<IPaymentTransactionRepository, PaymentTransactionRepository>();
-builder.Services.AddScoped<IReceiptRepository, ReceiptRepository>();
-builder.Services.AddScoped<IPaymentGateway, SimulatedPaymentGateway>();
-builder.Services.AddScoped<IPaymentTransactionCommandService, PaymentTransactionCommandService>();
-builder.Services.AddScoped<IPaymentTransactionQueryService, PaymentTransactionQueryService>();
-builder.Services.AddScoped<IReceiptCommandService, ReceiptCommandService>();
-builder.Services.AddScoped<IReceiptQueryService, ReceiptQueryService>();
+// Billing
+builder.Services.AddScoped<IPlanRepository, PlanRepository>();
+builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
+builder.Services.AddScoped<ISubscriptionPaymentRepository, SubscriptionPaymentRepository>();
+builder.Services.AddScoped<IFreightSettlementRepository, FreightSettlementRepository>();
+builder.Services.AddScoped<ICancellationCompensationRepository, CancellationCompensationRepository>();
+builder.Services.AddScoped<SubscriptionViewBuilder>();
+builder.Services.AddScoped<ISubscriptionCommandService, SubscriptionCommandService>();
+builder.Services.AddScoped<ISettlementCommandService, SettlementCommandService>();
+builder.Services.AddScoped<IBillingQueryService, BillingQueryService>();
 builder.Services.AddScoped<IBillingContextFacade, BillingContextFacade>();
 
+// Reputation
 builder.Services.AddScoped<IRatingRepository, RatingRepository>();
-builder.Services.AddScoped<IRatingCommandService, RatingCommandService>();
-builder.Services.AddScoped<IRatingQueryService, RatingQueryService>();
+builder.Services.AddScoped<ILoyaltyPointEntryRepository, LoyaltyPointEntryRepository>();
+builder.Services.AddScoped<RatingViewBuilder>();
+builder.Services.AddScoped<IReputationCommandService, ReputationCommandService>();
+builder.Services.AddScoped<IReputationQueryService, ReputationQueryService>();
+builder.Services.AddScoped<IReputationContextFacade, ReputationContextFacade>();
 
 builder.Services.AddScoped(typeof(ICommandPipelineBehavior<>), typeof(LoggingCommandBehavior<>));
 builder.Services.AddScoped(typeof(ICommandPipelineBehavior<>), typeof(ExceptionHandlingCommandBehavior<>));
@@ -175,13 +218,6 @@ builder.Services.AddCortexMediator(
     [typeof(Program)]);
 
 var app = builder.Build();
-
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<AppDbContext>();
-    context.Database.Migrate();
-}
 
 app.UseExceptionHandler();
 
@@ -193,13 +229,11 @@ var localizationOptions = new RequestLocalizationOptions()
 
 app.UseRequestLocalization(localizationOptions);
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.MapScalarApiReference();
-}
+// OpenAPI and Scalar stay available in every environment, so the deployed API can be explored too.
+app.MapOpenApi();
+app.MapScalarApiReference();
 
-app.UseCors("AllowAllPolicy");
+app.UseCors("TrazzaWebAppPolicy");
 
 app.UseRequestAuthorization();
 
@@ -210,3 +244,46 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+static bool IsBase64Key(string value)
+{
+    var buffer = new byte[32];
+    return Convert.TryFromBase64String(value, buffer, out var length) && length == 32;
+}
+
+static void LoadDotEnvForDevelopment()
+{
+    var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+    if (!string.IsNullOrEmpty(environment) && !environment.Equals("Development", StringComparison.OrdinalIgnoreCase))
+        return;
+
+    var envFile = FindDotEnvFile(Directory.GetCurrentDirectory()) ?? FindDotEnvFile(AppContext.BaseDirectory);
+    if (envFile is null) return;
+
+    foreach (var rawLine in File.ReadAllLines(envFile))
+    {
+        var line = rawLine.Trim();
+        if (line.Length == 0 || line.StartsWith('#')) continue;
+
+        var separator = line.IndexOf('=');
+        if (separator <= 0) continue;
+
+        var key = line[..separator].Trim();
+        var value = line[(separator + 1)..].Trim().Trim('"');
+
+        if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable(key)))
+            Environment.SetEnvironmentVariable(key, value);
+    }
+}
+
+static string? FindDotEnvFile(string startDirectory)
+{
+    var directory = new DirectoryInfo(startDirectory);
+    while (directory is not null)
+    {
+        var candidate = Path.Combine(directory.FullName, ".env");
+        if (File.Exists(candidate)) return candidate;
+        directory = directory.Parent;
+    }
+    return null;
+}

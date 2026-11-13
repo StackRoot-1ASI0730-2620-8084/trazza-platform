@@ -3,7 +3,7 @@
 title
     Trazza.Platform
     Class Diagram (v1.0.0)
-    Shared, IAM, Profiles, Matchmaking, Execution, Billing, Reputation
+    Shared, IAM, Matchmaking, Execution, Billing, Reputation
 end title
 
 skinparam classAttributeIconSize 0
@@ -60,358 +60,274 @@ package "Shared Bounded Context" as Shared {
         +District: string
         +IsValid: bool
         +Location: GeoLocation
-        +IsSamePlaceAs(other: Address): bool
     }
     class GeoLocation <<value object>> {
         +Latitude: double
         +Longitude: double
         +DistanceTo(other: GeoLocation): double
-        +MoveTowards(target: GeoLocation, fraction: double): GeoLocation
-        +DistanceToSegment(start: GeoLocation, end: GeoLocation): double
-    }
-    class LimaDistricts <<static>> {
-        +Names: IReadOnlyList<string>
-        +Contains(district: string): bool
-        +LocationOf(district: string): GeoLocation
     }
     Result --> Error
     Error --> EErrorType
-    Address ..> LimaDistricts
     Address ..> GeoLocation
 }
 
 package "IAM Bounded Context" as Iam {
     class User <<aggregate root>> {
-        +Id: UserId
-        +FullName: string
-        +Email: EmailAddress
-        +Phone: PhoneNumber
-        +Role: UserRole
+        +Id: long
+        +PublicId: Guid
+        +Email: string
+        +Phone: string
         +PasswordHash: string
-        +UpdateContact(fullName, phone): User
+        +Status: EAccountStatus
     }
-    class EmailAddress <<value object>>
-    class "PhoneNumber" as IamPhone <<value object>>
-    class UserRole <<value object>> {
-        +Value: string
-        +IsCarrier: bool
-        +IsMerchant: bool
+    class PersonIdentity <<aggregate root>> {
+        +Id: long
+        +UserId: long
+        +DocumentType: EIdentityDocumentType
+        +DocumentNumberCiphertext: byte[]
+        +DocumentNumberHash: byte[]
+        +FirstName: string
+        +LastName: string
     }
-    class UserRegisteredEvent <<event>>
-    class UserContactUpdatedEvent <<event>>
-    interface IUserCommandService
-    interface IUserQueryService
-    interface ITokenService
-    interface IHashingService
-    interface IIamContextFacade
-    User --> EmailAddress
-    User --> IamPhone
-    User --> UserRole
-    User ..> UserRegisteredEvent
-    User ..> UserContactUpdatedEvent
-}
-
-package "Profiles Bounded Context" as Profiles {
+    class IdentityVerification <<aggregate root>> {
+        +Id: long
+        +UserId: long
+        +Status: EVerificationStatus
+    }
     class CarrierProfile <<aggregate root>> {
-        +Id: CarrierProfileId
-        +UserId: UserId
-        +FullName: string
-        +Dni: Dni
-        +Phone: PhoneNumber
-        +Verified: bool
-        +Vehicles: IReadOnlyCollection<Vehicle>
-        +AddVehicle(...): Error
-        +UpdateVehicle(...): Error
-        +RemoveVehicle(vehicleId): Error
-    }
-    class Vehicle <<entity>> {
-        +Id: VehicleId
-        +Plate: LicensePlate
-        +BrandModel: string
-        +BodyType: VehicleBodyType
-        +Capacity: LoadCapacity
-        +Active: bool
-        +Label: string
+        +UserId: long
+        +AverageRating: decimal
+        +CompletedTripsCount: int
     }
     class MerchantProfile <<aggregate root>> {
-        +Id: MerchantProfileId
-        +UserId: UserId
-        +BusinessName: string
-        +ContactName: string
-        +Ruc: Ruc
-        +Phone: PhoneNumber
-        +Verified: bool
+        +UserId: long
+        +BusinessName: string?
+        +AverageRating: decimal
     }
-    class Dni <<value object>>
-    class Ruc <<value object>> {
-        +IsCompany: bool
+    class Vehicle <<aggregate root>> {
+        +Id: long
+        +PublicId: Guid
+        +CarrierUserId: long
+        +PlateNumber: string
+        +Brand: string
+        +Model: string
+        +BodyType: EVehicleBodyType
+        +MaxWeightKg: decimal
+        +MaxVolumeM3: decimal
+        +Status: EVehicleStatus
     }
-    class LicensePlate <<value object>>
-    class LoadCapacity <<value object>> {
-        +WeightKg: double
-        +VolumeM3: double
-        +CanHold(weightKg, volumeM3): bool
+    class Driver <<aggregate root>> {
+        +Id: long
+        +CarrierUserId: long
+        +FullName: string
+        +LicenseNumber: string
+        +LicenseCategory: string
+        +Status: EDriverStatus
     }
-    class VehicleBodyType <<value object>>
-    interface IProfilesContextFacade
-    CarrierProfile "1" *-- "0..*" Vehicle
-    CarrierProfile --> Dni
-    MerchantProfile --> Ruc
-    Vehicle --> LicensePlate
-    Vehicle --> LoadCapacity
-    Vehicle --> VehicleBodyType
+    class SavedAddress <<aggregate root>> {
+        +Id: long
+        +UserId: long
+        +Label: string
+        +District: string
+        +StreetLine: string
+    }
+    interface IUserCommandService
+    interface IUserQueryService
+    interface IFleetCommandService
+    interface IFleetQueryService
+    interface IIamContextFacade
+    User "1" -- "0..1" PersonIdentity
+    User "1" -- "0..1" CarrierProfile
+    User "1" -- "0..1" MerchantProfile
+    CarrierProfile "1" -- "0..*" Vehicle
+    CarrierProfile "1" -- "0..*" Driver
+    User "1" -- "0..*" SavedAddress
 }
 
 package "Matchmaking Bounded Context" as Matchmaking {
     class ReturnRoute <<aggregate root>> {
         +Id: ReturnRouteId
+        +PublicId: Guid
         +CarrierId: CarrierId
         +VehicleId: VehicleId
-        +Origin: Address
-        +Destination: Address
-        +DepartureDate: DateOnly
-        +TimeWindow: TimeWindow
-        +AvailableWeightKg: double
-        +AvailableVolumeM3: double
-        +MaxDetourKm: double
-        +AcceptedCargoTypes: List<CargoType>
+        +Origin: RouteStop
+        +Destination: RouteStop
+        +CorridorRadiusKm: decimal
+        +DepartureWindow: TimeWindow
+        +AvailableWeightKg: decimal
+        +AvailableVolumeM3: decimal
+        +SuggestedPriceAmount: decimal?
         +Status: ERouteStatus
-        +CanCarry(weightKg, volumeM3): bool
         +ReserveCapacity(weightKg, volumeM3): Error
-        +Close(): Error
+        +Cancel(): Error
     }
-    class FreightRequest <<aggregate root>> {
-        +Id: FreightRequestId
-        +Code: string
+    class ShipmentRequest <<aggregate root>> {
+        +Id: ShipmentRequestId
+        +PublicId: Guid
         +MerchantId: MerchantId
-        +Pickup: Address
-        +Delivery: Address
-        +PickupDate: DateOnly
+        +Origin: RouteStop
+        +Destination: RouteStop
         +PickupWindow: TimeWindow
         +Cargo: Cargo
-        +OfferedRate: Money?
+        +MaxBudgetAmount: decimal?
         +Status: ERequestStatus
-        +Publish(): Error
         +MarkMatched(): Error
         +Cancel(): Error
     }
     class MatchProposal <<aggregate root>> {
         +Id: MatchProposalId
-        +InitiatedBy: ENegotiationParty
-        +CurrentRate: Money
-        +PreviousRate: Money?
-        +LastOfferBy: ENegotiationParty
+        +PublicId: Guid
+        +ReturnRouteId: ReturnRouteId
+        +ShipmentRequestId: ShipmentRequestId
+        +ProposerUserId: UserId
+        +ProposedByRole: ENegotiationParty
+        +ProposedPrice: Money
         +Status: EProposalStatus
-        +Detour: Detour
-        +Accept(by): Error
-        +Counter(rate, by): Error
+        +Accept(): Error
         +Reject(): Error
-        +Confirm(by, request, route): Error
-        +Close(): void
+        +Cancel(): Error
     }
-    class TimeWindow <<value object>> {
-        +Start: string
-        +End: string
-        +Overlaps(other): bool
+    class Message <<aggregate root>> {
+        +Id: MessageId
+        +MatchProposalId: MatchProposalId
+        +SenderUserId: UserId
+        +Kind: EMessageKind
+        +Body: string?
+        +CounterofferAmount: decimal?
     }
-    class Cargo <<value object>> {
-        +Type: CargoType
-        +WeightKg: double
-        +VolumeM3: double
-        +Description: string
-    }
-    class CargoType <<value object>>
-    class Detour <<value object>> {
-        +DistanceKm: double
-        +DurationMinutes: int
-        +IsWithin(maxKm): bool
-    }
-    enum ERouteStatus {
-        Active
-        Matched
-        Closed
-    }
-    enum ERequestStatus {
-        Draft
-        Open
-        Matched
-        Cancelled
-    }
-    enum EProposalStatus {
-        Pending
-        Counteroffer
-        Accepted
-        Matched
-        Rejected
-        Closed
-    }
-    interface IRouteMatchingService {
-        +EstimateTrip(from, to): TripEstimation
-        +CalculateDetour(route, request): Detour
-        +Evaluate(route, request, maxDetourKm): MatchEvaluation
-    }
+    interface IRouteMatchingService
     class RouteMatchingService <<domain service>> implements IRouteMatchingService
-    class MatchProposalConfirmedEvent <<event>>
-    ReturnRoute --> TimeWindow
-    ReturnRoute --> ERouteStatus
-    FreightRequest --> Cargo
-    FreightRequest --> ERequestStatus
-    Cargo --> CargoType
-    MatchProposal --> Detour
-    MatchProposal --> EProposalStatus
-    MatchProposal ..> FreightRequest
-    MatchProposal ..> ReturnRoute
-    MatchProposal ..> MatchProposalConfirmedEvent
+    interface IMatchmakingContextFacade
+    MatchProposal --> ReturnRoute
+    MatchProposal --> ShipmentRequest
+    MatchProposal "1" -- "0..*" Message
     RouteMatchingService ..> ReturnRoute
-    RouteMatchingService ..> FreightRequest
+    RouteMatchingService ..> ShipmentRequest
 }
 
 package "Execution Bounded Context" as Execution {
-    class Shipment <<aggregate root>> {
-        +Id: ShipmentId
-        +Code: string
-        +ProposalId: ProposalId
-        +CarrierId: CarrierId
-        +MerchantId: MerchantId
-        +Pickup: Address
-        +Delivery: Address
-        +Rate: Money
-        +Status: EShipmentStatus
-        +CurrentLocation: GeoLocation?
-        +DeviationKm: double?
-        +EtaMinutes: int?
-        +ConfirmPickup(): Error
-        +UpdateLocation(location): Error
-        +ConfirmDelivery(acknowledgeDistance): Error
-        +ConfirmReception(): Error
-        +Cancel(): Error
-        +ReportIncident(...): Error
+    class Trip <<aggregate root>> {
+        +Id: long
+        +PublicId: Guid
+        +MatchProposalId: long
+        +ReturnRouteId: long
+        +ShipmentRequestId: long
+        +CarrierUserId: long
+        +MerchantUserId: long
+        +VehicleId: long
+        +DriverId: long?
+        +AgreedPriceAmount: decimal
+        +Status: ETripStatus
     }
-    class Incident <<entity>> {
-        +Id: IncidentId
-        +Type: IncidentType
-        +Description: string
-        +ReporterRole: EPartyRole
+    class TrackingPoint <<aggregate root>> {
+        +Id: long
+        +TripId: long
+        +RecordedAt: DateTime
+        +SpeedKmh: decimal?
+        +DistanceFromCorridorMeters: decimal?
+    }
+    class DeviationAlert <<aggregate root>> {
+        +Id: long
+        +TripId: long
+        +Severity: EAlertSeverity
+        +DeviationDistanceMeters: decimal
+    }
+    class Incident <<aggregate root>> {
+        +Id: long
+        +TripId: long
+        +ReportedByUserId: long
+        +Category: EIncidentCategory
+        +Severity: EIncidentSeverity
         +Status: EIncidentStatus
-        +Resolve(): Error
     }
-    class ShipmentEvent <<entity>> {
-        +Type: EShipmentEventType
-        +OccurredAt: DateTimeOffset
-        +Details: string
+    class IotDevice <<aggregate root>> {
+        +Id: long
+        +CarrierUserId: long
+        +DeviceIdentifier: string
+        +Status: EIotDeviceStatus
     }
-    enum EShipmentStatus {
-        Matched
-        PickedUp
-        InTransit
-        Delivered
-        Closed
-        Cancelled
-    }
-    class IncidentType <<value object>>
     interface IExecutionContextFacade
-    Shipment "1" *-- "0..*" Incident
-    Shipment "1" *-- "1..*" ShipmentEvent
-    Shipment --> EShipmentStatus
-    Incident --> IncidentType
+    Trip "1" -- "0..*" TrackingPoint
+    Trip "1" -- "0..*" DeviationAlert
+    Trip "1" -- "0..*" Incident
 }
 
 package "Billing Bounded Context" as Billing {
-    class PaymentTransaction <<aggregate root>> {
-        +Id: PaymentTransactionId
-        +UserId: UserId
-        +Plan: SubscriptionPlan
-        +Amount: Money
-        +Method: PaymentMethod
-        +Status: EPaymentStatus
-        +PeriodStart: DateOnly?
-        +PeriodEnd: DateOnly?
-        +MarkPaid(code, now): Error
-        +MarkFailed(): Error
-        +Covers(today): bool
+    class Plan <<aggregate root>> {
+        +Id: long
+        +Code: EPlanCode
+        +Name: string
+        +MonthlyPriceAmount: decimal
+        +MaxVehicles: int
     }
-    class Receipt <<aggregate root>> {
-        +Id: ReceiptId
-        +TransactionId: PaymentTransactionId
-        +Type: ReceiptType
-        +Number: int
-        +Total: Money
-        +Code: string
-        +Subtotal: Money
-        +Igv: Money
+    class Subscription <<aggregate root>> {
+        +Id: long
+        +CarrierUserId: long
+        +PlanId: long
+        +Status: ESubscriptionStatus
+        +CurrentPeriodStart: DateTime
+        +CurrentPeriodEnd: DateTime
     }
-    class SubscriptionPlan <<value object>> {
-        +Code: string
-        +Price: Money
-        +MonthlyPublications: int?
-        +AllowsPublication(used): bool
+    class SubscriptionPayment <<entity>> {
+        +Id: long
+        +SubscriptionId: long
+        +Amount: decimal
+        +Status: ESubscriptionPaymentStatus
     }
-    class PaymentMethod <<value object>> {
-        +Brand: string
-        +Last4: string
-        +HolderName: string
-        +Expiry: string
+    class FreightSettlement <<aggregate root>> {
+        +Id: long
+        +TripId: long
+        +CarrierUserId: long
+        +MerchantUserId: long
+        +GrossAmount: decimal
+        +PlatformFeeAmount: decimal
+        +CarrierNetAmount: decimal
+        +Status: ESettlementStatus
     }
-    class ReceiptType <<value object>> {
-        +Series: string
-        +AcceptsDocument(document): bool
+    class CancellationCompensation <<aggregate root>> {
+        +Id: long
+        +TripId: long
+        +CompensationAmount: decimal
+        +Status: ECompensationStatus
     }
-    interface IPaymentGateway
     interface IBillingContextFacade
-    PaymentTransaction --> SubscriptionPlan
-    PaymentTransaction --> PaymentMethod
-    Receipt --> ReceiptType
-    Receipt ..> PaymentTransaction
+    Subscription --> Plan
+    Subscription "1" *-- "0..*" SubscriptionPayment
 }
 
 package "Reputation Bounded Context" as Reputation {
     class Rating <<aggregate root>> {
-        +Id: RatingId
-        +ShipmentId: ShipmentId
-        +RaterId: RaterId
-        +Target: RatingTarget
-        +Score: Score
-        +Tags: List<string>
-        +Comment: string
+        +Id: long
+        +TripId: long
+        +ReviewerUserId: long
+        +ReviewedUserId: long
+        +ReviewerRole: EReviewerRole
+        +Stars: byte
+        +Comment: string?
     }
-    class RatingTarget <<value object>> {
-        +UserId: RatedUserId
-        +Role: string
-        +Name: string
-        +AllowsTag(tag): bool
+    class LoyaltyPointEntry <<aggregate root>> {
+        +Id: long
+        +UserId: long
+        +PointsDelta: int
+        +BalanceAfter: int
+        +Reason: ELoyaltyPointReason
     }
-    class Score <<value object>> {
-        +Value: int
-        +IsPositive: bool
-    }
-    class ReputationSummary <<read model>>
-    Rating --> RatingTarget
-    Rating --> Score
+    interface IReputationContextFacade
 }
 
 User --|> AggregateRoot
-CarrierProfile --|> AggregateRoot
-MerchantProfile --|> AggregateRoot
 ReturnRoute --|> AggregateRoot
-FreightRequest --|> AggregateRoot
+ShipmentRequest --|> AggregateRoot
 MatchProposal --|> AggregateRoot
-Shipment --|> AggregateRoot
-PaymentTransaction --|> AggregateRoot
-Receipt --|> AggregateRoot
+Trip --|> AggregateRoot
+Subscription --|> AggregateRoot
+FreightSettlement --|> AggregateRoot
 Rating --|> AggregateRoot
 
-ReturnRoute --> Address
-FreightRequest --> Address
-Shipment --> Address
-Shipment --> GeoLocation
-MatchProposal --> Money
-PaymentTransaction --> Money
-
-UserRegisteredEvent ..> CarrierProfile : creates
-UserRegisteredEvent ..> MerchantProfile : creates
-MatchProposalConfirmedEvent ..> Shipment : opens
-ReturnRoute ..> IProfilesContextFacade : vehicle capacity
-FreightRequest ..> IBillingContextFacade : publication limit
-Rating ..> IExecutionContextFacade : shipment parties
+Matchmaking ..> IIamContextFacade
+Matchmaking ..> IExecutionContextFacade
+Execution ..> IMatchmakingContextFacade
+Billing ..> IExecutionContextFacade
+Reputation ..> IExecutionContextFacade
 
 @enduml
