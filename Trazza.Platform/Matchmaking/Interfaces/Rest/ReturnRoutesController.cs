@@ -23,6 +23,7 @@ public class ReturnRoutesController(
     IReturnRouteCommandService returnRouteCommandService,
     IReturnRouteQueryService returnRouteQueryService,
     IMatchProposalQueryService matchProposalQueryService,
+    IShipmentRequestQueryService shipmentRequestQueryService,
     IExecutionContextFacade executionContextFacade,
     IPublicIdQueryService publicIdQueryService,
     IProfilesService profilesService,
@@ -72,6 +73,13 @@ public class ReturnRoutesController(
             problemDetailsFactory,
             found => Ok(ReturnRouteResourceFromEntityAssembler.ToResourceFromEntity(found, vehiclePublicIds)));
     }
+
+    [HttpGet]
+    [EndpointSummary("List my return routes")]
+    [EndpointDescription("Same as GET /return-routes/mine.")]
+    [ProducesResponseType(typeof(IEnumerable<ReturnRouteResource>), StatusCodes.Status200OK)]
+    public Task<IActionResult> GetReturnRoutes(CancellationToken cancellationToken) =>
+        GetMyReturnRoutes(cancellationToken);
 
     [HttpGet("mine")]
     [EndpointSummary("Get my return routes")]
@@ -126,6 +134,28 @@ public class ReturnRoutesController(
             list.Select(proposal => proposal.Id.Value).ToList(), cancellationToken);
         var publicIds = await publicIdQueryService.FetchProposalPublicIdsAsync(list, cancellationToken);
         return Ok(MatchProposalResourceFromEntityAssembler.ToResourcesFromEntities(list, publicIds, tripIds));
+    }
+
+    [HttpGet("{returnRouteId:guid}/suggested-shipments")]
+    [EndpointSummary("Get suggested shipment requests")]
+    [EndpointDescription(
+        "Open requests that fit one of my routes: pickup near the origin, delivery near the destination and a pickup window that includes the departure.")]
+    [ProducesResponseType(typeof(IEnumerable<ShipmentRequestResource>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetSuggestedShipmentRequests(Guid returnRouteId,
+        CancellationToken cancellationToken)
+    {
+        if (this.GetCurrentUserId() is not { } userId) return Unauthorized();
+
+        var result = await shipmentRequestQueryService.Handle(
+            new GetSuggestedShipmentRequestsQuery(userId, await FindIdAsync(returnRouteId, cancellationToken)),
+            cancellationToken);
+
+        return MatchmakingActionResultAssembler.ToActionResultFromResult(
+            this,
+            result,
+            problemDetailsFactory,
+            requests => Ok(requests.Select(ShipmentRequestResourceFromEntityAssembler.ToResourceFromEntity)));
     }
 
     [HttpPost("{returnRouteId:guid}/cancel")]
