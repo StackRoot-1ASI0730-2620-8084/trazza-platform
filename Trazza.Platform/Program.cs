@@ -250,11 +250,9 @@ var localizationOptions = new RequestLocalizationOptions()
 
 app.UseRequestLocalization(localizationOptions);
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.MapScalarApiReference();
-}
+// OpenAPI and Scalar stay available in every environment, so the deployed API can be explored too.
+app.MapOpenApi();
+app.MapScalarApiReference();
 
 app.UseCors("TrazzaWebAppPolicy");
 
