@@ -1,5 +1,6 @@
 using Trazza.Platform.Shared.Domain.Repositories;
 using Trazza.Platform.Shared.Infrastructure.Interfaces.AspNetCore.Configuration;
+using Trazza.Platform.Shared.Infrastructure.Interfaces.AspNetCore.Json;
 using Trazza.Platform.Shared.Infrastructure.Interfaces.AspNetCore.OpenApi;
 using Trazza.Platform.Shared.Infrastructure.Mediator.Cortex.Configuration;
 using Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
@@ -79,6 +80,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddControllers(options => options.Conventions.Add(new KebabCaseRouteNamingConvention()))
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new UtcDateTimeJsonConverter()))
     .AddDataAnnotationsLocalization();
 
 builder.Services.AddProblemDetails();
