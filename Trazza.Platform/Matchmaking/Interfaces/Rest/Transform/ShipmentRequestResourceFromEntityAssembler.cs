@@ -9,7 +9,7 @@ public static class ShipmentRequestResourceFromEntityAssembler
     public static ShipmentRequestResource ToResourceFromEntity(ShipmentRequest request)
     {
         return new ShipmentRequestResource(
-            request.Id,
+            request.PublicId,
             request.MerchantProfileId,
             request.Description,
             request.Cargo.WeightKg,

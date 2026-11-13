@@ -3,9 +3,9 @@ using Trazza.Platform.Shared.Interfaces.Rest.Resources;
 namespace Trazza.Platform.Matchmaking.Interfaces.Rest.Resources;
 
 public record MatchProposalResource(
-    ulong Id,
-    ulong ShipmentRequestId,
-    ulong ReturnRouteId,
+    Guid Id,
+    Guid ShipmentRequestId,
+    Guid ReturnRouteId,
     MoneyResource OfferedRate,
     string Status,
     DateTimeOffset? RespondedAt,

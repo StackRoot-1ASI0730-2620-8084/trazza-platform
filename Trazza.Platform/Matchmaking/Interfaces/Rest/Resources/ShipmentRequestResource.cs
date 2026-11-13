@@ -1,7 +1,7 @@
 namespace Trazza.Platform.Matchmaking.Interfaces.Rest.Resources;
 
 public record ShipmentRequestResource(
-    ulong Id,
+    Guid Id,
     ulong MerchantProfileId,
     string Description,
     decimal WeightKg,
