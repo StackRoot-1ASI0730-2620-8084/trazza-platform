@@ -24,9 +24,11 @@ public partial class MatchProposal : AggregateRoot
         ReturnRouteId = returnRouteId;
         OfferedRate = offeredRate;
         Status = EMatchProposalStatus.Pending;
+        PublicId = Guid.CreateVersion7();
     }
 
     public MatchProposalId Id { get; }
+    public Guid PublicId { get; private set; }
     public ShipmentRequestId ShipmentRequestId { get; private set; }
     public ReturnRouteId ReturnRouteId { get; private set; }
     public Money OfferedRate { get; private set; }

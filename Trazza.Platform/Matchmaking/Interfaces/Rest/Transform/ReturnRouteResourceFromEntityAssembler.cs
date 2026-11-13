@@ -11,7 +11,7 @@ public static class ReturnRouteResourceFromEntityAssembler
         IReadOnlyDictionary<VehicleId, Guid> vehiclePublicIds)
     {
         return new ReturnRouteResource(
-            route.Id,
+            route.PublicId,
             route.CarrierProfileId,
             vehiclePublicIds.TryGetValue(route.VehicleId, out var vehiclePublicId) ? vehiclePublicId : null,
             route.DriverId?.Value,

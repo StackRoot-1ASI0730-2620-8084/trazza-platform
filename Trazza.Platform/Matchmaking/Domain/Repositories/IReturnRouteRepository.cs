@@ -21,4 +21,15 @@ public interface IReturnRouteRepository : IBaseRepository<ReturnRoute>
     /// </summary>
     Task<IEnumerable<ReturnRoute>> SearchPublishedAsNoTrackingAsync(GeoLocation pickup, GeoLocation delivery,
         TimeWindow pickupWindow, double maxDistanceKm, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Id of the route with the given public id, or null when there is none.
+    /// </summary>
+    Task<ReturnRouteId?> FindIdByPublicIdAsync(Guid publicId, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Public ids of the given entities, by id. It reads only the two id columns.
+    /// </summary>
+    Task<IReadOnlyDictionary<ulong, Guid>> FindPublicIdsAsync(IReadOnlyCollection<ulong> ids,
+        CancellationToken cancellationToken);
 }

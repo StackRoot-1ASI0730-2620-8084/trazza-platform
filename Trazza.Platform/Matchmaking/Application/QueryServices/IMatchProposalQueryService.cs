@@ -10,4 +10,6 @@ public interface IMatchProposalQueryService
     Task<IEnumerable<MatchProposal>> Handle(GetProposalsByRouteQuery query, CancellationToken cancellationToken);
 
     Task<IEnumerable<MatchProposal>> Handle(GetProposalsByShipmentQuery query, CancellationToken cancellationToken);
+
+    Task<IEnumerable<MatchProposal>> Handle(GetProposalsByUserQuery query, CancellationToken cancellationToken);
 }
