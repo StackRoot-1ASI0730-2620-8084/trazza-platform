@@ -1,5 +1,6 @@
 using Trazza.Platform.Shared.Domain.Repositories;
 using Trazza.Platform.Shared.Infrastructure.Interfaces.AspNetCore.Configuration;
+using Trazza.Platform.Shared.Infrastructure.Interfaces.AspNetCore.Json;
 using Trazza.Platform.Shared.Infrastructure.Interfaces.AspNetCore.OpenApi;
 using Trazza.Platform.Shared.Infrastructure.Mediator.Cortex.Configuration;
 using Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
@@ -79,6 +80,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddControllers(options => options.Conventions.Add(new KebabCaseRouteNamingConvention()))
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new UtcDateTimeJsonConverter()))
     .AddDataAnnotationsLocalization();
 
 builder.Services.AddProblemDetails();
@@ -88,10 +90,13 @@ var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("TrazzaWebAppPolicy",
-        policy => policy.WithOrigins(allowedOrigins)
-            .AllowAnyMethod()
-            .AllowAnyHeader());
+    // An empty list or "*" accepts any origin, so static tools such as the GPS simulator can call the API.
+    options.AddPolicy("TrazzaWebAppPolicy", policy =>
+    {
+        if (allowedOrigins.Length == 0 || allowedOrigins.Contains("*")) policy.AllowAnyOrigin();
+        else policy.WithOrigins(allowedOrigins);
+        policy.AllowAnyMethod().AllowAnyHeader();
+    });
 });
 
 builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) =>
@@ -248,11 +253,9 @@ var localizationOptions = new RequestLocalizationOptions()
 
 app.UseRequestLocalization(localizationOptions);
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.MapScalarApiReference();
-}
+// OpenAPI and Scalar stay available in every environment, so the deployed API can be explored too.
+app.MapOpenApi();
+app.MapScalarApiReference();
 
 app.UseCors("TrazzaWebAppPolicy");
 
