@@ -15,4 +15,15 @@ public interface IShipmentRequestRepository : IBaseRepository<ShipmentRequest>
     /// </summary>
     Task<IEnumerable<ShipmentRequest>> SearchOpenAsNoTrackingAsync(GeoLocation origin, GeoLocation destination,
         DateTimeOffset departureAt, double maxDistanceKm, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Id of the shipment request with the given public id, or null when there is none.
+    /// </summary>
+    Task<ShipmentRequestId?> FindIdByPublicIdAsync(Guid publicId, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Public ids of the given entities, by id. It reads only the two id columns.
+    /// </summary>
+    Task<IReadOnlyDictionary<ulong, Guid>> FindPublicIdsAsync(IReadOnlyCollection<ulong> ids,
+        CancellationToken cancellationToken);
 }

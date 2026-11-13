@@ -8,12 +8,12 @@ namespace Trazza.Platform.Matchmaking.Interfaces.Rest.Transform;
 public static class SubmitMatchProposalCommandFromResourceAssembler
 {
     public static SubmitMatchProposalCommand ToCommandFromResource(UserId userId,
-        SubmitMatchProposalResource resource)
+        ShipmentRequestId shipmentRequestId, ReturnRouteId returnRouteId, SubmitMatchProposalResource resource)
     {
         return new SubmitMatchProposalCommand(
             userId,
-            new ShipmentRequestId(resource.ShipmentRequestId),
-            new ReturnRouteId(resource.ReturnRouteId),
+            shipmentRequestId,
+            returnRouteId,
             MoneyResourceAssembler.ToValueObjectFromResource(resource.OfferedRate));
     }
 }

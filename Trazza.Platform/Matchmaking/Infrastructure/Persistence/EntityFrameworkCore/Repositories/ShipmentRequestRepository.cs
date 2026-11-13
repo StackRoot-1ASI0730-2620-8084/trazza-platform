@@ -27,6 +27,7 @@ public class ShipmentRequestRepository(AppDbContext context)
         request.UpdatedAt = now;
 
         ulong merchantProfileId = request.MerchantProfileId;
+        var publicId = request.PublicId.ToByteArray();
         var pickup = request.Pickup;
         var delivery = request.Delivery;
         var pickupFrom = request.PickupWindow.From.UtcDateTime;
@@ -35,10 +36,10 @@ public class ShipmentRequestRepository(AppDbContext context)
         var status = request.Status.ToSnakeCaseValue().ToUpperInvariant();
 
         await Context.Database.ExecuteSqlInterpolatedAsync($@"
-            INSERT INTO shipment_requests (merchant_profile_id, description, weight_kg, volume_m3, pickup_address,
+            INSERT INTO shipment_requests (public_id, merchant_profile_id, description, weight_kg, volume_m3, pickup_address,
                 pickup_location, delivery_address, delivery_location, pickup_from, pickup_until, status,
                 created_at, updated_at)
-            VALUES ({merchantProfileId}, {request.Description}, {request.Cargo.WeightKg}, {request.Cargo.VolumeM3},
+            VALUES ({publicId}, {merchantProfileId}, {request.Description}, {request.Cargo.WeightKg}, {request.Cargo.VolumeM3},
                 {pickup.Address},
                 ST_PointFromText(CONCAT('POINT(', CAST({pickup.Location.Latitude} AS DECIMAL(11,8)), ' ', CAST({pickup.Location.Longitude} AS DECIMAL(11,8)), ')'), 4326),
                 {delivery.Address},
@@ -142,5 +143,29 @@ public class ShipmentRequestRepository(AppDbContext context)
         public double FirstLongitude { get; set; }
         public double SecondLatitude { get; set; }
         public double SecondLongitude { get; set; }
+    }
+
+    public async Task<ShipmentRequestId?> FindIdByPublicIdAsync(Guid publicId, CancellationToken cancellationToken)
+    {
+        var ids = await Context.Set<ShipmentRequest>()
+            .AsNoTracking()
+            .Where(request => request.PublicId == publicId)
+            .Select(request => request.Id)
+            .Take(1)
+            .ToListAsync(cancellationToken);
+        return ids.Count == 0 ? null : ids[0];
+    }
+
+    public async Task<IReadOnlyDictionary<ulong, Guid>> FindPublicIdsAsync(IReadOnlyCollection<ulong> ids,
+        CancellationToken cancellationToken)
+    {
+        if (ids.Count == 0) return new Dictionary<ulong, Guid>();
+        var keys = ids.Distinct().Select(id => new ShipmentRequestId(id)).ToList();
+        var rows = await Context.Set<ShipmentRequest>()
+            .AsNoTracking()
+            .Where(request => keys.Contains(request.Id))
+            .Select(request => new { request.Id, request.PublicId })
+            .ToListAsync(cancellationToken);
+        return rows.ToDictionary(row => row.Id.Value, row => row.PublicId);
     }
 }

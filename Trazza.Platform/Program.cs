@@ -193,6 +193,7 @@ builder.Services.AddScoped<IMatchProposalCommandService, MatchProposalCommandSer
 builder.Services.AddScoped<IMatchProposalQueryService, MatchProposalQueryService>();
 builder.Services.AddScoped<IMessageCommandService, MessageCommandService>();
 builder.Services.AddScoped<IMessageQueryService, MessageQueryService>();
+builder.Services.AddScoped<IPublicIdQueryService, PublicIdQueryService>();
 builder.Services.AddScoped<IMatchmakingContextFacade, MatchmakingContextFacade>();
 
 // Execution
