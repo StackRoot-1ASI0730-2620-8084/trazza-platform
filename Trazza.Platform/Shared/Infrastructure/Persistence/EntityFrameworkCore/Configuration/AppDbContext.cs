@@ -4,7 +4,7 @@ using Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Conf
 using Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration.ValueConverters;
 
 // Bounded context configurations: uncomment each block when its feature branch is merged into develop.
-// using Trazza.Platform.Iam.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
+using Trazza.Platform.Iam.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 // using Trazza.Platform.Profiles.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using Trazza.Platform.Matchmaking.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 // using Trazza.Platform.Execution.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
@@ -32,7 +32,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     {
         base.OnModelCreating(builder);
 
-        // builder.ApplyIamConfiguration();
+        builder.ApplyIamConfiguration();
         // builder.ApplyProfilesConfiguration();
         builder.ApplyMatchmakingConfiguration();
         // builder.ApplyExecutionConfiguration();

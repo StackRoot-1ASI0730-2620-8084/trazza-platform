@@ -1,9 +1,9 @@
-using TrazzaPlatform.API.Execution.Interfaces.Acl;
-using TrazzaPlatform.API.Iam.Interfaces.Acl;
-using TrazzaPlatform.API.Reputation.Domain.Model.Aggregates;
-using TrazzaPlatform.API.Reputation.Domain.Services;
+using Trazza.Platform.Execution.Interfaces.Acl;
+using Trazza.Platform.Iam.Interfaces.Acl;
+using Trazza.Platform.Reputation.Domain.Model.Aggregates;
+using Trazza.Platform.Reputation.Domain.Services;
 
-namespace TrazzaPlatform.API.Reputation.Application.Internal;
+namespace Trazza.Platform.Reputation.Application.Internal;
 
 public class RatingViewBuilder(IExecutionContextFacade executionContextFacade, IIamContextFacade iamContextFacade)
 {

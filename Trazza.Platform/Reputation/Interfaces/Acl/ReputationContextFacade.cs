@@ -1,7 +1,7 @@
-using TrazzaPlatform.API.Reputation.Domain.Model.Aggregates;
-using TrazzaPlatform.API.Reputation.Domain.Repositories;
+using Trazza.Platform.Reputation.Domain.Model.Aggregates;
+using Trazza.Platform.Reputation.Domain.Repositories;
 
-namespace TrazzaPlatform.API.Reputation.Interfaces.Acl;
+namespace Trazza.Platform.Reputation.Interfaces.Acl;
 
 public class ReputationContextFacade(ILoyaltyPointEntryRepository loyaltyRepository) : IReputationContextFacade
 {

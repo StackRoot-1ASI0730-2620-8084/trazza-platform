@@ -1,4 +1,4 @@
-namespace TrazzaPlatform.API.Iam.Domain.Model.ValueObjects;
+namespace Trazza.Platform.Iam.Domain.Model.ValueObjects;
 
 /// <summary>Role of an account. One account can be carrier and merchant at the same time (<c>user_roles</c>).</summary>
 public enum UserRoleType

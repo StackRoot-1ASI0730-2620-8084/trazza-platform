@@ -1,7 +1,7 @@
-using TrazzaPlatform.API.Reputation.Domain.Model.Aggregates;
-using TrazzaPlatform.API.Shared.Domain.Repositories;
+using Trazza.Platform.Reputation.Domain.Model.Aggregates;
+using Trazza.Platform.Shared.Domain.Repositories;
 
-namespace TrazzaPlatform.API.Reputation.Domain.Repositories;
+namespace Trazza.Platform.Reputation.Domain.Repositories;
 
 public interface IRatingRepository : IBaseRepository<Rating>
 {

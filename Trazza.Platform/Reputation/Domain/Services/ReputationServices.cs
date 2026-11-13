@@ -1,8 +1,8 @@
-using TrazzaPlatform.API.Reputation.Domain.Model.Aggregates;
-using TrazzaPlatform.API.Reputation.Domain.Model.Commands;
-using TrazzaPlatform.API.Shared.Domain.Model;
+using Trazza.Platform.Reputation.Domain.Model.Aggregates;
+using Trazza.Platform.Reputation.Domain.Model.Commands;
+using Trazza.Platform.Shared.Domain.Model;
 
-namespace TrazzaPlatform.API.Reputation.Domain.Services;
+namespace Trazza.Platform.Reputation.Domain.Services;
 
 public record RatingView(Rating Rating, Guid TripPublicId, Guid CounterpartPublicId, string CounterpartName);
 

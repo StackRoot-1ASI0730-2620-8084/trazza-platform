@@ -1,7 +1,7 @@
-using TrazzaPlatform.API.Iam.Domain.Model.Aggregates;
-using TrazzaPlatform.API.Shared.Domain.Repositories;
+using Trazza.Platform.Iam.Domain.Model.Aggregates;
+using Trazza.Platform.Shared.Domain.Repositories;
 
-namespace TrazzaPlatform.API.Iam.Domain.Repositories;
+namespace Trazza.Platform.Iam.Domain.Repositories;
 
 public interface IUserRepository : IBaseRepository<User>
 {

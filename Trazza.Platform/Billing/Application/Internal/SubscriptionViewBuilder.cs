@@ -1,9 +1,9 @@
-﻿using TrazzaPlatform.API.Billing.Domain.Model.Aggregates;
-using TrazzaPlatform.API.Billing.Domain.Repositories;
-using TrazzaPlatform.API.Billing.Domain.Services;
-using TrazzaPlatform.API.Iam.Interfaces.Acl;
+﻿using Trazza.Platform.Billing.Domain.Model.Aggregates;
+using Trazza.Platform.Billing.Domain.Repositories;
+using Trazza.Platform.Billing.Domain.Services;
+using Trazza.Platform.Iam.Interfaces.Acl;
  
-namespace TrazzaPlatform.API.Billing.Application.Internal;
+namespace Trazza.Platform.Billing.Application.Internal;
  
 public class SubscriptionViewBuilder(
     IPlanRepository planRepository,

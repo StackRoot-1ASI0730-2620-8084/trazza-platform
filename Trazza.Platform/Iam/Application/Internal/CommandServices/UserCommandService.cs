@@ -1,14 +1,14 @@
-using TrazzaPlatform.API.Iam.Application.Internal.OutboundServices;
-using TrazzaPlatform.API.Iam.Domain.Model.Aggregates;
-using TrazzaPlatform.API.Iam.Domain.Model.Commands;
-using TrazzaPlatform.API.Iam.Domain.Model.ValueObjects;
-using TrazzaPlatform.API.Iam.Domain.Repositories;
-using TrazzaPlatform.API.Iam.Domain.Services;
-using TrazzaPlatform.API.Shared.Domain.Model;
-using TrazzaPlatform.API.Shared.Domain.Model.ValueObjects;
-using TrazzaPlatform.API.Shared.Domain.Repositories;
+using Trazza.Platform.Iam.Application.Internal.OutboundServices;
+using Trazza.Platform.Iam.Domain.Model.Aggregates;
+using Trazza.Platform.Iam.Domain.Model.Commands;
+using Trazza.Platform.Iam.Domain.Model.ValueObjects;
+using Trazza.Platform.Iam.Domain.Repositories;
+using Trazza.Platform.Iam.Domain.Services;
+using Trazza.Platform.Shared.Domain.Model;
+using Trazza.Platform.Shared.Domain.Model.ValueObjects;
+using Trazza.Platform.Shared.Domain.Repositories;
 
-namespace TrazzaPlatform.API.Iam.Application.Internal.CommandServices;
+namespace Trazza.Platform.Iam.Application.Internal.CommandServices;
 
 /// <summary>
 ///     Own authentication (no external identity provider): sign-up, sign-in with lockout, refresh token rotation,

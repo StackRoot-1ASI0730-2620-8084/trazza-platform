@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using TrazzaPlatform.API.Iam.Domain.Model.Aggregates;
-using TrazzaPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
+using Trazza.Platform.Iam.Domain.Model.Aggregates;
+using Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 
-namespace TrazzaPlatform.API.Iam.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
+namespace Trazza.Platform.Iam.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 
 /// <summary>
 ///     Mapping of the IAM &amp; Profiles tables of <c>trazza_database</c>. <c>saved_addresses</c> is handled with SQL.
