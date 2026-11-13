@@ -1,3 +1,4 @@
+using Trazza.Platform.Execution.Interfaces.Acl;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 using Trazza.Platform.Matchmaking.Application.CommandServices;
@@ -20,6 +21,7 @@ public class ShipmentRequestsController(
     IShipmentRequestCommandService shipmentRequestCommandService,
     IShipmentRequestQueryService shipmentRequestQueryService,
     IMatchProposalQueryService matchProposalQueryService,
+    IExecutionContextFacade executionContextFacade,
     ProblemDetailsFactory problemDetailsFactory)
     : ControllerBase
 {
@@ -108,7 +110,10 @@ public class ShipmentRequestsController(
     {
         var proposals = await matchProposalQueryService.Handle(
             new GetProposalsByShipmentQuery(new ShipmentRequestId(shipmentRequestId)), cancellationToken);
-        return Ok(proposals.Select(MatchProposalResourceFromEntityAssembler.ToResourceFromEntity));
+        var list = proposals.ToList();
+        var tripIds = await executionContextFacade.FindTripPublicIdsByProposalIdsAsync(
+            list.Select(proposal => proposal.Id.Value).ToList(), cancellationToken);
+        return Ok(MatchProposalResourceFromEntityAssembler.ToResourcesFromEntities(list, tripIds));
     }
 
     [HttpPost("{shipmentRequestId}/cancel")]

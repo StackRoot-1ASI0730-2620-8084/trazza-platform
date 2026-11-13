@@ -14,7 +14,8 @@ public class MatchmakingContextFacade(
     IShipmentRequestQueryService shipmentRequestQueryService,
     IMatchProposalRepository matchProposalRepository,
     IReturnRouteRepository returnRouteRepository,
-    IShipmentRequestRepository shipmentRequestRepository)
+    IShipmentRequestRepository shipmentRequestRepository,
+    IMessageRepository messageRepository)
     : IMatchmakingContextFacade
 {
     public async Task<AcceptedMatchSummary?> FetchAcceptedMatch(ulong matchProposalId,
@@ -51,7 +52,8 @@ public class MatchmakingContextFacade(
                 proposals.AddRange(await matchProposalRepository.FindByShipmentRequestIdAsNoTrackingAsync(shipment.Id,
                     cancellationToken));
 
-        return proposals.Where(proposal => proposal.Status == EMatchProposalStatus.Accepted)
+        return proposals
+            .Where(proposal => proposal.Status is EMatchProposalStatus.Accepted or EMatchProposalStatus.Cancelled)
             .Select(proposal => proposal.Id.Value)
             .Distinct()
             .ToList();
@@ -81,6 +83,68 @@ public class MatchmakingContextFacade(
         }
 
         return contexts;
+    }
+
+    public async Task MarkPickedUpAsync(ulong matchProposalId, CancellationToken cancellationToken)
+    {
+        var proposal = await matchProposalRepository.FindByIdAsync(new MatchProposalId(matchProposalId),
+            cancellationToken);
+        if (proposal is null) return;
+        (await shipmentRequestRepository.FindByIdAsync(proposal.ShipmentRequestId, cancellationToken))?.MarkInTransit();
+        (await returnRouteRepository.FindByIdAsync(proposal.ReturnRouteId, cancellationToken))?.Start();
+    }
+
+    public async Task MarkDeliveredAsync(ulong matchProposalId, CancellationToken cancellationToken)
+    {
+        var proposal = await matchProposalRepository.FindByIdAsync(new MatchProposalId(matchProposalId),
+            cancellationToken);
+        if (proposal is null) return;
+        (await shipmentRequestRepository.FindByIdAsync(proposal.ShipmentRequestId, cancellationToken))?.MarkDelivered();
+        await CompleteRouteIfDoneAsync(proposal.ReturnRouteId, cancellationToken);
+    }
+
+    public async Task ReleaseAsync(ulong matchProposalId, bool cancelledByMerchant, string reason, DateTime now,
+        CancellationToken cancellationToken)
+    {
+        var proposal = await matchProposalRepository.FindByIdAsync(new MatchProposalId(matchProposalId),
+            cancellationToken);
+        if (proposal is null) return;
+        proposal.Cancel(now);
+
+        var shipment = await shipmentRequestRepository.FindByIdAsync(proposal.ShipmentRequestId, cancellationToken);
+        if (shipment is not null)
+        {
+            if (cancelledByMerchant || shipment.PickupWindow.Until <= now) shipment.Cancel(reason, now);
+            else shipment.Reopen();
+        }
+
+        var route = await returnRouteRepository.FindByIdAsync(proposal.ReturnRouteId, cancellationToken);
+        if (route is null) return;
+        if (route.Status == EReturnRouteStatus.Full && route.DepartureAt > now) route.Reopen();
+        else await CompleteRouteIfDoneAsync(route.Id, cancellationToken);
+    }
+
+    public Task<int> PurgeChatAsync(ulong matchProposalId, CancellationToken cancellationToken) =>
+        messageRepository.DeleteByMatchProposalIdAsync(new MatchProposalId(matchProposalId), cancellationToken);
+
+    /// <summary>
+    ///     A started route is completed once none of its shipments is still waiting or on the way.
+    /// </summary>
+    private async Task CompleteRouteIfDoneAsync(ReturnRouteId returnRouteId, CancellationToken cancellationToken)
+    {
+        var route = await returnRouteRepository.FindByIdAsync(returnRouteId, cancellationToken);
+        if (route is null || route.Status != EReturnRouteStatus.InProgress) return;
+
+        var accepted = (await matchProposalRepository.FindByReturnRouteIdAsNoTrackingAsync(route.Id, cancellationToken))
+            .Where(proposal => proposal.IsAccepted);
+        foreach (var proposal in accepted)
+        {
+            // Tracked lookups, so a shipment changed in this same unit of work is seen with its new status.
+            var shipment = await shipmentRequestRepository.FindByIdAsync(proposal.ShipmentRequestId, cancellationToken);
+            if (shipment?.Status is EShipmentRequestStatus.Matched or EShipmentRequestStatus.InTransit) return;
+        }
+
+        route.Complete();
     }
 
     private static Shared.Domain.Model.ValueObjects.GeoLocation ToLocation(AddressPoint point) =>

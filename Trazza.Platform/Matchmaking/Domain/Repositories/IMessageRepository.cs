@@ -12,6 +12,11 @@ public interface IMessageRepository : IBaseRepository<Message>
     /// <summary>
     ///     Unread messages of a proposal that were sent by someone else than the reader, tracked.
     /// </summary>
+    /// <summary>
+    ///     Deletes the chat of a proposal and returns how many messages were deleted.
+    /// </summary>
+    Task<int> DeleteByMatchProposalIdAsync(MatchProposalId matchProposalId, CancellationToken cancellationToken);
+
     Task<IEnumerable<Message>> ListUnreadSentByOthersAsync(MatchProposalId matchProposalId, UserId reader,
         CancellationToken cancellationToken);
 }
