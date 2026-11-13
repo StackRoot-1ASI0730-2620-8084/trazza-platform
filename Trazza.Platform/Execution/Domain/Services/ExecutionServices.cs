@@ -1,11 +1,8 @@
 using Trazza.Platform.Execution.Domain.Model.Aggregates;
 using Trazza.Platform.Execution.Domain.Model.Commands;
 using Trazza.Platform.Shared.Domain.Model;
-using TrazzaPlatform.API.Execution.Domain.Model.Aggregates;
-using TrazzaPlatform.API.Matchmaking.Interfaces.Acl;
-using TrazzaPlatform.API.Shared.Domain.Model;
 
-namespace TrazzaPlatform.API.Execution.Domain.Services;
+namespace Trazza.Platform.Execution.Domain.Services;
 
 /// <summary>A trip with the route, the shipment, both parties, the truck and its last position.</summary>
 public record TripView(
@@ -23,6 +20,10 @@ public record TripView(
     TrackingPoint? LastPoint,
     int OpenAlerts,
     bool IsCarrier);
+
+public class TripContextSnapshot
+{
+}
 
 public record TrackingResult(TrackingPoint Point, DeviationAlert? Alert, string TripStatus);
 
