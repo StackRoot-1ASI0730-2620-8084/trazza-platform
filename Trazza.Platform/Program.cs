@@ -90,10 +90,13 @@ var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("TrazzaWebAppPolicy",
-        policy => policy.WithOrigins(allowedOrigins)
-            .AllowAnyMethod()
-            .AllowAnyHeader());
+    // An empty list or "*" accepts any origin, so static tools such as the GPS simulator can call the API.
+    options.AddPolicy("TrazzaWebAppPolicy", policy =>
+    {
+        if (allowedOrigins.Length == 0 || allowedOrigins.Contains("*")) policy.AllowAnyOrigin();
+        else policy.WithOrigins(allowedOrigins);
+        policy.AllowAnyMethod().AllowAnyHeader();
+    });
 });
 
 builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) =>
