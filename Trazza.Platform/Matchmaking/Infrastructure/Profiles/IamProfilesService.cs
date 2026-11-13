@@ -35,4 +35,17 @@ public class IamProfilesService(IIamContextFacade iamContextFacade) : IProfilesS
         var driver = await iamContextFacade.FindDriverAsync(driverId.Value, cancellationToken);
         return driver is { IsActive: true } && driver.CarrierProfileId == carrierProfileId.Value;
     }
+
+    public async Task<VehicleId?> FetchVehicleIdByPublicId(Guid publicId, CancellationToken cancellationToken) =>
+        await iamContextFacade.FindVehicleAsync(publicId, cancellationToken) is { } vehicle
+            ? new VehicleId(vehicle.Id)
+            : null;
+
+    public async Task<IReadOnlyDictionary<VehicleId, Guid>> FetchVehiclePublicIds(
+        IReadOnlyCollection<VehicleId> vehicleIds, CancellationToken cancellationToken)
+    {
+        var ids = vehicleIds.Select(id => id.Value).Distinct().ToList();
+        var vehicles = await iamContextFacade.ListVehiclesAsync(ids, cancellationToken);
+        return vehicles.ToDictionary(vehicle => new VehicleId(vehicle.Id), vehicle => vehicle.PublicId);
+    }
 }

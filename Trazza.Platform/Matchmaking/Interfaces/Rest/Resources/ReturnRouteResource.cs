@@ -3,7 +3,7 @@ namespace Trazza.Platform.Matchmaking.Interfaces.Rest.Resources;
 public record ReturnRouteResource(
     ulong Id,
     ulong CarrierProfileId,
-    ulong VehicleId,
+    Guid? VehicleId,
     ulong? DriverId,
     string OriginAddress,
     GeoLocationResource OriginLocation,
