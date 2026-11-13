@@ -5,7 +5,6 @@ using Trazza.Platform.Shared.Domain.Model.ValueObjects;
 
 namespace Trazza.Platform.Execution.Domain.Services;
 
-/// <summary>A trip with the route, the shipment, both parties, the truck and its last position.</summary>
 public record TripView(
     Trip Trip,
     TripContextSnapshot Context,
@@ -22,7 +21,6 @@ public record TripView(
     int OpenAlerts,
     bool IsCarrier);
 
-/// <summary>The route and shipment of a trip, as Matchmaking sees them. Ids are the numeric Matchmaking ids.</summary>
 public record TripContextSnapshot(
     ulong MatchProposalId,
     Guid MatchProposalPublicId,

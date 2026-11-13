@@ -2,9 +2,6 @@ using Trazza.Platform.Iam.Domain.Model.ValueObjects;
 
 namespace Trazza.Platform.Iam.Domain.Model.Aggregates;
 
-/// <summary>
-///     One KYC attempt against RENIEC (simulated in the MVP). Document photos are optional S3 keys.
-/// </summary>
 public class IdentityVerification
 {
     public const string SimulatedProvider = "RENIEC_SIMULATED";

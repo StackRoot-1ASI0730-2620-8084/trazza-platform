@@ -41,7 +41,6 @@ public class ReturnRoutesController(
     {
         if (this.GetCurrentUserId() is not { } userId) return Unauthorized();
 
-        // The API exposes the public id of the vehicle; an unknown id fails as a vehicle the carrier does not own.
         var vehicleId = await profilesService.FetchVehicleIdByPublicId(resource.VehicleId, cancellationToken) ??
                         new VehicleId(0);
         var command = PublishReturnRouteCommandFromResourceAssembler.ToCommandFromResource(userId, vehicleId, resource);
@@ -179,9 +178,6 @@ public class ReturnRoutesController(
             cancelled => Ok(ReturnRouteResourceFromEntityAssembler.ToResourceFromEntity(cancelled, vehiclePublicIds)));
     }
 
-    /// <summary>
-    ///     An unknown public id resolves to id 0, which the services answer as a route not found.
-    /// </summary>
     private async Task<ReturnRouteId> FindIdAsync(Guid publicId, CancellationToken cancellationToken) =>
         await publicIdQueryService.FindReturnRouteIdAsync(publicId, cancellationToken) ?? new ReturnRouteId(0);
 

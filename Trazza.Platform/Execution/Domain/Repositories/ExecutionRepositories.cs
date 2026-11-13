@@ -13,7 +13,6 @@ public interface ITripRepository : IBaseRepository<Trip>
         CancellationToken cancellationToken = default);
 }
 
-/// <summary>SQL repository: <c>tracking_points.location</c> is a POINT column.</summary>
 public interface ITrackingPointRepository
 {
     Task<TrackingPoint> AddAsync(TrackingPoint point, CancellationToken cancellationToken = default);
@@ -23,7 +22,6 @@ public interface ITrackingPointRepository
     Task<TrackingPoint?> FindLastAsync(ulong tripId, CancellationToken cancellationToken = default);
 }
 
-/// <summary>SQL repository: <c>deviation_alerts.location</c> is a POINT column.</summary>
 public interface IDeviationAlertRepository
 {
     Task<DeviationAlert> AddAsync(DeviationAlert alert, CancellationToken cancellationToken = default);

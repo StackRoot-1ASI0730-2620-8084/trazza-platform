@@ -17,9 +17,6 @@ public record DriverSnapshot(ulong Id, ulong CarrierProfileId, string FullName, 
 
 public record ContactSnapshot(ulong UserId, Guid PublicId, string FullName, string? Phone, string? BusinessName);
 
-/// <summary>
-///     Anti-corruption layer used by the other bounded contexts to read IAM &amp; Profiles data.
-/// </summary>
 public interface IIamContextFacade
 {
     Task<ulong?> FindCarrierProfileIdAsync(ulong userId, CancellationToken ct = default);

@@ -4,9 +4,6 @@ using Trazza.Platform.Shared.Interfaces.Rest.Resources;
 
 namespace Trazza.Platform.Shared.Interfaces.Rest.Transform;
 
-/// <summary>
-///     Converts between the Money value object and its REST representation.
-/// </summary>
 public static class MoneyResourceAssembler
 {
     public static MoneyResource ToResourceFromValueObject(Money money)

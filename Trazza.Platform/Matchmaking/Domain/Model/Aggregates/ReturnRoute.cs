@@ -6,10 +6,6 @@ using Trazza.Platform.Shared.Domain.Model.Errors;
 
 namespace Trazza.Platform.Matchmaking.Domain.Model.Aggregates;
 
-/// <summary>
-///     Return route published by a carrier (table return_routes). The remaining capacity is not stored:
-///     it is calculated from the vehicle and the accepted shipments.
-/// </summary>
 public partial class ReturnRoute : AggregateRoot
 {
     public const byte DefaultMaxShipments = 2;
@@ -48,15 +44,8 @@ public partial class ReturnRoute : AggregateRoot
 
     public bool IsPublished => Status == EReturnRouteStatus.Published;
 
-    /// <summary>
-    ///     Raises the published event. Call it after the first save so the generated id is already assigned.
-    /// </summary>
     public void RaisePublished() => AddDomainEvent(new ReturnRoutePublishedEvent(Id, CarrierProfileId, DepartureAt));
 
-    /// <summary>
-    ///     Checks that the route can take one more shipment without passing the maximum number of shipments
-    ///     or the load capacity of the vehicle.
-    /// </summary>
     public Error EnsureCanTakeShipment(int acceptedShipments, decimal acceptedWeightKg, Cargo cargo,
         decimal vehicleMaxLoadKg)
     {
@@ -67,9 +56,6 @@ public partial class ReturnRoute : AggregateRoot
         return Error.None;
     }
 
-    /// <summary>
-    ///     Call it after a shipment is accepted. The route becomes full when it reaches its maximum.
-    /// </summary>
     public Error RegisterAcceptedShipment(int acceptedShipmentsAfter) =>
         acceptedShipmentsAfter >= MaxShipments ? MarkFull() : Error.None;
 
@@ -82,9 +68,6 @@ public partial class ReturnRoute : AggregateRoot
         return Error.None;
     }
 
-    /// <summary>
-    ///     Makes a full route available again, for example when an accepted proposal is cancelled.
-    /// </summary>
     public Error Reopen()
     {
         if (IsPublished) return Error.None;
@@ -94,9 +77,6 @@ public partial class ReturnRoute : AggregateRoot
         return Error.None;
     }
 
-    /// <summary>
-    ///     The first shipment of the route was picked up.
-    /// </summary>
     public Error Start()
     {
         if (Status == EReturnRouteStatus.InProgress) return Error.None;
@@ -107,9 +87,6 @@ public partial class ReturnRoute : AggregateRoot
         return Error.None;
     }
 
-    /// <summary>
-    ///     None of the shipments of the route is waiting or on the way anymore.
-    /// </summary>
     public Error Complete()
     {
         if (Status != EReturnRouteStatus.InProgress) return MatchmakingErrors.ReturnRouteNotPublished;
@@ -127,15 +104,8 @@ public partial class ReturnRoute : AggregateRoot
         return Error.None;
     }
 
-    /// <summary>
-    ///     The database generates the id. The repository assigns it after inserting the row.
-    /// </summary>
     internal void AssignGeneratedId(ReturnRouteId id) => Id = id;
 
-    /// <summary>
-    ///     The coordinates live in POINT columns that EF Core does not map. The repository
-    ///     reads them with SQL and sets them here.
-    /// </summary>
     internal void ApplyLocations(GeoLocation origin, GeoLocation destination)
     {
         Origin = Origin with { Location = origin };

@@ -9,11 +9,6 @@ using Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Conf
 
 namespace Trazza.Platform.Matchmaking.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 
-/// <summary>
-///     Maps the Matchmaking aggregates to the existing tables of trazza_database (database-first).
-///     The POINT columns (origin_location, destination_location, pickup_location, delivery_location) are not
-///     mapped: the repositories read and write them with SQL.
-/// </summary>
 public static class ModelBuilderExtensions
 {
     public static void ApplyMatchmakingConfiguration(this ModelBuilder builder)
@@ -151,9 +146,6 @@ public static class ModelBuilderExtensions
         });
     }
 
-    /// <summary>
-    ///     The database stores the enums as UPPER_SNAKE text (IN_PROGRESS).
-    /// </summary>
     private static ValueConverter<TEnum, string> EnumConverter<TEnum>() where TEnum : struct, Enum
     {
         return new ValueConverter<TEnum, string>(value => value.ToSnakeCaseValue().ToUpperInvariant(),

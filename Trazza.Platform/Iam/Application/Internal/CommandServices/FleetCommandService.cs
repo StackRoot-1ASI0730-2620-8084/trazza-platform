@@ -9,9 +9,6 @@ using Trazza.Platform.Shared.Domain.Repositories;
 
 namespace Trazza.Platform.Iam.Application.Internal.CommandServices;
 
-/// <summary>
-///     Fleet of a carrier (vehicles and drivers) and saved addresses of any user.
-/// </summary>
 public class FleetCommandService(
     ICarrierProfileRepository carrierProfileRepository,
     IVehicleRepository vehicleRepository,

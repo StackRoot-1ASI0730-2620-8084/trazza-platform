@@ -4,9 +4,6 @@ using Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Conf
 
 namespace Trazza.Platform.Shared.Interfaces.Rest;
 
-/// <summary>
-/// Health check: confirms the API is running and can reach the database.
-/// </summary>
 [ApiController]
 [Route("api/v1/[controller]")]
 [Produces("application/json")]

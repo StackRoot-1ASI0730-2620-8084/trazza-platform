@@ -7,10 +7,6 @@ using Trazza.Platform.Shared.Domain.Model.ValueObjects;
 
 namespace Trazza.Platform.Matchmaking.Domain.Model.Aggregates;
 
-/// <summary>
-///     The single offer a carrier makes for a shipment request using one of its routes (table match_proposals).
-///     There are no counteroffers: the merchant accepts or rejects.
-/// </summary>
 public partial class MatchProposal : AggregateRoot
 {
     public MatchProposal()
@@ -39,9 +35,6 @@ public partial class MatchProposal : AggregateRoot
 
     public bool IsAccepted => Status == EMatchProposalStatus.Accepted;
 
-    /// <summary>
-    ///     Raises the submitted event. Call it after the first save so the generated id is already assigned.
-    /// </summary>
     public void RaiseSubmitted() => AddDomainEvent(new MatchProposalSubmittedEvent(Id, ShipmentRequestId, ReturnRouteId));
 
     public Error Accept(DateTimeOffset now)
@@ -64,9 +57,6 @@ public partial class MatchProposal : AggregateRoot
         return Error.None;
     }
 
-    /// <summary>
-    ///     Expires a pending proposal, for example when another proposal for the same shipment is accepted.
-    /// </summary>
     public Error Expire()
     {
         if (!IsPending) return MatchmakingErrors.ProposalNotPending;
@@ -75,9 +65,6 @@ public partial class MatchProposal : AggregateRoot
         return Error.None;
     }
 
-    /// <summary>
-    ///     The carrier withdraws a pending or accepted proposal.
-    /// </summary>
     public Error Cancel(DateTimeOffset now)
     {
         if (Status is not (EMatchProposalStatus.Pending or EMatchProposalStatus.Accepted))

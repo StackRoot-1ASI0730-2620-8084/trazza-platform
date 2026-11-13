@@ -2,7 +2,6 @@ using Trazza.Platform.Execution.Domain.Model.ValueObjects;
 
 namespace Trazza.Platform.Execution.Domain.Model.Aggregates;
 
-/// <summary>Problem reported on a trip (damaged or incomplete cargo, delay...) with photo evidences in S3.</summary>
 public class Incident
 {
     private readonly List<IncidentEvidence> _evidences = [];
@@ -69,7 +68,6 @@ public class IncidentEvidence
     public DateTime UploadedAt { get; private set; }
 }
 
-/// <summary>Cargo sensor that Trazza lends to a truck with an IoT monitoring plan.</summary>
 public class IotDevice
 {
     protected IotDevice()

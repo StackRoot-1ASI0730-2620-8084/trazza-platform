@@ -10,10 +10,6 @@ using Trazza.Platform.Shared.Domain.Model.ValueObjects;
 
 namespace Trazza.Platform.Iam.Infrastructure.Tokens;
 
-/// <summary>
-///     Signs short-lived access tokens (HMAC-SHA256) whose subject is the user's public id, and creates
-///     random refresh tokens of which only the SHA-256 is stored.
-/// </summary>
 public class JwtTokenService(IOptions<TokenSettings> options, TimeProvider timeProvider) : ITokenService
 {
     private readonly TokenSettings _settings = options.Value;

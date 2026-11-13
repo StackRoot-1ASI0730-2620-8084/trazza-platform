@@ -4,10 +4,6 @@ using System.Text.Json.Serialization;
 
 namespace Trazza.Platform.Shared.Infrastructure.Interfaces.AspNetCore.Json;
 
-/// <summary>
-///     Every date-time in the database is UTC; this converter writes it with the <c>Z</c> suffix and
-///     turns incoming values into UTC.
-/// </summary>
 public class UtcDateTimeJsonConverter : JsonConverter<DateTime>
 {
     public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)

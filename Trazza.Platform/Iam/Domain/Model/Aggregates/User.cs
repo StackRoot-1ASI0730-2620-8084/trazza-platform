@@ -3,9 +3,6 @@ using Trazza.Platform.Shared.Domain.Model.Entities;
 
 namespace Trazza.Platform.Iam.Domain.Model.Aggregates;
 
-/// <summary>
-///     Account aggregate root (<c>users</c> + <c>user_roles</c>). Only the password hash is stored.
-/// </summary>
 public class User : IAuditableEntity
 {
     public const int MaxFailedLogins = 5;
@@ -73,9 +70,6 @@ public class User : IAuditableEntity
     }
 }
 
-/// <summary>
-///     Role granted to an account (<c>user_roles</c>, composite key user_id + role).
-/// </summary>
 public class UserRole
 {
     protected UserRole()

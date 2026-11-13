@@ -3,7 +3,6 @@ using Trazza.Platform.Shared.Domain.Model;
 
 namespace Trazza.Platform.Iam.Domain.Model.ValueObjects;
 
-/// <summary>Peruvian national identity document: exactly eight digits.</summary>
 public partial record Dni(string Value)
 {
     public static Result<Dni, CommandError> Create(string? value)
@@ -18,7 +17,6 @@ public partial record Dni(string Value)
     private static partial Regex Pattern();
 }
 
-/// <summary>Peruvian taxpayer number: eleven digits starting with 10 (person) or 20 (company).</summary>
 public partial record Ruc(string Value)
 {
     public static Result<Ruc, CommandError> Create(string? value)
@@ -31,7 +29,6 @@ public partial record Ruc(string Value)
     private static partial Regex Pattern();
 }
 
-/// <summary>Normalized e-mail address.</summary>
 public partial record EmailAddress(string Value)
 {
     public static Result<EmailAddress, CommandError> Create(string? value)
@@ -46,7 +43,6 @@ public partial record EmailAddress(string Value)
     private static partial Regex Pattern();
 }
 
-/// <summary>Peruvian vehicle plate normalized as <c>ABC-123</c>.</summary>
 public partial record LicensePlate(string Value)
 {
     public static Result<LicensePlate, CommandError> Create(string? value)

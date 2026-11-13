@@ -4,7 +4,6 @@ using Trazza.Platform.Shared.Domain.Model;
 
 namespace Trazza.Platform.Iam.Domain.Services;
 
-/// <summary>Account as seen by its owner: user, decrypted contact data and profiles.</summary>
 public record UserAccount(
     User User,
     PersonIdentity? Identity,
@@ -12,7 +11,6 @@ public record UserAccount(
     CarrierProfile? CarrierProfile,
     MerchantProfile? MerchantProfile);
 
-/// <summary>Result of sign-up, sign-in and refresh.</summary>
 public record AuthenticatedSession(
     UserAccount Account,
     string AccessToken,

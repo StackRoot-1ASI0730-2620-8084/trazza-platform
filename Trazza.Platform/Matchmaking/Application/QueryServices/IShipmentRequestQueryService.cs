@@ -17,9 +17,6 @@ public interface IShipmentRequestQueryService
     Task<IEnumerable<ShipmentRequest>> Handle(GetOpenShipmentRequestsQuery query,
         CancellationToken cancellationToken);
 
-    /// <summary>
-    ///     Fails with route not found when the route does not exist or belongs to another carrier.
-    /// </summary>
     Task<Result<IEnumerable<ShipmentRequest>>> Handle(GetSuggestedShipmentRequestsQuery query,
         CancellationToken cancellationToken);
 }

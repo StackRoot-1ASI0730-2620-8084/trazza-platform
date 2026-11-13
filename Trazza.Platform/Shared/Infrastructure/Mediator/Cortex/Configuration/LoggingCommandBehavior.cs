@@ -7,10 +7,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Trazza.Platform.Shared.Infrastructure.Mediator.Cortex.Configuration;
 
-/// <summary>
-///     Pipeline behavior that logs the start, the end and the duration of every command.
-/// </summary>
-/// <typeparam name="TCommand">The type of command being handled.</typeparam>
 public class LoggingCommandBehavior<TCommand>(ILogger<LoggingCommandBehavior<TCommand>> logger)
     : ICommandPipelineBehavior<TCommand> where TCommand : ICommand
 {

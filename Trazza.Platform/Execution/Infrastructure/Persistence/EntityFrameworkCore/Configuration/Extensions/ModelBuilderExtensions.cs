@@ -4,10 +4,6 @@ using Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Conf
 
 namespace Trazza.Platform.Execution.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 
-/// <summary>
-///     Mapping of the Service Execution &amp; Monitoring tables. <c>tracking_points</c> and <c>deviation_alerts</c>
-///     have POINT columns and are handled with SQL.
-/// </summary>
 public static class ModelBuilderExtensions
 {
     public static void ApplyExecutionConfiguration(this ModelBuilder builder)

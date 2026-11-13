@@ -6,9 +6,6 @@ using Trazza.Platform.Shared.Domain.Model.Errors;
 
 namespace Trazza.Platform.Matchmaking.Domain.Model.Aggregates;
 
-/// <summary>
-///     Shipment request created by a merchant (table shipment_requests).
-/// </summary>
 public partial class ShipmentRequest : AggregateRoot
 {
     public const int MaxDescriptionLength = 500;
@@ -50,9 +47,6 @@ public partial class ShipmentRequest : AggregateRoot
 
     public bool IsOpen => Status == EShipmentRequestStatus.Open;
 
-    /// <summary>
-    ///     Raises the created event. Call it after the first save so the generated id is already assigned.
-    /// </summary>
     public void RaiseCreated() => AddDomainEvent(new ShipmentRequestCreatedEvent(Id, MerchantProfileId));
 
     public Error MarkMatched()
@@ -63,9 +57,6 @@ public partial class ShipmentRequest : AggregateRoot
         return Error.None;
     }
 
-    /// <summary>
-    ///     Makes a matched request open again, for example when the accepted proposal is cancelled.
-    /// </summary>
     public Error Reopen()
     {
         if (IsOpen) return Error.None;
@@ -75,9 +66,6 @@ public partial class ShipmentRequest : AggregateRoot
         return Error.None;
     }
 
-    /// <summary>
-    ///     The carrier picked up the cargo.
-    /// </summary>
     public Error MarkInTransit()
     {
         if (Status != EShipmentRequestStatus.Matched) return MatchmakingErrors.ShipmentRequestNotOpen;
@@ -86,9 +74,6 @@ public partial class ShipmentRequest : AggregateRoot
         return Error.None;
     }
 
-    /// <summary>
-    ///     The carrier delivered the cargo.
-    /// </summary>
     public Error MarkDelivered()
     {
         if (Status != EShipmentRequestStatus.InTransit) return MatchmakingErrors.ShipmentRequestNotOpen;
@@ -108,15 +93,8 @@ public partial class ShipmentRequest : AggregateRoot
         return Error.None;
     }
 
-    /// <summary>
-    ///     The database generates the id. The repository assigns it after inserting the row.
-    /// </summary>
     internal void AssignGeneratedId(ShipmentRequestId id) => Id = id;
 
-    /// <summary>
-    ///     The coordinates live in POINT columns that EF Core does not map. The repository
-    ///     reads them with SQL and sets them here.
-    /// </summary>
     internal void ApplyLocations(GeoLocation pickup, GeoLocation delivery)
     {
         Pickup = Pickup with { Location = pickup };

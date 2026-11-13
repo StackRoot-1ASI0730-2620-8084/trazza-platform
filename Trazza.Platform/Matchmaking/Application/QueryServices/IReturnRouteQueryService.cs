@@ -12,9 +12,6 @@ public interface IReturnRouteQueryService
 
     Task<IEnumerable<ReturnRoute>> Handle(GetReturnRoutesByCarrierQuery query, CancellationToken cancellationToken);
 
-    /// <summary>
-    ///     Fails with shipment request not found when the request does not exist or belongs to another merchant.
-    /// </summary>
     Task<Result<IEnumerable<ReturnRoute>>> Handle(GetSuggestedReturnRoutesQuery query,
         CancellationToken cancellationToken);
 }

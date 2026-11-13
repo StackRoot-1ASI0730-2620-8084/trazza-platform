@@ -10,10 +10,6 @@ using Trazza.Platform.Shared.Domain.Repositories;
 
 namespace Trazza.Platform.Iam.Application.Internal.CommandServices;
 
-/// <summary>
-///     Own authentication (no external identity provider): sign-up, sign-in with lockout, refresh token rotation,
-///     roles, person identity and simulated RENIEC validation.
-/// </summary>
 public class UserCommandService(
     IUserRepository userRepository,
     IPersonIdentityRepository identityRepository,

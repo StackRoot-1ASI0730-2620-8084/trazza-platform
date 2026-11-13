@@ -2,9 +2,6 @@ using System.Globalization;
 
 namespace Trazza.Platform.Shared.Domain.Model.ValueObjects;
 
-/// <summary>
-///     Geographic coordinates (WGS 84, SRID 4326) in decimal degrees.
-/// </summary>
 public record GeoLocation(double Latitude, double Longitude)
 {
     private const double EarthRadiusKm = 6371;
@@ -19,14 +16,8 @@ public record GeoLocation(double Latitude, double Longitude)
         return new GeoLocation(latitude, longitude);
     }
 
-    /// <summary>
-    ///     Well-known text in latitude-longitude order, used with <c>ST_PointFromText(..., 4326, 'axis-order=lat-long')</c>.
-    /// </summary>
     public string ToWkt() => string.Create(CultureInfo.InvariantCulture, $"POINT({Latitude} {Longitude})");
 
-    /// <summary>
-    ///     Great-circle distance in kilometers (haversine formula).
-    /// </summary>
     public double DistanceTo(GeoLocation other)
     {
         static double ToRadians(double degrees) => degrees * Math.PI / 180;
@@ -37,10 +28,6 @@ public record GeoLocation(double Latitude, double Longitude)
         return 2 * EarthRadiusKm * Math.Asin(Math.Sqrt(a));
     }
 
-    /// <summary>
-    ///     Approximate distance in kilometers from this location to the segment between
-    ///     <paramref name="start" /> and <paramref name="end" />; used to detect route deviations.
-    /// </summary>
     public double DistanceToSegment(GeoLocation start, GeoLocation end)
     {
         var cosLat = Math.Cos(Latitude * Math.PI / 180);

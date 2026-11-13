@@ -1,8 +1,5 @@
 namespace Trazza.Platform.Matchmaking.Domain.Model.ValueObjects;
 
-/// <summary>
-///     A period of time, for example the pickup window of a shipment request.
-/// </summary>
 public record TimeWindow(DateTimeOffset From, DateTimeOffset Until)
 {
     public TimeWindow() : this(default, default)

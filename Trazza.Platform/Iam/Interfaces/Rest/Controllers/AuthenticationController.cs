@@ -10,9 +10,6 @@ using Trazza.Platform.Shared.Interfaces.Rest;
 
 namespace Trazza.Platform.Iam.Interfaces.Rest.Controllers;
 
-/// <summary>
-///     Own authentication: sign-up, sign-in, refresh token rotation and sign-out.
-/// </summary>
 [Route("api/v1/[controller]")]
 [Authorize]
 public class AuthenticationController(IUserCommandService userCommandService, IStringLocalizer<SharedResource> localizer)

@@ -8,10 +8,6 @@ using Trazza.Platform.Shared.Domain.Repositories;
 
 namespace Trazza.Platform.Execution.Application.Internal.CommandServices;
 
-/// <summary>
-///     GPS points sent by the carrier's phone (or by the simulator / an IoT device). A point farther than
-///     <see cref="DeviationThresholdKm" /> from the expected path raises a deviation alert.
-/// </summary>
 public class TrackingCommandService(
     TripAccessService tripAccessService,
     ITrackingPointRepository trackingPointRepository,
@@ -39,7 +35,6 @@ public class TrackingCommandService(
         return true;
     }
 
-    /// <summary>Expected path: route origin, pick-up, delivery and route destination.</summary>
     public static double DistanceToPathKm(GeoLocation point, IReadOnlyList<GeoLocation> path)
     {
         var best = double.MaxValue;

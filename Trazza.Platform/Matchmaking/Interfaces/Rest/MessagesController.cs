@@ -86,9 +86,6 @@ public class MessagesController(
             marked => Ok(new { marked }));
     }
 
-    /// <summary>
-    ///     An unknown public id resolves to id 0, which the services answer as a proposal not found.
-    /// </summary>
     private async Task<MatchProposalId> FindIdAsync(Guid publicId, CancellationToken cancellationToken) =>
         await publicIdQueryService.FindMatchProposalIdAsync(publicId, cancellationToken) ?? new MatchProposalId(0);
 }

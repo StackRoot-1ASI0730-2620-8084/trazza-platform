@@ -7,12 +7,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Trazza.Platform.Shared.Infrastructure.Mediator.Cortex.Configuration;
 
-/// <summary>
-///     Pipeline behavior that classifies the database exceptions thrown while a command runs.
-///     It logs them with the command name and rethrows them, so the GlobalExceptionHandler
-///     turns them into the right ProblemDetails response (409 for conflicts, 500 for the rest).
-/// </summary>
-/// <typeparam name="TCommand">The type of command being handled.</typeparam>
 public class ExceptionHandlingCommandBehavior<TCommand>(ILogger<ExceptionHandlingCommandBehavior<TCommand>> logger)
     : ICommandPipelineBehavior<TCommand> where TCommand : ICommand
 {

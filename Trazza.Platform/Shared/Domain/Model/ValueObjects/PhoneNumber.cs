@@ -2,9 +2,6 @@ using System.Text.RegularExpressions;
 
 namespace Trazza.Platform.Shared.Domain.Model.ValueObjects;
 
-/// <summary>
-///     Peruvian mobile number: 9 digits starting with 9 (an optional +51 prefix is removed).
-/// </summary>
 public partial record PhoneNumber(string Value)
 {
     public static Result<PhoneNumber, CommandError> Create(string? value)

@@ -3,10 +3,6 @@ using Trazza.Platform.Shared.Domain.Model.Entities;
 
 namespace Trazza.Platform.Iam.Domain.Model.Aggregates;
 
-/// <summary>
-///     Personal data of the account owner (<c>person_identities</c>). DNI and phone are encrypted by the
-///     application (AES-256-GCM); the DNI is also kept as an HMAC-SHA256 hash to check uniqueness.
-/// </summary>
 public class PersonIdentity : IAuditableEntity
 {
     protected PersonIdentity()

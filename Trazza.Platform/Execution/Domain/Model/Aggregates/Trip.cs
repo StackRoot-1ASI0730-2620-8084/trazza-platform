@@ -5,10 +5,6 @@ using Trazza.Platform.Shared.Domain.Model.ValueObjects;
 
 namespace Trazza.Platform.Execution.Domain.Model.Aggregates;
 
-/// <summary>
-///     Execution of an accepted proposal: SCHEDULED, PICKED_UP, IN_TRANSIT, DELIVERED and CONFIRMED by the merchant,
-///     or CANCELLED. Every change is written to <c>trip_status_history</c>.
-/// </summary>
 public class Trip : IAuditableEntity
 {
     private readonly List<TripStatusChange> _history = [];
@@ -67,7 +63,6 @@ public class Trip : IAuditableEntity
         return ChangeStatus(TripStatus.PickedUp, userId, now);
     }
 
-    /// <summary>The first GPS point after the pick-up moves the trip to IN_TRANSIT.</summary>
     public void RegisterMovement(double addedDistanceKm, ulong userId, DateTime now)
     {
         if (addedDistanceKm > 0)
@@ -89,7 +84,6 @@ public class Trip : IAuditableEntity
         return ChangeStatus(TripStatus.Confirmed, userId, now);
     }
 
-    /// <summary>Only a trip that has not been picked up can be cancelled.</summary>
     public Result<Trip, CommandError> Cancel(ulong userId, string reason, DateTime now)
     {
         if (Status != TripStatus.Scheduled) return CommandError.Conflict("trip-status-invalid");
@@ -109,7 +103,6 @@ public class Trip : IAuditableEntity
     }
 }
 
-/// <summary>Row of <c>trip_status_history</c>.</summary>
 public class TripStatusChange
 {
     protected TripStatusChange()
@@ -133,7 +126,6 @@ public class TripStatusChange
     public DateTime ChangedAt { get; private set; }
 }
 
-/// <summary>GPS point of an active trip. Stored with SQL (POINT column).</summary>
 public record TrackingPoint(
     ulong Id,
     ulong TripId,
@@ -143,7 +135,6 @@ public record TrackingPoint(
     TrackingSource Source,
     DateTime RecordedAt);
 
-/// <summary>The truck left the expected path by more than the allowed distance. Stored with SQL.</summary>
 public record DeviationAlert(
     ulong Id,
     ulong TripId,

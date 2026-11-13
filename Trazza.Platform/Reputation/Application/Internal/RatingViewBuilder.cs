@@ -7,7 +7,6 @@ namespace Trazza.Platform.Reputation.Application.Internal;
 
 public class RatingViewBuilder(IExecutionContextFacade executionContextFacade, IIamContextFacade iamContextFacade)
 {
-    /// <summary>The counterpart is the rated user for given ratings and the rater for received ones.</summary>
     public async Task<List<RatingView>> BuildAsync(IReadOnlyCollection<Rating> ratings, ulong userId,
         CancellationToken ct = default)
     {

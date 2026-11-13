@@ -2,9 +2,6 @@ using Trazza.Platform.Matchmaking.Domain.Model.ValueObjects;
 
 namespace Trazza.Platform.Matchmaking.Domain.Model.Commands;
 
-/// <summary>
-///     A carrier publishes a return route with one of its vehicles.
-/// </summary>
 public record PublishReturnRouteCommand(
     UserId UserId,
     VehicleId VehicleId,

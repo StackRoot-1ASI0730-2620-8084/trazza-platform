@@ -8,7 +8,6 @@ public enum LoyaltyReason
     Adjustment
 }
 
-/// <summary>One rating per person per confirmed trip. Averages are computed, never stored.</summary>
 public class Rating
 {
     public const int MaxCommentLength = 500;
@@ -36,7 +35,6 @@ public class Rating
     public DateTime CreatedAt { get; private set; }
 }
 
-/// <summary>Points ledger: positive entries are earned, negative ones redeemed. The balance is the sum.</summary>
 public class LoyaltyPointEntry
 {
     public const int TripCompletedPoints = 10;

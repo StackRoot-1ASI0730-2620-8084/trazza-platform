@@ -5,9 +5,6 @@ using Trazza.Platform.Shared.Domain.Model;
 
 namespace Trazza.Platform.Shared.Interfaces.Rest.Transform;
 
-/// <summary>
-///     Converts a <see cref="CommandError" /> into a localized RFC 7807 response with its stable <c>code</c>.
-/// </summary>
 public static class ProblemDetailsFromCommandErrorAssembler
 {
     public static ObjectResult ToActionResultFromError(CommandError error, IStringLocalizer<SharedResource> localizer)

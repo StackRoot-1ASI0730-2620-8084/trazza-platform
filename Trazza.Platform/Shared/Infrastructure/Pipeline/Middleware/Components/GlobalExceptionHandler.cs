@@ -12,10 +12,6 @@ using Trazza.Platform.Shared.Resources.Errors;
 
 namespace Trazza.Platform.Shared.Infrastructure.Pipeline.Middleware.Components;
 
-/// <summary>
-///     Turns every unhandled exception into an RFC 9457 ProblemDetails response with a stable error code.
-///     Expected business errors never reach this handler: they travel as Result failures.
-/// </summary>
 public class GlobalExceptionHandler(
     IProblemDetailsService problemDetailsService,
     IStringLocalizer<ErrorMessages> localizer,

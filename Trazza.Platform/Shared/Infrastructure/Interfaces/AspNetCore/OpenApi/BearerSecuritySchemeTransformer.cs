@@ -6,10 +6,6 @@ using Microsoft.OpenApi;
 
 namespace Trazza.Platform.Shared.Infrastructure.Interfaces.AspNetCore.OpenApi;
 
-/// <summary>
-///     Declares the JWT bearer security scheme in the OpenAPI document, so Scalar shows the authorization field.
-///     The IAM context marks which operations require it.
-/// </summary>
 public class BearerSecuritySchemeTransformer : IOpenApiDocumentTransformer
 {
     public const string SchemeName = "Bearer";

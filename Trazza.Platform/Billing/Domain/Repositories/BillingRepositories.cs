@@ -18,7 +18,6 @@ public interface ISubscriptionRepository : IBaseRepository<Subscription>
  
     Task<Subscription?> FindWithVehiclesAsync(ulong id, CancellationToken cancellationToken = default);
  
-    /// <summary>Vehicles of the list that already belong to an active subscription.</summary>
     Task<List<ulong>> ListSubscribedVehicleIdsAsync(IReadOnlyCollection<ulong> vehicleIds,
         CancellationToken cancellationToken = default);
 }

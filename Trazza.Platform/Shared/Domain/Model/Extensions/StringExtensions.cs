@@ -3,15 +3,8 @@ using System.Text;
 
 namespace Trazza.Platform.Shared.Domain.Model.Extensions;
 
-/// <summary>
-///     String helpers shared by every bounded context.
-/// </summary>
 public static class StringExtensions
 {
-    /// <summary>
-    ///     Converts a PascalCase or camelCase text into snake_case.
-    ///     Examples: PaymentTransaction to payment_transaction, InTransit to in_transit, IoTDevice to io_t_device.
-    /// </summary>
     public static string ToSnakeCase(this string text)
     {
         if (string.IsNullOrWhiteSpace(text)) return string.Empty;

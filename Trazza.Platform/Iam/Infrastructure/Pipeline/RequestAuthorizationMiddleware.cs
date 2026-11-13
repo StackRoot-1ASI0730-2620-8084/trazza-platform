@@ -3,10 +3,6 @@ using Trazza.Platform.Iam.Domain.Repositories;
 
 namespace Trazza.Platform.Iam.Infrastructure.Pipeline;
 
-/// <summary>
-///     Reads <c>Authorization: Bearer &lt;token&gt;</c>, validates the JWT and stores the active user in
-///     <c>HttpContext.Items</c>. The <c>[Authorize]</c> filter decides whether a user is required.
-/// </summary>
 public class RequestAuthorizationMiddleware(RequestDelegate next)
 {
     public async Task InvokeAsync(HttpContext context, ITokenService tokenService, IUserRepository userRepository)

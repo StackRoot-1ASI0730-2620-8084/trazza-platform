@@ -6,9 +6,6 @@ using Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Conf
 
 namespace Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 
-/// <summary>
-///     Saves every change tracked by the context in a single transaction.
-/// </summary>
 public class UnitOfWork(AppDbContext context) : IUnitOfWork
 {
     private bool _inExplicitTransaction;

@@ -127,9 +127,6 @@ public class MatchmakingContextFacade(
     public Task<int> PurgeChatAsync(ulong matchProposalId, CancellationToken cancellationToken) =>
         messageRepository.DeleteByMatchProposalIdAsync(new MatchProposalId(matchProposalId), cancellationToken);
 
-    /// <summary>
-    ///     A started route is completed once none of its shipments is still waiting or on the way.
-    /// </summary>
     private async Task CompleteRouteIfDoneAsync(ReturnRouteId returnRouteId, CancellationToken cancellationToken)
     {
         var route = await returnRouteRepository.FindByIdAsync(returnRouteId, cancellationToken);

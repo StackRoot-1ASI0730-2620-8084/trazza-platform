@@ -4,9 +4,6 @@ using Trazza.Platform.Matchmaking.Domain.Model.ValueObjects;
 
 namespace Trazza.Platform.Matchmaking.Infrastructure.Profiles;
 
-/// <summary>
-///     Reads carrier and merchant profiles, vehicles and drivers from the IAM context, which owns them.
-/// </summary>
 public class IamProfilesService(IIamContextFacade iamContextFacade) : IProfilesService
 {
     public async Task<CarrierProfileId?> FetchCarrierProfileIdByUserId(UserId userId,

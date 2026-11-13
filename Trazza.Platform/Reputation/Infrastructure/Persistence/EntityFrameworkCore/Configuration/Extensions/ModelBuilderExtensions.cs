@@ -4,7 +4,6 @@ using Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Conf
 
 namespace Trazza.Platform.Reputation.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 
-/// <summary>Mapping of the Loyalty &amp; Reputation tables.</summary>
 public static class ModelBuilderExtensions
 {
     public static void ApplyReputationConfiguration(this ModelBuilder builder)

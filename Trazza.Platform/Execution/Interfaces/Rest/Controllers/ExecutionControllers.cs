@@ -14,9 +14,6 @@ using Trazza.Platform.Shared.Interfaces.Rest;
 
 namespace Trazza.Platform.Execution.Interfaces.Rest.Controllers;
 
-/// <summary>
-///     Trips of the signed-in user (as carrier or merchant): life cycle, GPS tracking, deviation alerts and incidents.
-/// </summary>
 [Route("api/v1/[controller]")]
 [Authorize]
 public class TripsController(
@@ -76,7 +73,6 @@ public class TripsController(
         FromResult(await queryService.ListTrackingPointsAsync(UserId, tripId, ct),
             points => points.Select(ExecutionResourceAssembler.ToResource).ToList());
 
-    /// <summary>GPS point from the carrier's phone, the GPS simulator or an IoT device (source PHONE or IOT).</summary>
     [HttpPost("{tripId:guid}/tracking-points")]
     [Authorize(Roles.Carrier)]
     public async Task<IActionResult> RecordTrackingPoint(Guid tripId, [FromBody] RecordTrackingPointResource resource,
@@ -131,7 +127,6 @@ public class TripsController(
             ExecutionResourceAssembler.ToResource);
 }
 
-/// <summary>IoT cargo sensors lent to the signed-in carrier's trucks.</summary>
 [Route("api/v1/[controller]")]
 [Authorize(Roles.Carrier)]
 public class IotDevicesController(IExecutionQueryService queryService, IStringLocalizer<SharedResource> localizer)

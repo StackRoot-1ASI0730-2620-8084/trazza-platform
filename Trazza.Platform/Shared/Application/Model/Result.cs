@@ -3,11 +3,6 @@ using Trazza.Platform.Shared.Domain.Model.Errors;
 
 namespace Trazza.Platform.Shared.Application.Model;
 
-/// <summary>
-///     Outcome of an application operation: either a value or a domain error.
-///     Command services return it instead of throwing business exceptions.
-/// </summary>
-/// <typeparam name="T">The type of the value returned on success.</typeparam>
 public sealed class Result<T>
 {
     private readonly T? _value;

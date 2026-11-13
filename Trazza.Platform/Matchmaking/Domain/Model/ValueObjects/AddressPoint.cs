@@ -1,8 +1,5 @@
 namespace Trazza.Platform.Matchmaking.Domain.Model.ValueObjects;
 
-/// <summary>
-///     A text address together with its coordinates.
-/// </summary>
 public record AddressPoint(string Address, GeoLocation Location)
 {
     public const int MaxAddressLength = 255;

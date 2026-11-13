@@ -10,7 +10,6 @@ using Trazza.Platform.Shared.Interfaces.Rest;
 
 namespace Trazza.Platform.Reputation.Interfaces.Rest.Controllers;
 
-/// <summary>Ratings between carrier and merchant after a confirmed trip.</summary>
 [Route("api/v1/[controller]")]
 [Authorize]
 public class RatingsController(
@@ -34,13 +33,11 @@ public class RatingsController(
     public async Task<IActionResult> Given(CancellationToken ct) =>
         Ok((await queryService.ListGivenAsync(UserId, ct)).Select(ReputationResourceAssembler.ToResource));
 
-    /// <summary>Average score of any user, by public id. Shown on offers and trips.</summary>
     [HttpGet("summary/{userId:guid}")]
     public async Task<IActionResult> Summary(Guid userId, CancellationToken ct) =>
         FromResult(await queryService.GetSummaryAsync(userId, ct), ReputationResourceAssembler.ToResource);
 }
 
-/// <summary>Loyalty points: +10 per confirmed trip, +2 per rating given.</summary>
 [Route("api/v1/[controller]")]
 [Authorize]
 public class LoyaltyController(

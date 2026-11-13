@@ -8,9 +8,6 @@ using Trazza.Platform.Shared.Domain.Repositories;
 
 namespace Trazza.Platform.Reputation.Application.Internal.CommandServices;
 
-/// <summary>
-///     Ratings of confirmed trips (+2 points for rating) and redemption of loyalty points.
-/// </summary>
 public class ReputationCommandService(
     IRatingRepository ratingRepository,
     ILoyaltyPointEntryRepository loyaltyRepository,

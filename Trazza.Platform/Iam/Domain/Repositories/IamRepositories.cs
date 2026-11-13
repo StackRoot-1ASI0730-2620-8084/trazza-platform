@@ -59,9 +59,6 @@ public interface IVehicleRepository : IBaseRepository<Vehicle>
     Task<bool> ExistsByPlateAsync(string plate, ulong? exceptVehicleId, CancellationToken cancellationToken = default);
 }
 
-/// <summary>
-///     Saved addresses have a spatial column, so this repository writes immediately with SQL.
-/// </summary>
 public interface ISavedAddressRepository
 {
     Task<SavedAddress> AddAsync(SavedAddress address, CancellationToken cancellationToken = default);

@@ -11,9 +11,6 @@ using Trazza.Platform.Shared.Interfaces.Rest;
 
 namespace Trazza.Platform.Iam.Interfaces.Rest.Controllers;
 
-/// <summary>
-///     Trucks of the signed-in carrier. Identified by their public id.
-/// </summary>
 [Route("api/v1/[controller]")]
 [Authorize(Roles.Carrier)]
 public class VehiclesController(
@@ -45,9 +42,6 @@ public class VehiclesController(
         NoContentFromResult(await fleetCommandService.Handle(new DeactivateVehicleCommand(UserId, vehicleId), ct));
 }
 
-/// <summary>
-///     Drivers employed by the signed-in carrier.
-/// </summary>
 [Route("api/v1/[controller]")]
 [Authorize(Roles.Carrier)]
 public class DriversController(
@@ -84,9 +78,6 @@ public class DriversController(
         NoContentFromResult(await fleetCommandService.Handle(new DeactivateDriverCommand(UserId, driverId), ct));
 }
 
-/// <summary>
-///     Frequent pick-up and delivery addresses of the signed-in user, with real coordinates.
-/// </summary>
 [Route("api/v1/[controller]")]
 [Authorize]
 public class SavedAddressesController(

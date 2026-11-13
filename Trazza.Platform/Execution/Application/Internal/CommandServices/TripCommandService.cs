@@ -10,10 +10,6 @@ using Trazza.Platform.Shared.Domain.Repositories;
 
 namespace Trazza.Platform.Execution.Application.Internal.CommandServices;
 
-/// <summary>
-///     Trip life cycle. Delivering opens the freight settlement, confirming awards points and deletes the chat, and a
-///     merchant who cancels after the route left owes lost profit (30% of the agreed rate) to the carrier.
-/// </summary>
 public class TripCommandService(
     TripAccessService tripAccessService,
     IMatchmakingContextFacade matchmakingContextFacade,

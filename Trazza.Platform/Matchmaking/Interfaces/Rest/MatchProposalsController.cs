@@ -39,7 +39,6 @@ public class MatchProposalsController(
     {
         if (this.GetCurrentUserId() is not { } userId) return Unauthorized();
 
-        // Unknown public ids fail as a request or route that does not exist.
         var shipmentRequestId =
             await publicIdQueryService.FindShipmentRequestIdAsync(resource.ShipmentRequestId, cancellationToken) ??
             new ShipmentRequestId(0);
@@ -130,9 +129,6 @@ public class MatchProposalsController(
             ? tripId
             : null;
 
-    /// <summary>
-    ///     An unknown public id resolves to id 0, which the command services answer as a proposal not found.
-    /// </summary>
     private async Task<MatchProposalId> FindIdAsync(Guid publicId, CancellationToken cancellationToken) =>
         await publicIdQueryService.FindMatchProposalIdAsync(publicId, cancellationToken) ?? new MatchProposalId(0);
 

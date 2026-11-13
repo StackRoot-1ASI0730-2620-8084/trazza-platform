@@ -11,9 +11,6 @@ using Trazza.Platform.Shared.Interfaces.Rest;
 
 namespace Trazza.Platform.Iam.Interfaces.Rest.Controllers;
 
-/// <summary>
-///     The signed-in account: identity, roles, merchant profile and KYC (simulated RENIEC).
-/// </summary>
 [Route("api/v1/[controller]/me")]
 [Authorize]
 public class UsersController(

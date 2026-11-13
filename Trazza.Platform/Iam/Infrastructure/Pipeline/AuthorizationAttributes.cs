@@ -8,9 +8,6 @@ using Trazza.Platform.Shared.Interfaces.Rest.Transform;
 
 namespace Trazza.Platform.Iam.Infrastructure.Pipeline;
 
-/// <summary>
-///     Requires an authenticated user and, optionally, one of the given roles (<c>CARRIER</c>, <c>MERCHANT</c>).
-/// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
 public class AuthorizeAttribute(params string[] roles) : Attribute, IAuthorizationFilter
 {
@@ -37,9 +34,6 @@ public class AuthorizeAttribute(params string[] roles) : Attribute, IAuthorizati
     }
 }
 
-/// <summary>
-///     Marks an action that does not need a bearer token (sign-up, sign-in and refresh).
-/// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false)]
 public class AllowAnonymousAttribute : Attribute
 {

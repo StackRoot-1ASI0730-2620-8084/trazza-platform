@@ -1,9 +1,5 @@
 namespace Trazza.Platform.Shared.Domain.Model.Errors;
 
-/// <summary>
-///     Typed domain error with a stable code, a default message and its classification.
-///     Domain operations return it instead of throwing business exceptions.
-/// </summary>
 public sealed record Error(string Code, string Message, EErrorType Type)
 {
     public static readonly Error None = new(string.Empty, string.Empty, EErrorType.None);

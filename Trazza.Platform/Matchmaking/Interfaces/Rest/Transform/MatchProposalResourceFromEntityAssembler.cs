@@ -13,10 +13,6 @@ public static class MatchProposalResourceFromEntityAssembler
         proposals.Select(proposal => ToResourceFromEntity(proposal, publicIds,
             tripIds.TryGetValue(proposal.Id, out var tripId) ? tripId : null));
 
-    /// <summary>
-    ///     The route and the shipment request are referenced by their public ids. The trip id is the public id of
-    ///     the trip that Execution created when the proposal was accepted.
-    /// </summary>
     public static MatchProposalResource ToResourceFromEntity(MatchProposal proposal, ProposalPublicIds publicIds,
         Guid? tripId = null)
     {

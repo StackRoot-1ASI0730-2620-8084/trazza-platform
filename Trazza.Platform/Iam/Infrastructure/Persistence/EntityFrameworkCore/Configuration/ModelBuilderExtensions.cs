@@ -4,9 +4,6 @@ using Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Conf
 
 namespace Trazza.Platform.Iam.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 
-/// <summary>
-///     Mapping of the IAM &amp; Profiles tables of <c>trazza_database</c>. <c>saved_addresses</c> is handled with SQL.
-/// </summary>
 public static class ModelBuilderExtensions
 {
     public static void ApplyIamConfiguration(this ModelBuilder builder)

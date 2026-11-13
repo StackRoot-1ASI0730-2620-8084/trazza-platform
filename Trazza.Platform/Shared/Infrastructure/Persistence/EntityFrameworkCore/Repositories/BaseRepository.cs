@@ -10,11 +10,6 @@ using Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Conf
 
 namespace Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
 
-/// <summary>
-///     EF Core implementation of the common repository operations.
-///     Context repositories inherit it and use <see cref="Context" /> for their own queries.
-/// </summary>
-/// <typeparam name="TEntity">The aggregate type.</typeparam>
 public class BaseRepository<TEntity>(AppDbContext context) : IBaseRepository<TEntity> where TEntity : class
 {
     protected AppDbContext Context { get; } = context;
@@ -53,9 +48,6 @@ public class BaseRepository<TEntity>(AppDbContext context) : IBaseRepository<TEn
         Context.Set<TEntity>().Remove(entity);
     }
 
-    /// <summary>
-    ///     Builds the predicate entity => EF.Property&lt;TId&gt;(entity, "PrimaryKey") == id.
-    /// </summary>
     private Expression<Func<TEntity, bool>> HasId<TId>(TId id) where TId : struct
     {
         var keyName = Context.Model.FindEntityType(typeof(TEntity))?.FindPrimaryKey()?.Properties.Single().Name

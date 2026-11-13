@@ -1,8 +1,5 @@
 namespace Trazza.Platform.Matchmaking.Domain.Model.ValueObjects;
 
-/// <summary>
-///     Weight and volume of a shipment.
-/// </summary>
 public record Cargo
 {
     public Cargo() : this(0m, 0m)

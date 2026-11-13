@@ -3,9 +3,6 @@ using Trazza.Platform.Shared.Domain.Model.Entities;
 
 namespace Trazza.Platform.Iam.Domain.Model.Aggregates;
 
-/// <summary>
-///     Driver of a fleet (<c>drivers</c>). Drivers have no account: only name, optional sex and experience (1 to 5 stars).
-/// </summary>
 public class Driver : IAuditableEntity
 {
     protected Driver()
@@ -45,9 +42,6 @@ public class Driver : IAuditableEntity
     public void Deactivate() => IsActive = false;
 }
 
-/// <summary>
-///     Truck of a fleet (<c>vehicles</c>): plate, model, maximum load and cargo box dimensions.
-/// </summary>
 public class Vehicle : IAuditableEntity
 {
     protected Vehicle()
@@ -102,10 +96,6 @@ public class Vehicle : IAuditableEntity
     public void Deactivate() => IsActive = false;
 }
 
-/// <summary>
-///     Frequent address of a user (<c>saved_addresses</c>), e.g. "Almacén" or "Tienda Gamarra".
-///     It has a spatial column, so its repository uses SQL instead of EF Core change tracking.
-/// </summary>
 public record SavedAddress(
     ulong Id,
     ulong UserId,

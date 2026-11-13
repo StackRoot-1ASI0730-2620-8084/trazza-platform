@@ -6,10 +6,6 @@ using Trazza.Platform.Shared.Resources.Errors;
 
 namespace Trazza.Platform.Shared.Interfaces.Rest.ProblemDetails;
 
-/// <summary>
-///     Turns a domain <see cref="Error" /> into an RFC 9457 ProblemDetails response.
-///     The title is localized from ErrorMessages using the error code, according to Accept-Language.
-/// </summary>
 public class ProblemDetailsFactory(IStringLocalizer<ErrorMessages> localizer)
 {
     public IActionResult CreateProblemDetails(ControllerBase controller, Error error)

@@ -1,8 +1,5 @@
 namespace Trazza.Platform.Iam.Domain.Model.Aggregates;
 
-/// <summary>
-///     Refresh token of a session. Only the SHA-256 of the token is stored (<c>refresh_tokens</c>).
-/// </summary>
 public class RefreshToken
 {
     protected RefreshToken()

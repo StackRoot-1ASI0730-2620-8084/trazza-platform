@@ -6,16 +6,8 @@ using Trazza.Platform.Shared.Domain.Model.ValueObjects;
 
 namespace Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 
-/// <summary>
-///     Model builder helpers shared by every bounded context.
-/// </summary>
 public static class ModelBuilderExtensions
 {
-    /// <summary>
-    ///     Applies the snake_case naming convention of trazza_database to tables, columns, keys,
-    ///     foreign keys and indexes. Default table names are also pluralized (PersonIdentity to person_identities).
-    ///     Names set explicitly with ToTable or HasColumnName are only converted to snake_case.
-    /// </summary>
     public static void UseSnakeCaseNamingConvention(this ModelBuilder builder)
     {
         foreach (var entity in builder.Model.GetEntityTypes())
@@ -55,25 +47,16 @@ public static class ModelBuilderExtensions
         }
     }
 
-    /// <summary>
-    ///     Stores an enum as the UPPER_SNAKE_CASE text of a MySQL ENUM column.
-    /// </summary>
     public static PropertyBuilder<TEnum> HasEnumText<TEnum>(this PropertyBuilder<TEnum> property)
         where TEnum : struct, Enum =>
         property.HasConversion(value => EnumText.ToText(value), text => EnumText.FromText<TEnum>(text));
 
-    /// <summary>
-    ///     Stores a nullable enum as the UPPER_SNAKE_CASE text of a nullable MySQL ENUM column.
-    /// </summary>
     public static PropertyBuilder<TEnum?> HasNullableEnumText<TEnum>(this PropertyBuilder<TEnum?> property)
         where TEnum : struct, Enum =>
         property.HasConversion(
             value => value.HasValue ? EnumText.ToText(value.Value) : null,
             text => text == null ? null : (TEnum?)EnumText.FromText<TEnum>(text));
 
-    /// <summary>
-    ///     Stores a <see cref="Guid" /> public identifier in a <c>BINARY(16)</c> column.
-    /// </summary>
     public static PropertyBuilder<Guid> HasPublicId(this PropertyBuilder<Guid> property) =>
         property.HasConversion(value => value.ToByteArray(), bytes => new Guid(bytes))
             .HasColumnType("binary(16)");

@@ -10,9 +10,6 @@ using Trazza.Platform.Shared.Domain.Model.Events;
 
 namespace Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Interceptors;
 
-/// <summary>
-///     Publishes the domain events recorded by the aggregates after the changes were saved successfully.
-/// </summary>
 public class DispatchDomainEventsInterceptor(IMediator mediator) : SaveChangesInterceptor
 {
     private static readonly MethodInfo PublishMethod = typeof(IMediator).GetMethods()
@@ -46,9 +43,6 @@ public class DispatchDomainEventsInterceptor(IMediator mediator) : SaveChangesIn
         foreach (var domainEvent in domainEvents) await PublishAsync(domainEvent, cancellationToken);
     }
 
-    /// <summary>
-    ///     Publishes the event with its concrete type, so Cortex.Mediator finds the INotificationHandler of that event.
-    /// </summary>
     private Task PublishAsync(IEvent domainEvent, CancellationToken cancellationToken)
     {
         return (Task)PublishMethod.MakeGenericMethod(domainEvent.GetType())

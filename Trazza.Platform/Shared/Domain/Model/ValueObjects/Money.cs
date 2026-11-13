@@ -3,9 +3,6 @@ using System.Globalization;
 
 namespace Trazza.Platform.Shared.Domain.Model.ValueObjects;
 
-/// <summary>
-///     Immutable amount of money with its ISO 4217 currency code.
-/// </summary>
 public record Money
 {
     public const string Soles = "PEN";

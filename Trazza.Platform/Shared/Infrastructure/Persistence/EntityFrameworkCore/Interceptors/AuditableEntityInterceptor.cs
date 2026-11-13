@@ -7,9 +7,6 @@ using Trazza.Platform.Shared.Domain.Model.Entities;
 
 namespace Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Interceptors;
 
-/// <summary>
-///     Fills CreatedAt and UpdatedAt of every <see cref="IAuditableEntity" /> in UTC before saving.
-/// </summary>
 public class AuditableEntityInterceptor : SaveChangesInterceptor
 {
     public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)

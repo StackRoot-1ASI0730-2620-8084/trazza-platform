@@ -6,16 +6,12 @@ using Trazza.Platform.Matchmaking.Interfaces.Acl;
 
 namespace Trazza.Platform.Execution.Application.Internal;
 
-/// <summary>A trip with its route/shipment context and who takes part in it.</summary>
 public record TripAccess(Trip Trip, TripContextSnapshot Context, ulong CarrierUserId, ulong MerchantUserId, ulong UserId)
 {
     public bool IsCarrier => UserId == CarrierUserId;
     public bool IsMerchant => UserId == MerchantUserId;
 }
 
-/// <summary>
-///     Loads trips only for their carrier or merchant, and builds <see cref="TripView" />.
-/// </summary>
 public class TripAccessService(
     ITripRepository tripRepository,
     ITrackingPointRepository trackingPointRepository,
@@ -23,7 +19,6 @@ public class TripAccessService(
     IMatchmakingContextFacade matchmakingContextFacade,
     IIamContextFacade iamContextFacade)
 {
-    /// <summary>Null when the trip does not exist or the user is not part of it.</summary>
     public async Task<TripAccess?> FindAsync(ulong userId, Guid tripId, CancellationToken ct = default)
     {
         var trip = await tripRepository.FindByPublicIdAsync(tripId, false, ct);

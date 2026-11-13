@@ -189,9 +189,6 @@ public class ShipmentRequestsController(
             cancelled => Ok(ShipmentRequestResourceFromEntityAssembler.ToResourceFromEntity(cancelled)));
     }
 
-    /// <summary>
-    ///     An unknown public id resolves to id 0, which the services answer as a shipment request not found.
-    /// </summary>
     private async Task<ShipmentRequestId> FindIdAsync(Guid publicId, CancellationToken cancellationToken) =>
         await publicIdQueryService.FindShipmentRequestIdAsync(publicId, cancellationToken) ??
         new ShipmentRequestId(0);

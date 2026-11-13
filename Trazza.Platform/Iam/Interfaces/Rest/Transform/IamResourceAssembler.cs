@@ -8,9 +8,6 @@ using Trazza.Platform.Shared.Domain.Model.ValueObjects;
 
 namespace Trazza.Platform.Iam.Interfaces.Rest.Transform;
 
-/// <summary>
-///     Converts IAM resources into commands and aggregates into resources.
-/// </summary>
 public static class IamResourceAssembler
 {
     public static Result<SignUpCommand, CommandError> ToCommand(SignUpResource resource)

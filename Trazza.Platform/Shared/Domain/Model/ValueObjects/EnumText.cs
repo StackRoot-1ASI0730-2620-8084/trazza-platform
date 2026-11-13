@@ -2,10 +2,6 @@ using System.Text;
 
 namespace Trazza.Platform.Shared.Domain.Model.ValueObjects;
 
-/// <summary>
-///     Converts enum members to the UPPER_SNAKE_CASE text used by the database ENUM columns and the API
-///     (for example <c>TripStatus.PickedUp</c> is <c>PICKED_UP</c>) and back.
-/// </summary>
 public static class EnumText
 {
     public static string ToText<TEnum>(TEnum value) where TEnum : struct, Enum

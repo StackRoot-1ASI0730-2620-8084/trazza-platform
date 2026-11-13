@@ -6,9 +6,6 @@ using Trazza.Platform.Shared.Interfaces.Rest.Transform;
 
 namespace Trazza.Platform.Shared.Interfaces.Rest;
 
-/// <summary>
-///     Base class of every REST controller: turns a <see cref="Result{TValue,TError}" /> into an HTTP response.
-/// </summary>
 [ApiController]
 [Produces("application/json")]
 public abstract class TrazzaControllerBase(IStringLocalizer<SharedResource> localizer) : ControllerBase

@@ -2,9 +2,6 @@ using Trazza.Platform.Iam.Application.Internal.OutboundServices;
 
 namespace Trazza.Platform.Iam.Infrastructure.Security;
 
-/// <summary>
-///     Simulated RENIEC check for the MVP: every DNI is validated except the test DNI <c>00000000</c>.
-/// </summary>
 public class SimulatedReniecProvider(TimeProvider timeProvider) : IIdentityVerificationProvider
 {
     public const string RejectedTestDni = "00000000";
