@@ -6,11 +6,12 @@ namespace Trazza.Platform.Matchmaking.Interfaces.Rest.Transform;
 
 public static class PublishReturnRouteCommandFromResourceAssembler
 {
-    public static PublishReturnRouteCommand ToCommandFromResource(UserId userId, PublishReturnRouteResource resource)
+    public static PublishReturnRouteCommand ToCommandFromResource(UserId userId, VehicleId vehicleId,
+        PublishReturnRouteResource resource)
     {
         return new PublishReturnRouteCommand(
             userId,
-            new VehicleId(resource.VehicleId),
+            vehicleId,
             resource.DriverId is { } driverId ? new DriverId(driverId) : null,
             new AddressPoint((resource.OriginAddress ?? string.Empty).Trim(),
                 GeoLocationResourceAssembler.ToValueObjectFromResource(resource.OriginLocation)),

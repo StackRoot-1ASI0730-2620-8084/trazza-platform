@@ -1,4 +1,5 @@
 using Trazza.Platform.Matchmaking.Domain.Model.Aggregates;
+using Trazza.Platform.Matchmaking.Domain.Model.ValueObjects;
 using Trazza.Platform.Matchmaking.Interfaces.Rest.Resources;
 using Trazza.Platform.Shared.Domain.Model.Extensions;
 
@@ -6,12 +7,13 @@ namespace Trazza.Platform.Matchmaking.Interfaces.Rest.Transform;
 
 public static class ReturnRouteResourceFromEntityAssembler
 {
-    public static ReturnRouteResource ToResourceFromEntity(ReturnRoute route)
+    public static ReturnRouteResource ToResourceFromEntity(ReturnRoute route,
+        IReadOnlyDictionary<VehicleId, Guid> vehiclePublicIds)
     {
         return new ReturnRouteResource(
             route.Id,
             route.CarrierProfileId,
-            route.VehicleId,
+            vehiclePublicIds.TryGetValue(route.VehicleId, out var vehiclePublicId) ? vehiclePublicId : null,
             route.DriverId?.Value,
             route.Origin.Address,
             GeoLocationResourceAssembler.ToResourceFromValueObject(route.Origin.Location),
