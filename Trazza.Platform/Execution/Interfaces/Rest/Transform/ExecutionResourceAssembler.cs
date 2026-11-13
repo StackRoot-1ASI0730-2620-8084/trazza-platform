@@ -43,7 +43,7 @@ public static class ExecutionResourceAssembler
             trip.ConfirmedAt,
             trip.CancelledAt,
             trip.CancellationReason,
-            trip.CreatedAt);
+            trip.CreatedAt?.UtcDateTime ?? DateTime.UtcNow);
     }
 
     public static TripStatusChangeResource ToResource(TripStatusChange change) =>
