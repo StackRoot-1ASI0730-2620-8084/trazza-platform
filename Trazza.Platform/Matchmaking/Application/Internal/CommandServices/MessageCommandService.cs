@@ -1,3 +1,4 @@
+using Trazza.Platform.Execution.Interfaces.Acl;
 using Trazza.Platform.Matchmaking.Application.CommandServices;
 using Trazza.Platform.Matchmaking.Application.Internal.OutboundServices;
 using Trazza.Platform.Matchmaking.Domain.Model.Aggregates;
@@ -17,6 +18,7 @@ public class MessageCommandService(
     IReturnRouteRepository returnRouteRepository,
     IShipmentRequestRepository shipmentRequestRepository,
     IProfilesService profilesService,
+    IExecutionContextFacade executionContextFacade,
     IUnitOfWork unitOfWork)
     : IMessageCommandService
 {
@@ -32,6 +34,14 @@ public class MessageCommandService(
         var error = await EnsureParticipantAsync(command.UserId, command.MatchProposalId, cancellationToken);
         if (!error.IsNone)
             return Result<Message>.Failure(error);
+
+        // The chat is open while the proposal is pending, and after it is accepted until its trip is closed.
+        var proposal =
+            await matchProposalRepository.FindByIdAsNoTrackingAsync(command.MatchProposalId, cancellationToken);
+        var chatOpen = proposal is not null && (proposal.IsPending || (proposal.IsAccepted &&
+            !await executionContextFacade.IsTripClosedAsync(proposal.Id, cancellationToken)));
+        if (!chatOpen)
+            return Result<Message>.Failure(MatchmakingErrors.ChatClosed);
 
         var message = new Message(command.MatchProposalId, command.UserId, content, DateTimeOffset.UtcNow);
 

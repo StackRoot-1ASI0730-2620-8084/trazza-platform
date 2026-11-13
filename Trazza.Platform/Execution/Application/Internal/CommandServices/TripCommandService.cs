@@ -2,6 +2,7 @@ using Trazza.Platform.Execution.Domain.Model.Aggregates;
 using Trazza.Platform.Execution.Domain.Model.Commands;
 using Trazza.Platform.Execution.Domain.Services;
 using Trazza.Platform.Iam.Interfaces.Acl;
+using Trazza.Platform.Matchmaking.Interfaces.Acl;
 using Trazza.Platform.Shared.Domain.Model;
 using Trazza.Platform.Shared.Domain.Repositories;
 
@@ -13,6 +14,7 @@ namespace Trazza.Platform.Execution.Application.Internal.CommandServices;
 /// </summary>
 public class TripCommandService(
     TripAccessService tripAccessService,
+    IMatchmakingContextFacade matchmakingContextFacade,
     IIamContextFacade iamContextFacade,
     IUnitOfWork unitOfWork,
     TimeProvider timeProvider) : ITripCommandService
@@ -40,6 +42,7 @@ public class TripCommandService(
         if (!access.IsCarrier) return CommandError.Forbidden("only-carrier");
 
         var result = access.Trip.PickUp(command.UserId, timeProvider.GetUtcNow().UtcDateTime);
+        if (result.IsSuccess) await matchmakingContextFacade.MarkPickedUpAsync(access.Trip.MatchProposalId, ct);
         return await SaveAsync(access, result, ct);
     }
 
@@ -53,6 +56,8 @@ public class TripCommandService(
         if (!access.IsCarrier) return CommandError.Forbidden("only-carrier");
 
         var result = access.Trip.Deliver(command.UserId, timeProvider.GetUtcNow().UtcDateTime);
+        if (result.IsSuccess) await matchmakingContextFacade.MarkDeliveredAsync(access.Trip.MatchProposalId, ct);
+
         return await SaveAsync(access, result, ct);
     }
 
@@ -67,6 +72,8 @@ public class TripCommandService(
 
         var now = timeProvider.GetUtcNow().UtcDateTime;
         var result = access.Trip.Confirm(command.UserId, now);
+        if (result.IsSuccess) await matchmakingContextFacade.PurgeChatAsync(access.Trip.MatchProposalId, ct);
+
         return await SaveAsync(access, result, ct);
     }
 
@@ -80,6 +87,13 @@ public class TripCommandService(
 
         var now = timeProvider.GetUtcNow().UtcDateTime;
         var result = access.Trip.Cancel(command.UserId, command.Reason, now);
+        if (result.IsSuccess)
+        {
+            await matchmakingContextFacade.ReleaseAsync(access.Trip.MatchProposalId, access.IsMerchant,
+                command.Reason, now, ct);
+            await matchmakingContextFacade.PurgeChatAsync(access.Trip.MatchProposalId, ct);
+        }
+
         return await SaveAsync(access, result, ct);
     }
 

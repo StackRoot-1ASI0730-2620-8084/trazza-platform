@@ -1,3 +1,4 @@
+using Trazza.Platform.Execution.Interfaces.Acl;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 using Trazza.Platform.Matchmaking.Application.CommandServices;
@@ -22,6 +23,7 @@ public class ReturnRoutesController(
     IReturnRouteCommandService returnRouteCommandService,
     IReturnRouteQueryService returnRouteQueryService,
     IMatchProposalQueryService matchProposalQueryService,
+    IExecutionContextFacade executionContextFacade,
     IProfilesService profilesService,
     ProblemDetailsFactory problemDetailsFactory)
     : ControllerBase
@@ -118,7 +120,10 @@ public class ReturnRoutesController(
     {
         var proposals = await matchProposalQueryService.Handle(
             new GetProposalsByRouteQuery(new ReturnRouteId(returnRouteId)), cancellationToken);
-        return Ok(proposals.Select(MatchProposalResourceFromEntityAssembler.ToResourceFromEntity));
+        var list = proposals.ToList();
+        var tripIds = await executionContextFacade.FindTripPublicIdsByProposalIdsAsync(
+            list.Select(proposal => proposal.Id.Value).ToList(), cancellationToken);
+        return Ok(MatchProposalResourceFromEntityAssembler.ToResourcesFromEntities(list, tripIds));
     }
 
     [HttpPost("{returnRouteId}/cancel")]

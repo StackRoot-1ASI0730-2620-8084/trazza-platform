@@ -25,7 +25,7 @@ public interface IMatchmakingContextFacade
     Task<AcceptedMatchSummary?> FetchAcceptedMatch(ulong matchProposalId, CancellationToken cancellationToken);
 
     /// <summary>
-    ///     Returns the ids of the accepted proposals of the carrier routes or the merchant requests.
+    ///     Returns the ids of the accepted or withdrawn proposals of the carrier routes or the merchant requests.
     /// </summary>
     Task<List<ulong>> ListProposalIdsWithTripsAsync(ulong? carrierProfileId, ulong? merchantProfileId,
         CancellationToken cancellationToken);
@@ -35,4 +35,27 @@ public interface IMatchmakingContextFacade
     /// </summary>
     Task<List<TripContextSnapshot>> ListTripContextsAsync(IReadOnlyCollection<ulong> matchProposalIds,
         CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     The cargo was picked up: the shipment request is in transit and the route is in progress.
+    /// </summary>
+    Task MarkPickedUpAsync(ulong matchProposalId, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     The cargo was delivered: the shipment request is delivered and the route is completed when nothing else is
+    ///     pending on it.
+    /// </summary>
+    Task MarkDeliveredAsync(ulong matchProposalId, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     The trip was cancelled: the proposal is withdrawn, the shipment request is cancelled (by the merchant, or
+    ///     when its pickup window is over) or opened again, and the place on the route is released.
+    /// </summary>
+    Task ReleaseAsync(ulong matchProposalId, bool cancelledByMerchant, string reason, DateTime now,
+        CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Deletes the chat of the proposal once its trip is closed.
+    /// </summary>
+    Task<int> PurgeChatAsync(ulong matchProposalId, CancellationToken cancellationToken);
 }

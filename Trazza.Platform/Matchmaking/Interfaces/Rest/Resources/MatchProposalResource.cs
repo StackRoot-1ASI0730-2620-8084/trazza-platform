@@ -9,4 +9,5 @@ public record MatchProposalResource(
     MoneyResource OfferedRate,
     string Status,
     DateTimeOffset? RespondedAt,
-    DateTimeOffset? CreatedAt);
+    DateTimeOffset? CreatedAt,
+    Guid? TripId);

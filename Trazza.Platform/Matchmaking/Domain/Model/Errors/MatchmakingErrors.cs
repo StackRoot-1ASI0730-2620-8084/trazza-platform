@@ -82,6 +82,12 @@ public static class MatchmakingErrors
     public static readonly Error EmptyMessage =
         Error.Validation("Matchmaking.EmptyMessage", "The message cannot be empty.");
 
+    public static readonly Error ChatClosed =
+        Error.Conflict("Matchmaking.ChatClosed", "The chat of this proposal is closed.");
+
+    public static readonly Error ProposalHasTrip =
+        Error.Conflict("Matchmaking.ProposalHasTrip", "The proposal already has a trip. Cancel the trip instead.");
+
     public static readonly Error MessageTooLong =
         Error.Validation("Matchmaking.MessageTooLong", "The message cannot have more than 2000 characters.");
 }
