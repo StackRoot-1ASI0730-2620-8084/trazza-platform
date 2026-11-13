@@ -190,8 +190,7 @@ builder.Services.AddScoped<IShipmentRequestRepository, ShipmentRequestRepository
 builder.Services.AddScoped<IMatchProposalRepository, MatchProposalRepository>();
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 builder.Services.AddScoped<IRouteMatchingService, RouteMatchingService>();
-// Temporary: replace it with the adapter to the Profiles context when feature/profiles is merged.
-builder.Services.AddScoped<IProfilesService, FakeProfilesService>();
+builder.Services.AddScoped<IProfilesService, IamProfilesService>();
 builder.Services.AddScoped<IReturnRouteCommandService, ReturnRouteCommandService>();
 builder.Services.AddScoped<IReturnRouteQueryService, ReturnRouteQueryService>();
 builder.Services.AddScoped<IShipmentRequestCommandService, ShipmentRequestCommandService>();
