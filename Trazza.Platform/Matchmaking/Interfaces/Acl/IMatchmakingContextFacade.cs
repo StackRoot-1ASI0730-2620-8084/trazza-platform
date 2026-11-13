@@ -1,3 +1,5 @@
+using Trazza.Platform.Execution.Domain.Services;
+
 namespace Trazza.Platform.Matchmaking.Interfaces.Acl;
 
 /// <summary>
@@ -21,4 +23,16 @@ public interface IMatchmakingContextFacade
     ///     Returns the data of an accepted proposal, or null when it does not exist or it is not accepted.
     /// </summary>
     Task<AcceptedMatchSummary?> FetchAcceptedMatch(ulong matchProposalId, CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Returns the ids of the accepted proposals of the carrier routes or the merchant requests.
+    /// </summary>
+    Task<List<ulong>> ListProposalIdsWithTripsAsync(ulong? carrierProfileId, ulong? merchantProfileId,
+        CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Returns the route and shipment of each proposal. Proposals that no longer exist are skipped.
+    /// </summary>
+    Task<List<TripContextSnapshot>> ListTripContextsAsync(IReadOnlyCollection<ulong> matchProposalIds,
+        CancellationToken cancellationToken);
 }
