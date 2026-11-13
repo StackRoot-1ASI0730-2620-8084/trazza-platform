@@ -1,15 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
-using TrazzaPlatform.API.Iam.Domain.Model.Commands;
-using TrazzaPlatform.API.Iam.Domain.Model.ValueObjects;
-using TrazzaPlatform.API.Iam.Domain.Services;
-using TrazzaPlatform.API.Iam.Infrastructure.Pipeline;
-using TrazzaPlatform.API.Iam.Interfaces.Rest.Resources;
-using TrazzaPlatform.API.Iam.Interfaces.Rest.Transform;
-using TrazzaPlatform.API.Resources;
-using TrazzaPlatform.API.Shared.Interfaces.Rest;
+using Trazza.Platform.Iam.Domain.Model.Commands;
+using Trazza.Platform.Iam.Domain.Model.ValueObjects;
+using Trazza.Platform.Iam.Domain.Services;
+using Trazza.Platform.Iam.Infrastructure.Pipeline;
+using Trazza.Platform.Iam.Interfaces.Rest.Resources;
+using Trazza.Platform.Iam.Interfaces.Rest.Transform;
+using Trazza.Platform.Resources;
+using Trazza.Platform.Shared.Interfaces.Rest;
 
-namespace TrazzaPlatform.API.Iam.Interfaces.Rest.Controllers;
+namespace Trazza.Platform.Iam.Interfaces.Rest.Controllers;
 
 /// <summary>
 ///     Trucks of the signed-in carrier. Identified by their public id.

@@ -1,6 +1,6 @@
-using TrazzaPlatform.API.Shared.Domain.Model.Entities;
+using Trazza.Platform.Shared.Domain.Model.Entities;
 
-namespace TrazzaPlatform.API.Iam.Domain.Model.Aggregates;
+namespace Trazza.Platform.Iam.Domain.Model.Aggregates;
 
 /// <summary>
 ///     Carrier profile (<c>carrier_profiles</c>): owner of the fleet (vehicles and drivers).
@@ -20,6 +20,9 @@ public class CarrierProfile : IAuditableEntity
     public ulong UserId { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
+
+    DateTimeOffset? IAuditableEntity.CreatedAt { get => CreatedAt; set => CreatedAt = value?.UtcDateTime ?? default; }
+    DateTimeOffset? IAuditableEntity.UpdatedAt { get => UpdatedAt; set => UpdatedAt = value?.UtcDateTime ?? default; }
 }
 
 /// <summary>
@@ -49,6 +52,9 @@ public class MerchantProfile : IAuditableEntity
     public string BusinessType { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
+
+    DateTimeOffset? IAuditableEntity.CreatedAt { get => CreatedAt; set => CreatedAt = value?.UtcDateTime ?? default; }
+    DateTimeOffset? IAuditableEntity.UpdatedAt { get => UpdatedAt; set => UpdatedAt = value?.UtcDateTime ?? default; }
 
     public void Update(string businessName, string businessType)
     {

@@ -1,9 +1,9 @@
-﻿using TrazzaPlatform.API.Billing.Domain.Model.Aggregates;
-using TrazzaPlatform.API.Billing.Domain.Repositories;
-using TrazzaPlatform.API.Billing.Domain.Services;
-using TrazzaPlatform.API.Execution.Interfaces.Acl;
+﻿using Trazza.Platform.Billing.Domain.Model.Aggregates;
+using Trazza.Platform.Billing.Domain.Repositories;
+using Trazza.Platform.Billing.Domain.Services;
+using Trazza.Platform.Execution.Interfaces.Acl;
  
-namespace TrazzaPlatform.API.Billing.Application.Internal.QueryServices;
+namespace Trazza.Platform.Billing.Application.Internal.QueryServices;
  
 public class BillingQueryService(
     IPlanRepository planRepository,

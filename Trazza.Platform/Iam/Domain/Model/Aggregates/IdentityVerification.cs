@@ -1,6 +1,6 @@
-using TrazzaPlatform.API.Iam.Domain.Model.ValueObjects;
+using Trazza.Platform.Iam.Domain.Model.ValueObjects;
 
-namespace TrazzaPlatform.API.Iam.Domain.Model.Aggregates;
+namespace Trazza.Platform.Iam.Domain.Model.Aggregates;
 
 /// <summary>
 ///     One KYC attempt against RENIEC (simulated in the MVP). Document photos are optional S3 keys.

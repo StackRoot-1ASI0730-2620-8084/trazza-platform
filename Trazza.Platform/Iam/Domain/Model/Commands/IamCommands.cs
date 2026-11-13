@@ -1,6 +1,6 @@
-using TrazzaPlatform.API.Iam.Domain.Model.ValueObjects;
+using Trazza.Platform.Iam.Domain.Model.ValueObjects;
 
-namespace TrazzaPlatform.API.Iam.Domain.Model.Commands;
+namespace Trazza.Platform.Iam.Domain.Model.Commands;
 
 /// <summary>Business data required for the merchant role.</summary>
 public record MerchantData(string BusinessName, string Ruc, string BusinessType);

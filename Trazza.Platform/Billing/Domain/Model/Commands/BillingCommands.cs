@@ -1,4 +1,4 @@
-﻿namespace TrazzaPlatform.API.Billing.Domain.Model.Commands;
+﻿namespace Trazza.Platform.Billing.Domain.Model.Commands;
  
 public record SubscribeCommand(ulong UserId, string PlanCode, IReadOnlyCollection<Guid> VehicleIds);
  

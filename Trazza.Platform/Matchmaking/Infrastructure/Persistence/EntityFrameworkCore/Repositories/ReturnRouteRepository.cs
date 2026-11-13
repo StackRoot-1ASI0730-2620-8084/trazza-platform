@@ -134,12 +134,13 @@ public class ReturnRouteRepository(AppDbContext context) : BaseRepository<Return
 
         // The ids come from the database, so joining them in the text is safe.
         var ids = string.Join(",", routes.Select(route => route.Id.Value));
-        var rows = await Context.Database.SqlQueryRaw<LocationRow>(
-                "SELECT id AS Id, " +
-                "ST_Latitude(origin_location) AS FirstLatitude, ST_Longitude(origin_location) AS FirstLongitude, " +
-                "ST_Latitude(destination_location) AS SecondLatitude, " +
-                "ST_Longitude(destination_location) AS SecondLongitude " +
-                $"FROM return_routes WHERE id IN ({ids})")
+        var sql =
+            "SELECT id AS Id, " +
+            "ST_Latitude(origin_location) AS FirstLatitude, ST_Longitude(origin_location) AS FirstLongitude, " +
+            "ST_Latitude(destination_location) AS SecondLatitude, " +
+            "ST_Longitude(destination_location) AS SecondLongitude " +
+            $"FROM return_routes WHERE id IN ({ids})";
+        var rows = await Context.Database.SqlQueryRaw<LocationRow>(sql)
             .ToListAsync(cancellationToken);
 
         var locations = rows.ToDictionary(row => row.Id);

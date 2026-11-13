@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Localization;
-using TrazzaPlatform.API.Resources;
-using TrazzaPlatform.API.Shared.Domain.Model;
-using TrazzaPlatform.API.Shared.Domain.Model.ValueObjects;
-using TrazzaPlatform.API.Shared.Interfaces.Rest.Transform;
+using Trazza.Platform.Resources;
+using Trazza.Platform.Shared.Domain.Model;
+using Trazza.Platform.Shared.Domain.Model.ValueObjects;
+using Trazza.Platform.Shared.Interfaces.Rest.Transform;
 
-namespace TrazzaPlatform.API.Iam.Infrastructure.Pipeline;
+namespace Trazza.Platform.Iam.Infrastructure.Pipeline;
 
 /// <summary>
 ///     Requires an authenticated user and, optionally, one of the given roles (<c>CARRIER</c>, <c>MERCHANT</c>).

@@ -1,9 +1,9 @@
-﻿using TrazzaPlatform.API.Billing.Domain.Model.Aggregates;
-using TrazzaPlatform.API.Billing.Domain.Model.Commands;
-using TrazzaPlatform.API.Execution.Interfaces.Acl;
-using TrazzaPlatform.API.Shared.Domain.Model;
+﻿using Trazza.Platform.Billing.Domain.Model.Aggregates;
+using Trazza.Platform.Billing.Domain.Model.Commands;
+using Trazza.Platform.Execution.Interfaces.Acl;
+using Trazza.Platform.Shared.Domain.Model;
  
-namespace TrazzaPlatform.API.Billing.Domain.Services;
+namespace Trazza.Platform.Billing.Domain.Services;
  
 public record SubscribedVehicle(Guid Id, string Plate);
  

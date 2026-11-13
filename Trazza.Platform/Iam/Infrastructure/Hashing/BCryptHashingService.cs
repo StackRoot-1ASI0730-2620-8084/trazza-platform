@@ -1,8 +1,8 @@
 
-using TrazzaPlatform.API.Iam.Application.Internal.OutboundServices;
+using Trazza.Platform.Iam.Application.Internal.OutboundServices;
 using BCryptNet = BCrypt.Net.BCrypt;
 
-namespace TrazzaPlatform.API.Iam.Infrastructure.Hashing;
+namespace Trazza.Platform.Iam.Infrastructure.Hashing;
 
 public class BCryptHashingService : IHashingService
 {
