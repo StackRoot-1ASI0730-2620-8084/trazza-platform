@@ -1,6 +1,7 @@
 using Trazza.Platform.Execution.Domain.Model.Aggregates;
 using Trazza.Platform.Execution.Domain.Model.Commands;
 using Trazza.Platform.Shared.Domain.Model;
+using Trazza.Platform.Shared.Domain.Model.ValueObjects;
 
 namespace Trazza.Platform.Execution.Domain.Services;
 
@@ -21,9 +22,28 @@ public record TripView(
     int OpenAlerts,
     bool IsCarrier);
 
-public class TripContextSnapshot
-{
-}
+/// <summary>The route and shipment of a trip, as Matchmaking sees them. Ids are the numeric Matchmaking ids.</summary>
+public record TripContextSnapshot(
+    ulong MatchProposalId,
+    ulong MatchProposalPublicId,
+    ulong ReturnRoutePublicId,
+    ulong ShipmentRequestPublicId,
+    ulong CarrierProfileId,
+    ulong MerchantProfileId,
+    ulong VehicleId,
+    ulong? RouteDriverId,
+    string OriginAddress,
+    GeoLocation Origin,
+    string DestinationAddress,
+    GeoLocation Destination,
+    string PickupAddress,
+    GeoLocation Pickup,
+    string DeliveryAddress,
+    GeoLocation Delivery,
+    DateTime DepartureAt,
+    string Description,
+    decimal WeightKg,
+    decimal VolumeM3);
 
 public record TrackingResult(TrackingPoint Point, DeviationAlert? Alert, string TripStatus);
 
