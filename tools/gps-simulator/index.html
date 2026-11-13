@@ -160,7 +160,7 @@
   async function sendNext(tripId) {
     if (index >= path.length) return stop('Llegó al destino. Marca la entrega desde la app.');
     let [lat, lng] = path[index++];
-    if ($('deviate').checked) lat += 0.027; // about 3 km to the north
+    if ($('deviate').checked) lat += 0.027;
     try {
       const result = await api('POST', `/api/v1/trips/${tripId}/tracking-points`, {
         latitude: lat, longitude: lng, speedKmh: 35 + Math.round(Math.random() * 20), source: 'PHONE'

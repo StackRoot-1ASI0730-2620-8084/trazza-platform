@@ -16,8 +16,6 @@ using Microsoft.Extensions.Localization;
 using Scalar.AspNetCore;
 using ProblemDetailsFactory = Trazza.Platform.Shared.Interfaces.Rest.ProblemDetails.ProblemDetailsFactory;
 
-// Bounded context namespaces: uncomment each block when its feature branch is merged into develop.
-// IAM (feature/iam)
 using Trazza.Platform.Iam.Application.Internal.CommandServices;
 using Trazza.Platform.Iam.Application.Internal.OutboundServices;
 using Trazza.Platform.Iam.Application.Internal.QueryServices;
@@ -29,16 +27,6 @@ using Trazza.Platform.Iam.Infrastructure.Pipeline;
 using Trazza.Platform.Iam.Infrastructure.Security;
 using Trazza.Platform.Iam.Infrastructure.Tokens;
 using Trazza.Platform.Iam.Interfaces.Acl;
-// Profiles (feature/profiles)
-// using Trazza.Platform.Profiles.Application.Acl;
-// using Trazza.Platform.Profiles.Application.CommandServices;
-// using Trazza.Platform.Profiles.Application.Internal.CommandServices;
-// using Trazza.Platform.Profiles.Application.Internal.QueryServices;
-// using Trazza.Platform.Profiles.Application.QueryServices;
-// using Trazza.Platform.Profiles.Domain.Repositories;
-// using Trazza.Platform.Profiles.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
-// using Trazza.Platform.Profiles.Interfaces.Acl;
-// Matchmaking (feature/matchmaking)
 using Trazza.Platform.Matchmaking.Application.Acl;
 using Trazza.Platform.Matchmaking.Application.CommandServices;
 using Trazza.Platform.Matchmaking.Application.Internal.CommandServices;
@@ -133,16 +121,13 @@ builder.Services.AddSingleton<ProblemDetailsFactory>();
 builder.Services.AddOpenApi(options =>
 {
     options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
-    // IAM (feature/iam)
-    // options.AddOperationTransformer<IamBearerSecurityOperationTransformer>();
 });
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<AuditableEntityInterceptor>();
 builder.Services.AddScoped<DispatchDomainEventsInterceptor>();
 
-// Bounded context registrations: uncomment each block when its feature branch is merged into develop.
-// IAM (feature/iam)
+// IAM
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddOptions<TokenSettings>()
     .Bind(builder.Configuration.GetSection("TokenSettings"))
@@ -174,16 +159,7 @@ builder.Services.AddScoped<IFleetCommandService, FleetCommandService>();
 builder.Services.AddScoped<IFleetQueryService, FleetQueryService>();
 builder.Services.AddScoped<IIamContextFacade, IamContextFacade>();
 
-// Profiles (feature/profiles)
-// builder.Services.AddScoped<ICarrierProfileRepository, CarrierProfileRepository>();
-// builder.Services.AddScoped<IMerchantProfileRepository, MerchantProfileRepository>();
-// builder.Services.AddScoped<ICarrierProfileCommandService, CarrierProfileCommandService>();
-// builder.Services.AddScoped<ICarrierProfileQueryService, CarrierProfileQueryService>();
-// builder.Services.AddScoped<IMerchantProfileCommandService, MerchantProfileCommandService>();
-// builder.Services.AddScoped<IMerchantProfileQueryService, MerchantProfileQueryService>();
-// builder.Services.AddScoped<IProfilesContextFacade, ProfilesContextFacade>();
-
-// Matchmaking (feature/matchmaking)
+// Matchmaking
 builder.Services.AddScoped<IReturnRouteRepository, ReturnRouteRepository>();
 builder.Services.AddScoped<IShipmentRequestRepository, ShipmentRequestRepository>();
 builder.Services.AddScoped<IMatchProposalRepository, MatchProposalRepository>();
@@ -259,7 +235,6 @@ app.MapScalarApiReference();
 
 app.UseCors("TrazzaWebAppPolicy");
 
-// IAM (feature/iam)
 app.UseRequestAuthorization();
 
 app.UseHttpsRedirection();
