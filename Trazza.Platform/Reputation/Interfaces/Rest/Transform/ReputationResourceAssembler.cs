@@ -1,8 +1,8 @@
-using TrazzaPlatform.API.Reputation.Domain.Services;
-using TrazzaPlatform.API.Reputation.Interfaces.Rest.Resources;
-using TrazzaPlatform.API.Shared.Domain.Model.ValueObjects;
+using Trazza.Platform.Reputation.Domain.Services;
+using Trazza.Platform.Reputation.Interfaces.Rest.Resources;
+using Trazza.Platform.Shared.Domain.Model.ValueObjects;
 
-namespace TrazzaPlatform.API.Reputation.Interfaces.Rest.Transform;
+namespace Trazza.Platform.Reputation.Interfaces.Rest.Transform;
 
 public static class ReputationResourceAssembler
 {

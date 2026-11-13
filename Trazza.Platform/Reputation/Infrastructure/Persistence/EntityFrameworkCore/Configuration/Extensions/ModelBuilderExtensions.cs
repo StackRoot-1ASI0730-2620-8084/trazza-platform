@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using TrazzaPlatform.API.Reputation.Domain.Model.Aggregates;
-using TrazzaPlatform.API.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
+using Trazza.Platform.Reputation.Domain.Model.Aggregates;
+using Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 
-namespace TrazzaPlatform.API.Reputation.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
+namespace Trazza.Platform.Reputation.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 
 /// <summary>Mapping of the Loyalty &amp; Reputation tables.</summary>
 public static class ModelBuilderExtensions

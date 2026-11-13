@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
-using TrazzaPlatform.API.Shared.Domain.Model;
+using Trazza.Platform.Shared.Domain.Model;
 
-namespace TrazzaPlatform.API.Iam.Domain.Model.ValueObjects;
+namespace Trazza.Platform.Iam.Domain.Model.ValueObjects;
 
 /// <summary>Peruvian national identity document: exactly eight digits.</summary>
 public partial record Dni(string Value)

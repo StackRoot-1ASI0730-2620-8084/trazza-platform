@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="ErrorTitleConflict" xml:space="preserve"><value>La operación entra en conflicto con el estado actual</value></data>
+  <data name="ErrorTitleForbidden" xml:space="preserve"><value>Operación no permitida</value></data>
+  <data name="ErrorTitleNotFound" xml:space="preserve"><value>Recurso no encontrado</value></data>
+  <data name="ErrorTitleUnauthorized" xml:space="preserve"><value>Autenticación requerida</value></data>
+  <data name="ErrorTitleUnexpected" xml:space="preserve"><value>Error inesperado del servidor</value></data>
+  <data name="ErrorTitleValidation" xml:space="preserve"><value>Solicitud no válida</value></data>
+  <data name="InvalidModelStateTitle" xml:space="preserve"><value>Se produjeron uno o más errores de validación.</value></data>
+  <data name="OpenApiBearerDescription" xml:space="preserve"><value>JWT devuelto por sign-in o sign-up.</value></data>
+  <data name="OpenApiDocumentDescription" xml:space="preserve"><value>API RESTful de Trazza: los transportistas publican sus viajes de retorno vacíos y los comerciantes de Lima envían su mercadería en ellos. Inicia sesión con POST /api/v1/authentication/sign-in y usa el token como autenticación Bearer.</value></data>
+  <data name="RequiredField" xml:space="preserve"><value>El campo {0} es obligatorio.</value></data>
+  <data name="ScoreRange" xml:space="preserve"><value>La calificación debe estar entre 1 y 5.</value></data>
+  <data name="UnexpectedErrorProcessingRequest" xml:space="preserve"><value>Ocurrió un error inesperado al procesar la solicitud.</value></data>
+  <data name="UnexpectedServerError" xml:space="preserve"><value>Error inesperado del servidor</value></data>
+  <data name="account-locked" xml:space="preserve"><value>Demasiados intentos fallidos. Vuelve a intentarlo en 15 minutos.</value></data>
+  <data name="address-district-invalid" xml:space="preserve"><value>El distrito no es válido.</value></data>
+  <data name="address-invalid" xml:space="preserve"><value>La dirección es obligatoria (hasta 255 caracteres).</value></data>
+  <data name="address-label-required" xml:space="preserve"><value>La dirección necesita una etiqueta (por ejemplo Casa o Almacén).</value></data>
+  <data name="address-street-required" xml:space="preserve"><value>La dirección es obligatoria.</value></data>
+  <data name="alert-not-found" xml:space="preserve"><value>La alerta de desvío no existe.</value></data>
+  <data name="authentication-required" xml:space="preserve"><value>Debes iniciar sesión.</value></data>
+  <data name="business-name-required" xml:space="preserve"><value>La razón social es obligatoria.</value></data>
+  <data name="business-type-required" xml:space="preserve"><value>El rubro del negocio es obligatorio.</value></data>
+  <data name="cancellation-reason-required" xml:space="preserve"><value>Indica el motivo de la cancelación (hasta 255 caracteres).</value></data>
+  <data name="capacity-exceeded" xml:space="preserve"><value>El camión no tiene capacidad libre ni cupos suficientes para esta carga.</value></data>
+  <data name="capacity-volume-invalid" xml:space="preserve"><value>El volumen no es válido.</value></data>
+  <data name="capacity-weight-invalid" xml:space="preserve"><value>La carga máxima debe ser mayor a 0 y hasta 30 000 kg.</value></data>
+  <data name="cargo-dimensions-invalid" xml:space="preserve"><value>Las medidas de la tolva deben ser mayores a 0 y hasta 20 m.</value></data>
+  <data name="carrier-profile-required" xml:space="preserve"><value>Necesitas el rol de transportista para hacer esto.</value></data>
+  <data name="carrier-role-required" xml:space="preserve"><value>Necesitas el rol de transportista para hacer esto.</value></data>
+  <data name="chat-closed" xml:space="preserve"><value>El chat de esta oferta está cerrado.</value></data>
+  <data name="comment-invalid" xml:space="preserve"><value>El comentario puede tener hasta 500 caracteres.</value></data>
+  <data name="compensation-not-found" xml:space="preserve"><value>Este viaje no tiene compensación por lucro cesante.</value></data>
+  <data name="compensation-settled" xml:space="preserve"><value>La compensación ya fue resuelta.</value></data>
+  <data name="currency-invalid" xml:space="preserve"><value>La moneda debe ser PEN o USD.</value></data>
+  <data name="date-time-invalid" xml:space="preserve"><value>La fecha y hora no son válidas.</value></data>
+  <data name="departure-must-be-future" xml:space="preserve"><value>La salida debe ser en el futuro.</value></data>
+  <data name="description-invalid" xml:space="preserve"><value>La descripción es obligatoria (hasta el largo permitido).</value></data>
+  <data name="dni-already-registered" xml:space="preserve"><value>Este DNI ya está registrado.</value></data>
+  <data name="dni-invalid" xml:space="preserve"><value>El DNI debe tener 8 dígitos.</value></data>
+  <data name="driver-inactive" xml:space="preserve"><value>El conductor está inactivo.</value></data>
+  <data name="driver-not-found" xml:space="preserve"><value>El conductor no existe.</value></data>
+  <data name="email-already-registered" xml:space="preserve"><value>Este correo ya está registrado.</value></data>
+  <data name="email-invalid" xml:space="preserve"><value>El correo no es válido.</value></data>
+  <data name="experience-stars-invalid" xml:space="preserve"><value>La experiencia debe estar entre 1 y 5 estrellas.</value></data>
+  <data name="external-reference-invalid" xml:space="preserve"><value>El número de operación puede tener hasta 100 caracteres.</value></data>
+  <data name="full-name-required" xml:space="preserve"><value>El nombre completo es obligatorio.</value></data>
+  <data name="identity-already-validated" xml:space="preserve"><value>Tu identidad ya está validada.</value></data>
+  <data name="identity-not-found" xml:space="preserve"><value>No se encontraron tus datos de identidad.</value></data>
+  <data name="incident-not-found" xml:space="preserve"><value>La incidencia no existe.</value></data>
+  <data name="incident-resolved" xml:space="preserve"><value>La incidencia ya está resuelta.</value></data>
+  <data name="incident-type-invalid" xml:space="preserve"><value>El tipo de incidencia debe ser DAMAGED, INCOMPLETE, DELAY u OTHER.</value></data>
+  <data name="invalid-credentials" xml:space="preserve"><value>El correo o la contraseña son incorrectos.</value></data>
+  <data name="invalid-refresh-token" xml:space="preserve"><value>Tu sesión expiró. Inicia sesión nuevamente.</value></data>
+  <data name="invalid-request" xml:space="preserve"><value>La solicitud no es válida.</value></data>
+  <data name="iot-device-unavailable" xml:space="preserve"><value>No hay dispositivos IoT disponibles para prestar en este momento.</value></data>
+  <data name="latitude-invalid" xml:space="preserve"><value>La latitud debe estar entre -90 y 90.</value></data>
+  <data name="longitude-invalid" xml:space="preserve"><value>La longitud debe estar entre -180 y 180.</value></data>
+  <data name="max-shipments-invalid" xml:space="preserve"><value>Una ruta puede llevar 1 o 2 envíos.</value></data>
+  <data name="merchant-data-required" xml:space="preserve"><value>Los datos del negocio (razón social, RUC y rubro) son obligatorios para el rol de emprendedor.</value></data>
+  <data name="merchant-profile-not-found" xml:space="preserve"><value>No tienes perfil de emprendedor.</value></data>
+  <data name="merchant-profile-required" xml:space="preserve"><value>Necesitas el rol de emprendedor para hacer esto.</value></data>
+  <data name="message-invalid" xml:space="preserve"><value>El mensaje debe tener entre 1 y 2 000 caracteres.</value></data>
+  <data name="money-invalid" xml:space="preserve"><value>El monto no es válido.</value></data>
+  <data name="only-carrier" xml:space="preserve"><value>Solo el transportista del viaje puede hacer esto.</value></data>
+  <data name="only-merchant" xml:space="preserve"><value>Solo el emprendedor del viaje puede hacer esto.</value></data>
+  <data name="password-too-short" xml:space="preserve"><value>La contraseña debe tener al menos 8 caracteres.</value></data>
+  <data name="phone-invalid" xml:space="preserve"><value>El celular debe ser peruano (9 dígitos que empiezan con 9).</value></data>
+  <data name="pickup-window-invalid" xml:space="preserve"><value>La ventana de recojo debe terminar después de empezar.</value></data>
+  <data name="pickup-window-past" xml:space="preserve"><value>La ventana de recojo ya terminó.</value></data>
+  <data name="plan-not-found" xml:space="preserve"><value>El plan no existe.</value></data>
+  <data name="plan-vehicle-count-invalid" xml:space="preserve"><value>La cantidad de camiones no calza con el plan (el paquete de 6 necesita 5 o 6).</value></data>
+  <data name="plate-already-registered" xml:space="preserve"><value>Esta placa ya está registrada.</value></data>
+  <data name="plate-invalid" xml:space="preserve"><value>La placa debe tener el formato ABC-123.</value></data>
+  <data name="points-insufficient" xml:space="preserve"><value>No tienes puntos suficientes.</value></data>
+  <data name="points-invalid" xml:space="preserve"><value>Los puntos deben ser mayores a 0.</value></data>
+  <data name="proposal-already-exists" xml:space="preserve"><value>Ya hiciste una oferta para este envío con esta ruta.</value></data>
+  <data name="proposal-not-found" xml:space="preserve"><value>La oferta no existe.</value></data>
+  <data name="proposal-not-pending" xml:space="preserve"><value>La oferta ya fue respondida.</value></data>
+  <data name="rate-invalid" xml:space="preserve"><value>La tarifa debe ser mayor a 0.</value></data>
+  <data name="rating-already-given" xml:space="preserve"><value>Ya calificaste este viaje.</value></data>
+  <data name="recorded-at-invalid" xml:space="preserve"><value>La hora del GPS no puede estar en el futuro.</value></data>
+  <data name="resolution-invalid" xml:space="preserve"><value>La resolución es obligatoria (hasta 1 000 caracteres).</value></data>
+  <data name="role-already-granted" xml:space="preserve"><value>Ya tienes este rol.</value></data>
+  <data name="role-invalid" xml:space="preserve"><value>El rol debe ser CARRIER o MERCHANT.</value></data>
+  <data name="role-required" xml:space="preserve"><value>Tu cuenta no tiene el rol necesario para esto.</value></data>
+  <data name="route-closed" xml:space="preserve"><value>La ruta ya está completada o cancelada.</value></data>
+  <data name="route-has-trips" xml:space="preserve"><value>La ruta tiene envíos aceptados. Cancela esos viajes primero.</value></data>
+  <data name="route-not-accepting" xml:space="preserve"><value>La ruta no está recibiendo nuevos envíos.</value></data>
+  <data name="route-not-found" xml:space="preserve"><value>La ruta no existe.</value></data>
+  <data name="ruc-already-registered" xml:space="preserve"><value>Este RUC ya está registrado.</value></data>
+  <data name="ruc-invalid" xml:space="preserve"><value>El RUC debe tener 11 dígitos y empezar con 10 o 20.</value></data>
+  <data name="s3-key-invalid" xml:space="preserve"><value>La clave del archivo no es válida.</value></data>
+  <data name="saved-address-not-found" xml:space="preserve"><value>La dirección guardada no existe.</value></data>
+  <data name="schedule-incompatible" xml:space="preserve"><value>La salida de la ruta no calza con la ventana de recojo.</value></data>
+  <data name="score-invalid" xml:space="preserve"><value>La calificación debe estar entre 1 y 5.</value></data>
+  <data name="settlement-not-found" xml:space="preserve"><value>Este viaje aún no tiene liquidación de flete.</value></data>
+  <data name="sex-invalid" xml:space="preserve"><value>El sexo debe ser F, M o X.</value></data>
+  <data name="shipment-not-found" xml:space="preserve"><value>El envío no existe.</value></data>
+  <data name="shipment-not-open" xml:space="preserve"><value>El envío ya no está abierto.</value></data>
+  <data name="source-invalid" xml:space="preserve"><value>La fuente debe ser PHONE o IOT.</value></data>
+  <data name="speed-invalid" xml:space="preserve"><value>La velocidad debe estar entre 0 y 300 km/h.</value></data>
+  <data name="subscription-cancelled" xml:space="preserve"><value>La suscripción está cancelada.</value></data>
+  <data name="subscription-not-found" xml:space="preserve"><value>La suscripción no existe.</value></data>
+  <data name="trip-not-confirmed" xml:space="preserve"><value>Solo puedes calificar viajes confirmados.</value></data>
+  <data name="trip-not-found" xml:space="preserve"><value>El viaje no existe.</value></data>
+  <data name="trip-not-on-the-road" xml:space="preserve"><value>Solo se aceptan puntos GPS después del recojo y antes de la entrega.</value></data>
+  <data name="trip-status-invalid" xml:space="preserve"><value>Esta acción no está permitida en el estado actual del viaje.</value></data>
+  <data name="unexpected-error" xml:space="preserve"><value>Ocurrió un error inesperado.</value></data>
+  <data name="user-not-found" xml:space="preserve"><value>El usuario no existe.</value></data>
+  <data name="vehicle-already-subscribed" xml:space="preserve"><value>Uno de los camiones ya tiene un plan activo.</value></data>
+  <data name="vehicle-inactive" xml:space="preserve"><value>El camión está inactivo.</value></data>
+  <data name="vehicle-model-required" xml:space="preserve"><value>El modelo del camión es obligatorio.</value></data>
+  <data name="vehicle-not-found" xml:space="preserve"><value>El camión no existe.</value></data>
+  <data name="volume-invalid" xml:space="preserve"><value>El volumen debe ser mayor a 0.</value></data>
+  <data name="weight-invalid" xml:space="preserve"><value>El peso debe ser mayor a 0 y hasta 30 000 kg.</value></data>
+</root>

@@ -4,11 +4,11 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using TrazzaPlatform.API.Iam.Application.Internal.OutboundServices;
-using TrazzaPlatform.API.Iam.Domain.Model.Aggregates;
-using TrazzaPlatform.API.Shared.Domain.Model.ValueObjects;
+using Trazza.Platform.Iam.Application.Internal.OutboundServices;
+using Trazza.Platform.Iam.Domain.Model.Aggregates;
+using Trazza.Platform.Shared.Domain.Model.ValueObjects;
 
-namespace TrazzaPlatform.API.Iam.Infrastructure.Tokens;
+namespace Trazza.Platform.Iam.Infrastructure.Tokens;
 
 /// <summary>
 ///     Signs short-lived access tokens (HMAC-SHA256) whose subject is the user's public id, and creates

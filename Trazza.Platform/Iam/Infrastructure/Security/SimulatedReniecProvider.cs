@@ -1,6 +1,6 @@
-using TrazzaPlatform.API.Iam.Application.Internal.OutboundServices;
+using Trazza.Platform.Iam.Application.Internal.OutboundServices;
 
-namespace TrazzaPlatform.API.Iam.Infrastructure.Security;
+namespace Trazza.Platform.Iam.Infrastructure.Security;
 
 /// <summary>
 ///     Simulated RENIEC check for the MVP: every DNI is validated except the test DNI <c>00000000</c>.

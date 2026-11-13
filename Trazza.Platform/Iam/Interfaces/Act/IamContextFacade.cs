@@ -1,7 +1,7 @@
-using TrazzaPlatform.API.Iam.Application.Internal.OutboundServices;
-using TrazzaPlatform.API.Iam.Domain.Repositories;
+using Trazza.Platform.Iam.Application.Internal.OutboundServices;
+using Trazza.Platform.Iam.Domain.Repositories;
 
-namespace TrazzaPlatform.API.Iam.Interfaces.Acl;
+namespace Trazza.Platform.Iam.Interfaces.Acl;
 
 public record VehicleSnapshot(
     ulong Id,

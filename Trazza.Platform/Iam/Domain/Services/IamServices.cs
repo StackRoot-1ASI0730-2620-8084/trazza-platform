@@ -1,8 +1,8 @@
-using TrazzaPlatform.API.Iam.Domain.Model.Aggregates;
-using TrazzaPlatform.API.Iam.Domain.Model.Commands;
-using TrazzaPlatform.API.Shared.Domain.Model;
+using Trazza.Platform.Iam.Domain.Model.Aggregates;
+using Trazza.Platform.Iam.Domain.Model.Commands;
+using Trazza.Platform.Shared.Domain.Model;
 
-namespace TrazzaPlatform.API.Iam.Domain.Services;
+namespace Trazza.Platform.Iam.Domain.Services;
 
 /// <summary>Account as seen by its owner: user, decrypted contact data and profiles.</summary>
 public record UserAccount(

@@ -117,12 +117,13 @@ public class ShipmentRequestRepository(AppDbContext context)
 
         // The ids come from the database, so joining them in the text is safe.
         var ids = string.Join(",", requests.Select(request => request.Id.Value));
-        var rows = await Context.Database.SqlQueryRaw<LocationRow>(
-                "SELECT id AS Id, " +
-                "ST_Latitude(pickup_location) AS FirstLatitude, ST_Longitude(pickup_location) AS FirstLongitude, " +
-                "ST_Latitude(delivery_location) AS SecondLatitude, " +
-                "ST_Longitude(delivery_location) AS SecondLongitude " +
-                $"FROM shipment_requests WHERE id IN ({ids})")
+        var sql =
+            "SELECT id AS Id, " +
+            "ST_Latitude(pickup_location) AS FirstLatitude, ST_Longitude(pickup_location) AS FirstLongitude, " +
+            "ST_Latitude(delivery_location) AS SecondLatitude, " +
+            "ST_Longitude(delivery_location) AS SecondLongitude " +
+            $"FROM shipment_requests WHERE id IN ({ids})";
+        var rows = await Context.Database.SqlQueryRaw<LocationRow>(sql)
             .ToListAsync(cancellationToken);
 
         var locations = rows.ToDictionary(row => row.Id);

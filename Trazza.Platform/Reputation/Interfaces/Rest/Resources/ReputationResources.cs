@@ -1,4 +1,4 @@
-namespace TrazzaPlatform.API.Reputation.Interfaces.Rest.Resources;
+namespace Trazza.Platform.Reputation.Interfaces.Rest.Resources;
 
 public record RateTripResource(Guid TripId, int Score, string? Comment);
 
