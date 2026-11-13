@@ -12,6 +12,12 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Matchmaking.ChatClosed" xml:space="preserve">
+    <value>The chat of this proposal is closed.</value>
+  </data>
+  <data name="Matchmaking.ProposalHasTrip" xml:space="preserve">
+    <value>The proposal already has a trip. Cancel the trip instead.</value>
+  </data>
   <data name="Matchmaking.CapacityExceeded" xml:space="preserve">
     <value>The shipment exceeds the remaining capacity of the vehicle.</value>
   </data>

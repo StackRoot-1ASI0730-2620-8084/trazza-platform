@@ -73,6 +73,28 @@ public partial class ShipmentRequest : AggregateRoot
         return Error.None;
     }
 
+    /// <summary>
+    ///     The carrier picked up the cargo.
+    /// </summary>
+    public Error MarkInTransit()
+    {
+        if (Status != EShipmentRequestStatus.Matched) return MatchmakingErrors.ShipmentRequestNotOpen;
+
+        Status = EShipmentRequestStatus.InTransit;
+        return Error.None;
+    }
+
+    /// <summary>
+    ///     The carrier delivered the cargo.
+    /// </summary>
+    public Error MarkDelivered()
+    {
+        if (Status != EShipmentRequestStatus.InTransit) return MatchmakingErrors.ShipmentRequestNotOpen;
+
+        Status = EShipmentRequestStatus.Delivered;
+        return Error.None;
+    }
+
     public Error Cancel(string? reason, DateTimeOffset now)
     {
         if (Status is not (EShipmentRequestStatus.Open or EShipmentRequestStatus.Matched))

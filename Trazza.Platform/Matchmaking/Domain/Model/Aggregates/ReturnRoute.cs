@@ -92,6 +92,30 @@ public partial class ReturnRoute : AggregateRoot
         return Error.None;
     }
 
+    /// <summary>
+    ///     The first shipment of the route was picked up.
+    /// </summary>
+    public Error Start()
+    {
+        if (Status == EReturnRouteStatus.InProgress) return Error.None;
+        if (Status is not (EReturnRouteStatus.Published or EReturnRouteStatus.Full))
+            return MatchmakingErrors.ReturnRouteNotPublished;
+
+        Status = EReturnRouteStatus.InProgress;
+        return Error.None;
+    }
+
+    /// <summary>
+    ///     None of the shipments of the route is waiting or on the way anymore.
+    /// </summary>
+    public Error Complete()
+    {
+        if (Status != EReturnRouteStatus.InProgress) return MatchmakingErrors.ReturnRouteNotPublished;
+
+        Status = EReturnRouteStatus.Completed;
+        return Error.None;
+    }
+
     public Error Cancel()
     {
         if (Status is not (EReturnRouteStatus.Published or EReturnRouteStatus.Full))

@@ -11,12 +11,15 @@ namespace Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.
 /// </summary>
 public class UnitOfWork(AppDbContext context) : IUnitOfWork
 {
+    private bool _inExplicitTransaction;
+
     public async Task CompleteAsync(CancellationToken cancellationToken = default)
     {
         await context.SaveChangesAsync(cancellationToken);
 
         // A repository may open a transaction to hold a row lock or to read LAST_INSERT_ID on the same connection.
-        if (context.Database.CurrentTransaction is { } transaction)
+        // A transaction opened by ExecuteInTransactionAsync is committed there, at the end of the whole work.
+        if (!_inExplicitTransaction && context.Database.CurrentTransaction is { } transaction)
             await transaction.CommitAsync(cancellationToken);
     }
 
@@ -26,6 +29,7 @@ public class UnitOfWork(AppDbContext context) : IUnitOfWork
         if (context.Database.CurrentTransaction is not null) return await work();
 
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+        _inExplicitTransaction = true;
         try
         {
             var result = await work();
@@ -37,6 +41,10 @@ public class UnitOfWork(AppDbContext context) : IUnitOfWork
         {
             await transaction.RollbackAsync(cancellationToken);
             throw;
+        }
+        finally
+        {
+            _inExplicitTransaction = false;
         }
     }
 }

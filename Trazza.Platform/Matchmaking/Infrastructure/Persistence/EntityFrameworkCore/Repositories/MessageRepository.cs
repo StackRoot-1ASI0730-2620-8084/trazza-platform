@@ -19,6 +19,14 @@ public class MessageRepository(AppDbContext context) : BaseRepository<Message>(c
             .ToListAsync(cancellationToken);
     }
 
+    public async Task<int> DeleteByMatchProposalIdAsync(MatchProposalId matchProposalId,
+        CancellationToken cancellationToken)
+    {
+        return await Context.Set<Message>()
+            .Where(message => message.MatchProposalId == matchProposalId)
+            .ExecuteDeleteAsync(cancellationToken);
+    }
+
     public async Task<IEnumerable<Message>> ListUnreadSentByOthersAsync(MatchProposalId matchProposalId,
         UserId reader, CancellationToken cancellationToken)
     {

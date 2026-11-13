@@ -1,3 +1,4 @@
+using Trazza.Platform.Execution.Interfaces.Acl;
 using Trazza.Platform.Matchmaking.Application.CommandServices;
 using Trazza.Platform.Matchmaking.Application.Internal.OutboundServices;
 using Trazza.Platform.Matchmaking.Domain.Model.Aggregates;
@@ -14,6 +15,7 @@ public class MatchProposalCommandService(
     IReturnRouteRepository returnRouteRepository,
     IShipmentRequestRepository shipmentRequestRepository,
     IProfilesService profilesService,
+    IExecutionContextFacade executionContextFacade,
     IUnitOfWork unitOfWork)
     : IMatchProposalCommandService
 {
@@ -61,10 +63,15 @@ public class MatchProposalCommandService(
     }
 
     /// <summary>
-    ///     The merchant accepts an offer: the shipment is matched, the other pending offers expire
-    ///     and the route may become full.
+    ///     The merchant accepts an offer: the shipment is matched, the other pending offers expire,
+    ///     the route may become full and the trip is created, all in one transaction.
     /// </summary>
-    public async Task<Result<MatchProposal>> Handle(AcceptMatchProposalCommand command,
+    public Task<Result<MatchProposal>> Handle(AcceptMatchProposalCommand command,
+        CancellationToken cancellationToken) =>
+        unitOfWork.ExecuteInTransactionAsync(() => AcceptAsync(command, cancellationToken),
+            result => result.IsSuccess, cancellationToken);
+
+    private async Task<Result<MatchProposal>> AcceptAsync(AcceptMatchProposalCommand command,
         CancellationToken cancellationToken)
     {
         var merchantProfileId =
@@ -128,6 +135,8 @@ public class MatchProposalCommandService(
             return Result<MatchProposal>.Failure(error);
 
         await unitOfWork.CompleteAsync(cancellationToken);
+        await executionContextFacade.CreateTripAsync(proposal.Id, route.DriverId?.Value, proposal.OfferedRate.Amount,
+            proposal.OfferedRate.Currency, command.UserId.Value, cancellationToken);
         return Result<MatchProposal>.Success(proposal);
     }
 
@@ -182,6 +191,11 @@ public class MatchProposalCommandService(
             return Result<MatchProposal>.Failure(MatchmakingErrors.NotRouteOwner);
 
         var wasAccepted = proposal.IsAccepted;
+
+        // Once accepted, the proposal has a trip: it is cancelled from the trip, which releases the proposal.
+        if (wasAccepted && (await executionContextFacade.FindTripPublicIdsByProposalIdsAsync([proposal.Id],
+                cancellationToken)).Count > 0)
+            return Result<MatchProposal>.Failure(MatchmakingErrors.ProposalHasTrip);
 
         var error = proposal.Cancel(DateTimeOffset.UtcNow);
         if (!error.IsNone)

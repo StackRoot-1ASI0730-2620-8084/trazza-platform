@@ -1,5 +1,6 @@
 using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
+using Trazza.Platform.Execution.Interfaces.Acl;
 using Trazza.Platform.Matchmaking.Application.CommandServices;
 using Trazza.Platform.Matchmaking.Application.QueryServices;
 using Trazza.Platform.Matchmaking.Domain.Model.Commands;
@@ -19,6 +20,7 @@ namespace Trazza.Platform.Matchmaking.Interfaces.Rest;
 public class MatchProposalsController(
     IMatchProposalCommandService matchProposalCommandService,
     IMatchProposalQueryService matchProposalQueryService,
+    IExecutionContextFacade executionContextFacade,
     ProblemDetailsFactory problemDetailsFactory)
     : ControllerBase
 {
@@ -54,13 +56,14 @@ public class MatchProposalsController(
     {
         var proposal = await matchProposalQueryService.Handle(
             new GetMatchProposalByIdQuery(new MatchProposalId(matchProposalId)), cancellationToken);
+        var tripId = await FindTripIdAsync(matchProposalId, cancellationToken);
 
         return MatchmakingActionResultAssembler.ToActionResultFromEntity(
             this,
             proposal,
             MatchmakingErrors.MatchProposalNotFound,
             problemDetailsFactory,
-            found => Ok(MatchProposalResourceFromEntityAssembler.ToResourceFromEntity(found)));
+            found => Ok(MatchProposalResourceFromEntityAssembler.ToResourceFromEntity(found, tripId)));
     }
 
     [HttpPost("{matchProposalId}/accept")]
@@ -77,13 +80,20 @@ public class MatchProposalsController(
 
         var result = await matchProposalCommandService.Handle(
             new AcceptMatchProposalCommand(userId, new MatchProposalId(matchProposalId)), cancellationToken);
+        var tripId = result.IsSuccess ? await FindTripIdAsync(matchProposalId, cancellationToken) : null;
 
         return MatchmakingActionResultAssembler.ToActionResultFromResult(
             this,
             result,
             problemDetailsFactory,
-            accepted => Ok(MatchProposalResourceFromEntityAssembler.ToResourceFromEntity(accepted)));
+            accepted => Ok(MatchProposalResourceFromEntityAssembler.ToResourceFromEntity(accepted, tripId)));
     }
+
+    private async Task<Guid?> FindTripIdAsync(ulong matchProposalId, CancellationToken cancellationToken) =>
+        (await executionContextFacade.FindTripPublicIdsByProposalIdsAsync([matchProposalId], cancellationToken))
+        .TryGetValue(matchProposalId, out var tripId)
+            ? tripId
+            : null;
 
     [HttpPost("{matchProposalId}/reject")]
     [EndpointSummary("Reject match proposal")]
