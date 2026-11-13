@@ -28,4 +28,11 @@
         <PackageReference Include="Cortex.Mediator" Version="3.1.2"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Execution\Application\Internal\CommandServices\" />
+      <Folder Include="Execution\Application\Internal\QueryServices\" />
+      <Folder Include="Execution\Interfaces\Acl\" />
+      <Folder Include="Execution\Interfaces\Rest\" />
+    </ItemGroup>
+
 </Project>
