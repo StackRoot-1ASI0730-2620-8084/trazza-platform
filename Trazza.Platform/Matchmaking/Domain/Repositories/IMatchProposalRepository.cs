@@ -40,4 +40,10 @@ public interface IMatchProposalRepository : IBaseRepository<MatchProposal>
     /// </summary>
     Task<IReadOnlyDictionary<ulong, Guid>> FindPublicIdsAsync(IReadOnlyCollection<ulong> ids,
         CancellationToken cancellationToken);
+
+    Task<IEnumerable<MatchProposal>> FindByReturnRouteIdsAsNoTrackingAsync(IReadOnlyCollection<ReturnRouteId> ids,
+        CancellationToken cancellationToken);
+
+    Task<IEnumerable<MatchProposal>> FindByShipmentRequestIdsAsNoTrackingAsync(
+        IReadOnlyCollection<ShipmentRequestId> ids, CancellationToken cancellationToken);
 }

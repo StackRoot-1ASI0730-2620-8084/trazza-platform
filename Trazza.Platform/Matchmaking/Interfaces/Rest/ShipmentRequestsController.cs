@@ -2,6 +2,7 @@ using Trazza.Platform.Execution.Interfaces.Acl;
 using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 using Trazza.Platform.Matchmaking.Application.CommandServices;
+using Trazza.Platform.Matchmaking.Application.Internal.OutboundServices;
 using Trazza.Platform.Matchmaking.Application.QueryServices;
 using Trazza.Platform.Matchmaking.Domain.Model.Commands;
 using Trazza.Platform.Matchmaking.Domain.Model.Errors;
@@ -21,6 +22,8 @@ public class ShipmentRequestsController(
     IShipmentRequestCommandService shipmentRequestCommandService,
     IShipmentRequestQueryService shipmentRequestQueryService,
     IMatchProposalQueryService matchProposalQueryService,
+    IReturnRouteQueryService returnRouteQueryService,
+    IProfilesService profilesService,
     IExecutionContextFacade executionContextFacade,
     IPublicIdQueryService publicIdQueryService,
     ProblemDetailsFactory problemDetailsFactory)
@@ -64,6 +67,25 @@ public class ShipmentRequestsController(
             MatchmakingErrors.ShipmentRequestNotFound,
             problemDetailsFactory,
             found => Ok(ShipmentRequestResourceFromEntityAssembler.ToResourceFromEntity(found)));
+    }
+
+    [HttpGet]
+    [EndpointSummary("List my shipment requests")]
+    [EndpointDescription("Same as GET /shipment-requests/mine.")]
+    [ProducesResponseType(typeof(IEnumerable<ShipmentRequestResource>), StatusCodes.Status200OK)]
+    public Task<IActionResult> GetShipmentRequests(CancellationToken cancellationToken) =>
+        GetMyShipmentRequests(cancellationToken);
+
+    [HttpGet("open")]
+    [EndpointSummary("List open shipment requests")]
+    [EndpointDescription("Open requests whose pickup window has not ended, the soonest first.")]
+    [ProducesResponseType(typeof(IEnumerable<ShipmentRequestResource>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetOpenShipmentRequests(CancellationToken cancellationToken)
+    {
+        if (this.GetCurrentUserId() is null) return Unauthorized();
+
+        var requests = await shipmentRequestQueryService.Handle(new GetOpenShipmentRequestsQuery(), cancellationToken);
+        return Ok(requests.Select(ShipmentRequestResourceFromEntityAssembler.ToResourceFromEntity));
     }
 
     [HttpGet("mine")]
@@ -117,6 +139,32 @@ public class ShipmentRequestsController(
             list.Select(proposal => proposal.Id.Value).ToList(), cancellationToken);
         var publicIds = await publicIdQueryService.FetchProposalPublicIdsAsync(list, cancellationToken);
         return Ok(MatchProposalResourceFromEntityAssembler.ToResourcesFromEntities(list, publicIds, tripIds));
+    }
+
+    [HttpGet("{shipmentRequestId:guid}/suggested-routes")]
+    [EndpointSummary("Get suggested return routes")]
+    [EndpointDescription(
+        "Published routes that fit one of my requests: they start near the pickup, end near the delivery and leave inside the pickup window.")]
+    [ProducesResponseType(typeof(IEnumerable<ReturnRouteResource>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetSuggestedReturnRoutes(Guid shipmentRequestId,
+        CancellationToken cancellationToken)
+    {
+        if (this.GetCurrentUserId() is not { } userId) return Unauthorized();
+
+        var result = await returnRouteQueryService.Handle(
+            new GetSuggestedReturnRoutesQuery(userId, await FindIdAsync(shipmentRequestId, cancellationToken)),
+            cancellationToken);
+        var routes = result.IsSuccess ? result.Value.ToList() : [];
+        var vehiclePublicIds = await profilesService.FetchVehiclePublicIds(
+            routes.Select(route => route.VehicleId).ToList(), cancellationToken);
+
+        return MatchmakingActionResultAssembler.ToActionResultFromResult(
+            this,
+            result,
+            problemDetailsFactory,
+            _ => Ok(routes.Select(route =>
+                ReturnRouteResourceFromEntityAssembler.ToResourceFromEntity(route, vehiclePublicIds))));
     }
 
     [HttpPost("{shipmentRequestId:guid}/cancel")]

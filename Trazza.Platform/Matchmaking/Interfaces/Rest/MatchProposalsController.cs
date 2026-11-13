@@ -61,6 +61,23 @@ public class MatchProposalsController(
                 MatchProposalResourceFromEntityAssembler.ToResourceFromEntity(submitted, publicIds)));
     }
 
+    [HttpGet]
+    [EndpointSummary("List my match proposals")]
+    [EndpointDescription(
+        "Proposals on my routes, as carrier, and on my shipment requests, as merchant. The newest first.")]
+    [ProducesResponseType(typeof(IEnumerable<MatchProposalResource>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetMatchProposals(CancellationToken cancellationToken)
+    {
+        if (this.GetCurrentUserId() is not { } userId) return Unauthorized();
+
+        var proposals = (await matchProposalQueryService.Handle(new GetProposalsByUserQuery(userId),
+            cancellationToken)).ToList();
+        var tripIds = await executionContextFacade.FindTripPublicIdsByProposalIdsAsync(
+            proposals.Select(proposal => proposal.Id.Value).ToList(), cancellationToken);
+        var publicIds = await publicIdQueryService.FetchProposalPublicIdsAsync(proposals, cancellationToken);
+        return Ok(MatchProposalResourceFromEntityAssembler.ToResourcesFromEntities(proposals, publicIds, tripIds));
+    }
+
     [HttpGet("{matchProposalId:guid}")]
     [EndpointSummary("Get match proposal by id")]
     [ProducesResponseType(typeof(MatchProposalResource), StatusCodes.Status200OK)]

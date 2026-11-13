@@ -26,4 +26,10 @@ public interface IShipmentRequestRepository : IBaseRepository<ShipmentRequest>
     /// </summary>
     Task<IReadOnlyDictionary<ulong, Guid>> FindPublicIdsAsync(IReadOnlyCollection<ulong> ids,
         CancellationToken cancellationToken);
+
+    /// <summary>
+    ///     Open requests whose pickup window ends after the given time, the soonest first.
+    /// </summary>
+    Task<IEnumerable<ShipmentRequest>> ListOpenAsNoTrackingAsync(DateTimeOffset now,
+        CancellationToken cancellationToken);
 }

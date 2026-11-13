@@ -80,4 +80,24 @@ public class MatchProposalRepository(AppDbContext context)
             .ToListAsync(cancellationToken);
         return rows.ToDictionary(row => row.Id.Value, row => row.PublicId);
     }
+
+    public async Task<IEnumerable<MatchProposal>> FindByReturnRouteIdsAsNoTrackingAsync(
+        IReadOnlyCollection<ReturnRouteId> ids, CancellationToken cancellationToken)
+    {
+        if (ids.Count == 0) return [];
+        return await Context.Set<MatchProposal>()
+            .AsNoTracking()
+            .Where(proposal => ids.Contains(proposal.ReturnRouteId))
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<IEnumerable<MatchProposal>> FindByShipmentRequestIdsAsNoTrackingAsync(
+        IReadOnlyCollection<ShipmentRequestId> ids, CancellationToken cancellationToken)
+    {
+        if (ids.Count == 0) return [];
+        return await Context.Set<MatchProposal>()
+            .AsNoTracking()
+            .Where(proposal => ids.Contains(proposal.ShipmentRequestId))
+            .ToListAsync(cancellationToken);
+    }
 }

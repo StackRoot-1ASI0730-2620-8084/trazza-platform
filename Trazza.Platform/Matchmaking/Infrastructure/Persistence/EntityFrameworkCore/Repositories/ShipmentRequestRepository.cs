@@ -168,4 +168,17 @@ public class ShipmentRequestRepository(AppDbContext context)
             .ToListAsync(cancellationToken);
         return rows.ToDictionary(row => row.Id.Value, row => row.PublicId);
     }
+
+    public async Task<IEnumerable<ShipmentRequest>> ListOpenAsNoTrackingAsync(DateTimeOffset now,
+        CancellationToken cancellationToken)
+    {
+        var requests = await Context.Set<ShipmentRequest>()
+            .AsNoTracking()
+            .Where(request => request.Status == EShipmentRequestStatus.Open && request.PickupWindow.Until >= now)
+            .OrderBy(request => request.PickupWindow.From)
+            .ToListAsync(cancellationToken);
+
+        await HydrateLocationsAsync(requests, cancellationToken);
+        return requests;
+    }
 }
