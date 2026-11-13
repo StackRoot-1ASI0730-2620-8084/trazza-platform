@@ -29,13 +29,10 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Execution\Aplication\Internal\CommandServices\" />
-      <Folder Include="Execution\Aplication\Internal\QueryServices\" />
-      <Folder Include="Execution\Domain\Model\Commands\" />
-      <Folder Include="Execution\Domain\Repositories\" />
-      <Folder Include="Execution\Domain\Services\" />
-      <Folder Include="Execution\Infrastructure\" />
-      <Folder Include="Execution\Interfaces\" />
+      <Folder Include="Execution\Application\Internal\CommandServices\" />
+      <Folder Include="Execution\Application\Internal\QueryServices\" />
+      <Folder Include="Execution\Interfaces\Acl\" />
+      <Folder Include="Execution\Interfaces\Rest\" />
     </ItemGroup>
 
 </Project>
