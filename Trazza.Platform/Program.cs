@@ -50,15 +50,13 @@ using Trazza.Platform.Matchmaking.Infrastructure.Persistence.EntityFrameworkCore
 using Trazza.Platform.Matchmaking.Infrastructure.Profiles;
 using Trazza.Platform.Matchmaking.Infrastructure.Services;
 using Trazza.Platform.Matchmaking.Interfaces.Acl;
-// Execution (feature/execution)
-// using Trazza.Platform.Execution.Application.Acl;
-// using Trazza.Platform.Execution.Application.CommandServices;
-// using Trazza.Platform.Execution.Application.Internal.CommandServices;
-// using Trazza.Platform.Execution.Application.Internal.QueryServices;
-// using Trazza.Platform.Execution.Application.QueryServices;
-// using Trazza.Platform.Execution.Domain.Repositories;
-// using Trazza.Platform.Execution.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
-// using Trazza.Platform.Execution.Interfaces.Acl;
+using Trazza.Platform.Execution.Application.Internal;
+using Trazza.Platform.Execution.Application.Internal.CommandServices;
+using Trazza.Platform.Execution.Application.Internal.QueryServices;
+using Trazza.Platform.Execution.Domain.Repositories;
+using Trazza.Platform.Execution.Domain.Services;
+using Trazza.Platform.Execution.Infrastructure.Persistence.EntityFrameworkCore.Repositories;
+using Trazza.Platform.Execution.Interfaces.Acl;
 // Billing (feature/billing)
 // using Trazza.Platform.Billing.Application.Acl;
 // using Trazza.Platform.Billing.Application.CommandServices;
@@ -201,11 +199,18 @@ builder.Services.AddScoped<IMessageCommandService, MessageCommandService>();
 builder.Services.AddScoped<IMessageQueryService, MessageQueryService>();
 builder.Services.AddScoped<IMatchmakingContextFacade, MatchmakingContextFacade>();
 
-// Execution (feature/execution)
-// builder.Services.AddScoped<IShipmentRepository, ShipmentRepository>();
-// builder.Services.AddScoped<IShipmentCommandService, ShipmentCommandService>();
-// builder.Services.AddScoped<IShipmentQueryService, ShipmentQueryService>();
-// builder.Services.AddScoped<IExecutionContextFacade, ExecutionContextFacade>();
+// Execution
+builder.Services.AddScoped<ITripRepository, TripRepository>();
+builder.Services.AddScoped<ITrackingPointRepository, TrackingPointRepository>();
+builder.Services.AddScoped<IDeviationAlertRepository, DeviationAlertRepository>();
+builder.Services.AddScoped<IIncidentRepository, IncidentRepository>();
+builder.Services.AddScoped<IIotDeviceRepository, IotDeviceRepository>();
+builder.Services.AddScoped<TripAccessService>();
+builder.Services.AddScoped<ITripCommandService, TripCommandService>();
+builder.Services.AddScoped<ITrackingCommandService, TrackingCommandService>();
+builder.Services.AddScoped<IIncidentCommandService, IncidentCommandService>();
+builder.Services.AddScoped<IExecutionQueryService, ExecutionQueryService>();
+builder.Services.AddScoped<IExecutionContextFacade, ExecutionContextFacade>();
 
 // Billing (feature/billing)
 // builder.Services.AddScoped<IPaymentTransactionRepository, PaymentTransactionRepository>();
