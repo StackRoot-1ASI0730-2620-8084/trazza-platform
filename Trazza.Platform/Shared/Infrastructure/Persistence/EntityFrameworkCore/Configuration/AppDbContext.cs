@@ -8,8 +8,8 @@ using Trazza.Platform.Iam.Infrastructure.Persistence.EntityFrameworkCore.Configu
 // using Trazza.Platform.Profiles.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using Trazza.Platform.Matchmaking.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using Trazza.Platform.Execution.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
-// using Trazza.Platform.Billing.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
-// using Trazza.Platform.Reputation.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
+using Trazza.Platform.Billing.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
+using Trazza.Platform.Reputation.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 
 namespace Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration;
 
@@ -36,8 +36,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         // builder.ApplyProfilesConfiguration();
         builder.ApplyMatchmakingConfiguration();
         builder.ApplyExecutionConfiguration();
-        // builder.ApplyBillingConfiguration();
-        // builder.ApplyReputationConfiguration();
+        builder.ApplyBillingConfiguration();
+        builder.ApplyReputationConfiguration();
 
         builder.UseSnakeCaseNamingConvention();
     }
