@@ -32,9 +32,11 @@ public partial class ReturnRoute : AggregateRoot
         DepartureAt = departureAt;
         MaxShipments = maxShipments;
         Status = EReturnRouteStatus.Published;
+        PublicId = Guid.CreateVersion7();
     }
 
     public ReturnRouteId Id { get; private set; }
+    public Guid PublicId { get; private set; }
     public CarrierProfileId CarrierProfileId { get; private set; }
     public VehicleId VehicleId { get; private set; }
     public DriverId? DriverId { get; private set; }

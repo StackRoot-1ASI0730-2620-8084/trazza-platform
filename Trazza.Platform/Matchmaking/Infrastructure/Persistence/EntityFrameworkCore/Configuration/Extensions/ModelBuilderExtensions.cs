@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Trazza.Platform.Matchmaking.Domain.Model.Aggregates;
 using Trazza.Platform.Matchmaking.Domain.Model.ValueObjects;
 using Trazza.Platform.Shared.Domain.Model.Extensions;
+using Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
 using Trazza.Platform.Shared.Infrastructure.Persistence.EntityFrameworkCore.Configuration.ValueConverters;
 
 namespace Trazza.Platform.Matchmaking.Infrastructure.Persistence.EntityFrameworkCore.Configuration.Extensions;
@@ -25,6 +26,7 @@ public static class ModelBuilderExtensions
                 .HasConversion(new StronglyTypedIdConverter<ReturnRouteId, ulong>(id => id.Value,
                     value => new ReturnRouteId(value)))
                 .ValueGeneratedOnAdd();
+            route.Property(r => r.PublicId).HasPublicId();
             route.Property(r => r.CarrierProfileId)
                 .HasConversion(new StronglyTypedIdConverter<CarrierProfileId, ulong>(id => id.Value,
                     value => new CarrierProfileId(value)))
@@ -62,6 +64,7 @@ public static class ModelBuilderExtensions
                 .HasConversion(new StronglyTypedIdConverter<ShipmentRequestId, ulong>(id => id.Value,
                     value => new ShipmentRequestId(value)))
                 .ValueGeneratedOnAdd();
+            request.Property(r => r.PublicId).HasPublicId();
             request.Property(r => r.MerchantProfileId)
                 .HasConversion(new StronglyTypedIdConverter<MerchantProfileId, ulong>(id => id.Value,
                     value => new MerchantProfileId(value)))
@@ -103,6 +106,7 @@ public static class ModelBuilderExtensions
                 .HasConversion(new StronglyTypedIdConverter<MatchProposalId, ulong>(id => id.Value,
                     value => new MatchProposalId(value)))
                 .ValueGeneratedOnAdd();
+            proposal.Property(p => p.PublicId).HasPublicId();
             proposal.Property(p => p.ShipmentRequestId)
                 .HasConversion(new StronglyTypedIdConverter<ShipmentRequestId, ulong>(id => id.Value,
                     value => new ShipmentRequestId(value)))
